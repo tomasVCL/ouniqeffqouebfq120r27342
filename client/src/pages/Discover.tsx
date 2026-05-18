@@ -200,14 +200,14 @@ export default function Discover() {
 
   const filters = useMemo(() => ({
     search: search || undefined,
-    discipline: discipline || undefined,
-    availability: availability || undefined,
-    experienceLevel: experienceLevel || undefined,
+    discipline: (discipline && discipline !== "all") ? discipline : undefined,
+    availability: (availability && availability !== "all") ? availability : undefined,
+    experienceLevel: (experienceLevel && experienceLevel !== "all") ? experienceLevel : undefined,
   }), [search, discipline, availability, experienceLevel]);
 
   const { data: talents, isLoading } = trpc.talents.list.useQuery(filters);
 
-  const hasFilters = search || discipline || availability || experienceLevel;
+  const hasFilters = search || (discipline && discipline !== "all") || (availability && availability !== "all") || (experienceLevel && experienceLevel !== "all");
 
   function clearFilters() {
     setSearch("");
@@ -249,7 +249,7 @@ export default function Discover() {
               <SelectValue placeholder="Discipline" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All disciplines</SelectItem>
+              <SelectItem value="all">All disciplines</SelectItem>
               {DISCIPLINES.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
             </SelectContent>
           </Select>
@@ -258,7 +258,7 @@ export default function Discover() {
               <SelectValue placeholder="Availability" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Any availability</SelectItem>
+              <SelectItem value="all">Any availability</SelectItem>
               <SelectItem value="available">Available</SelectItem>
               <SelectItem value="busy">Busy</SelectItem>
               <SelectItem value="unavailable">Unavailable</SelectItem>
@@ -269,7 +269,7 @@ export default function Discover() {
               <SelectValue placeholder="Experience" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Any level</SelectItem>
+              <SelectItem value="all">Any level</SelectItem>
               <SelectItem value="emerging">Emerging</SelectItem>
               <SelectItem value="mid">Mid-level</SelectItem>
               <SelectItem value="established">Established</SelectItem>
