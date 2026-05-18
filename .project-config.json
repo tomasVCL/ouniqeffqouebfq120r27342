@@ -1,0 +1,43 @@
+{
+  "build_command": "pnpm run build",
+  "capabilities": [
+    "server",
+    "db",
+    "user"
+  ],
+  "dev_command": "pnpm run dev",
+  "env_vars": {
+    "DATABASE_URL": "mysql://3esR8BqFEHZUgRc.a16dc864c756:514HqNBuz3yD7rbr0Tox@gateway06.us-east-1.prod.aws.tidbcloud.com:4000/Y9zvYEHzACFsGpcDkJbgmg?ssl={\"rejectUnauthorized\":true}"
+  },
+  "experiments": [
+    "no_db_push"
+  ],
+  "git_remote": {
+    "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663609309988/Y9zvYEHzACFsGpcDkJbgmg",
+    "access_key_id": "ASIAZV3A2ECZA5XBIVGJ",
+    "secret_access_key": "O6xNWQBeI/bJenDSt4NL2Muohxbk0LkuHOiaAzdo",
+    "session_token": "IQoJb3JpZ2luX2VjEP3//////////wEaCXVzLWVhc3QtMSJHMEUCIQC8LqGIBPPkUCyQbnsmaBa/GMdvPsq72ppFsYOZEV8TpwIgdrsP860VoOLdp1sDSxpJlr9SRV+6AlW/AvRPaZOn2sMq/wMIxv//////////ARAEGgw2NjUzODYwOTg4NjYiDGgNhynbBDB/iaptcSrTAxDBRdtQHAAhS26w8F+PFj0/a43zD7YmSE1B2+5/4sMw/mRMeOABrW47rFU1KmEbTo30qBoQ85j3kyCc67a43RQRAGXZ1j5xgvaoDY4hrRaVRz/TrzEYxo3FfEqAObwiyTnFwXCt+xIxp1VbEBReN1V5A1Xc1U/nmV5JIXFVupYf6qOKvNihLZ65AFH1lGRhcvWHW4p9IgKMFhTssOW8p8vYnmhZNC9tb6AUYSW5ctUfEXFNDr8bdOKz6tLkkVVjWPr3U4GiUJjZJykbJhtJiPJ9smwg1IoO8LJytRJIy16HXmUPrtUtONhmZMbYV9l1eapguQuEou5pxEkBYWjt8h7L+JvRxJioK1UYf/XxHAyZ6DVaZDMVmxN1YJ8L2HqrMXbtR+ECUK0R9E1wPWXCSpC8+UvRkzc2bLtPJfVBEG5McSlJ4GRfQfNrQfg9kEv8KpBPQISvFW+KbjvNhT+T1OvWZEUbYIFQ5ipJD/uV1FAUKUi+JGdCOVlF5ci52nesMzjgVX43w96cdrWcTEvmwedfjBj+hhwbpgYxZ2bRdEGjRRiVBQrVTJdihWqyAUZheIDvGA1frbipPaPM8t6hilChmW7EYxjtQ18dzif7+WhGTBMkMMn7rdAGOp0BfdP4ltbYdeaE27w1rzSgHjk1o4ZA6B5W29nhCTno1AsZF164tlXm54btj55N7nk5pmnilQxYXdwUmjNGQRcke3BCIRTcnNku4sWQCiAtRpmrdXOuizBaaV7iiIPAzBwtoTz8xOSGCFkPdDBr7yUC+sJUEdjCgavQCG4t03E+EZo12AUtKhp0lde3QUQ0hMKJFMAV3z+DWO6Bg7iSUg==",
+    "expiration": "2026-05-19T08:59:53.000Z"
+  },
+  "name": "vclstudio-scouting-platform",
+  "path": "/home/ubuntu/vclstudio-scouting-platform",
+  "port": 3000,
+  "secrets": {
+    "BUILT_IN_FORGE_API_KEY": "HLREcR7o6E5yg2nQvrXP3s",
+    "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
+    "JWT_SECRET": "auYngKfJRPXaR2EfVMibFg",
+    "OAUTH_SERVER_URL": "https://api.manus.im",
+    "OWNER_NAME": "Tomás Valles Salazar",
+    "OWNER_OPEN_ID": "NhCnbaCBar53AFzLaXPquL",
+    "VITE_ANALYTICS_ENDPOINT": "https://manus-analytics.com",
+    "VITE_ANALYTICS_WEBSITE_ID": "410d5b84-05fe-4220-9841-646200326b20",
+    "VITE_APP_ID": "Y9zvYEHzACFsGpcDkJbgmg",
+    "VITE_APP_LOGO": "",
+    "VITE_APP_TITLE": "VCL Studio Scouting Platform",
+    "VITE_FRONTEND_FORGE_API_KEY": "AZuuMGQr5b9VDSCnjpue5V",
+    "VITE_FRONTEND_FORGE_API_URL": "https://forge.manus.ai",
+    "VITE_OAUTH_PORTAL_URL": "https://manus.im"
+  },
+  "template_id": "web-db-user",
+  "test_command": "pnpm test"
+}
