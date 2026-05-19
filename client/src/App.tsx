@@ -4,42 +4,41 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import DashboardLayout from "./components/DashboardLayout";
-import Dashboard from "./pages/Dashboard";
-import Discover from "./pages/Discover";
-import TalentProfile from "./pages/TalentProfile";
-import Shortlists from "./pages/Shortlists";
-import Submissions from "./pages/Submissions";
-import AdminPanel from "./pages/AdminPanel";
-import SubmitTalent from "./pages/SubmitTalent";
-import SharedShortlist from "./pages/SharedShortlist";
+import AnalystLayout from "./components/AnalystLayout";
+import AnalystLogin from "./pages/AnalystLogin";
+import AnalystDashboard from "./pages/AnalystDashboard";
+import AnalystProjects from "./pages/AnalystProjects";
+import ProjectWorkspace from "./pages/ProjectWorkspace";
+import ClientPortal from "./pages/ClientPortal";
 
-function AuthenticatedApp() {
+function AnalystApp() {
   return (
-    <DashboardLayout>
+    <AnalystLayout>
       <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/dashboard" component={Dashboard} />
-        <Route path="/discover" component={Discover} />
-        <Route path="/talent/:id" component={TalentProfile} />
-        <Route path="/shortlists" component={Shortlists} />
-        <Route path="/submissions" component={Submissions} />
-        <Route path="/admin" component={AdminPanel} />
+        <Route path="/analyst" component={AnalystDashboard} />
+        <Route path="/analyst/dashboard" component={AnalystDashboard} />
+        <Route path="/analyst/projects" component={AnalystProjects} />
+        <Route path="/analyst/projects/:id" component={ProjectWorkspace} />
+        <Route path="/analyst/projects/:id/step/:step" component={ProjectWorkspace} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>
-    </DashboardLayout>
+    </AnalystLayout>
   );
 }
 
 function Router() {
   return (
     <Switch>
-      {/* Public routes - no auth required */}
-      <Route path="/submit" component={SubmitTalent} />
-      <Route path="/shared/:token" component={SharedShortlist} />
-      {/* All other routes go through authenticated layout */}
-      <Route component={AuthenticatedApp} />
+      {/* Public client portal — accessed via passkey */}
+      <Route path="/client/:projectId" component={ClientPortal} />
+      {/* Analyst login */}
+      <Route path="/login" component={AnalystLogin} />
+      {/* Root redirects to analyst dashboard */}
+      <Route path="/" component={AnalystLogin} />
+      {/* All /analyst/* routes go through the analyst layout */}
+      <Route path="/analyst/:rest*" component={AnalystApp} />
+      <Route component={NotFound} />
     </Switch>
   );
 }

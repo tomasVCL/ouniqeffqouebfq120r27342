@@ -1,56 +1,56 @@
-# VCL Studio Scouting Platform — TODO
+# VCL Studio Innovation Startup Scouting Platform — TODO
 
-## Foundation
-
-- [x] Upload brand assets (logo-dark, logo-white, isotipo, logo-orange) to CDN
-- [x] Database schema: talents, shortlists, shortlist_members, submissions, scout_notes, users
-- [x] Apply all migrations via webdev_execute_sql
-- [x] Brand theming: CSS variables (VCL Orange #FE4E03, Amber #FFCA2B, Dark #292432)
-- [x] Google Fonts: Archivo Black + Inter
-- [x] DashboardLayout: dark sidebar #292432, VCL logo-white in nav, brand tokens
-- [x] Responsive mobile sidebar overlay
-
-## Auth & Routing
-
-- [x] Manus OAuth login screen with VCL branding (dark logo on white card)
-- [x] Protected routes via DashboardLayout auth guard
-- [x] Public routes: /submit, /shared/:token
-- [x] Role-based access: Admin section only visible to admin users
-- [x] Admin procedures protected with FORBIDDEN guard
-
-## Pages
-
-- [x] Dashboard: welcome banner, stats grid, recent talents list
-- [x] Discover: search bar, filter panel (discipline, availability, experience, location), talent cards grid
-- [x] TalentProfile: bio, portfolio media, skills, social links, availability badge, private notes with star ratings, shortlist add/remove
-- [x] Shortlists: list view, create shortlist dialog, delete shortlist, generate share token, shortlist detail with talent cards
-- [x] Submissions: list view with status badges, approve/reject actions, review notes
-- [x] SubmitTalent (public): intake form — name, email, phone, discipline, bio, portfolio URL, Instagram, location
-- [x] SharedShortlist (public): read-only shared shortlist view via token
-- [x] AdminPanel: user management (promote/demote roles), talent management (approve/delete), submissions overview
+## Database
+- [x] Create projects table
+- [x] Create requirements table
+- [x] Create formulas + formula_variables tables
+- [x] Create startups table
+- [x] Create clusters table
+- [x] Create capabilities table
+- [x] Create wsm_scores, pugh_scores, capfit_scores tables
+- [x] Create rankings table
+- [x] Create recommendations table
+- [x] Create publish_log table
+- [x] Create analyst_credentials table
 
 ## Server
+- [x] db.ts: all helpers for innovation scouting tables
+- [x] routers.ts: analyst auth, projects, requirements, formulas, startups, clusters, capabilities, scores (WSM/Pugh/CapFit) + AI suggest, composite calc, rankings, recommendations AI draft + update, publish/unpublish, report.getByPasskey
 
-- [x] tRPC routers: talents, shortlists, submissions, notes, admin, dashboard, auth
-- [x] DB helpers aligned to actual table names (scout_notes, shortlist_members)
-- [x] Shortlist share token generation
-- [x] Submission approval auto-creates talent profile
+## Frontend — Analyst Portal
+- [x] Analyst login page (shared username + password, separate from Manus OAuth)
+- [x] Projects list page (create, edit, delete, progress indicator per step)
+- [x] Project workspace with step sidebar (A–L)
+- [x] Step A: Project Setup form (all fields + passkey setter)
+- [x] Step B: Requirements Builder (drag-reorder, weight % validation)
+- [x] Step C: Formula Library (expression evaluator, variable table)
+- [x] Step D: Startup Universe (add startups, eligibility auto-flag)
+- [x] Step E: Strategic Clusters (create clusters, assign startups)
+- [x] Step F: WSM Matrix (grid input, AI suggest, Human/AI toggle, divergence highlight)
+- [x] Step G: Pugh Matrix (grid input, AI suggest, Human/AI toggle)
+- [x] Step H: Capability Fit Matrix (grid input, AI suggest, Human/AI toggle)
+- [x] Step I: Composite Final Matrix (auto-calculated, read-only display)
+- [x] Step J: Rankings & Tiers (auto-calculated, tier badges)
+- [x] Step K: Recommendations (AI draft per startup, inline edit, decision + reason)
+- [x] Step L: Publish (publish/unpublish, publish history log)
+- [ ] Auto-save on every field change (debounced)
 
-## Tests (21 passing)
+## Frontend — Client Portal
+- [x] Client passkey entry page (main public URL)
+- [ ] Section 1: Header (VCL logo, report title, client, industry, date)
+- [ ] Section 2: Project Overview
+- [ ] Section 3: Search Constraints (requirements table)
+- [ ] Section 4: Formula Library
+- [ ] Section 5: Startup Universe roster
+- [ ] Section 6: Strategic Clusters cards
+- [ ] Section 7: Composite Evaluation Matrix (interactive cells, sortable columns, sticky startup column, horizontal scroll)
+- [x] Section 8: Rankings & Tiers table
+- [x] Section 9: Final Recommendations cards
+- [ ] Section 10: Methodology Note
 
-- [x] auth.logout clears cookie
-- [x] auth.me returns null for unauthenticated
-- [x] auth.me returns user for authenticated
-- [x] admin.listUsers FORBIDDEN for non-admin
-- [x] admin.promoteUser FORBIDDEN for non-admin
-- [x] admin.deleteTalent FORBIDDEN for non-admin
-- [x] shortlists.create rejects empty name
-- [x] submissions.create rejects invalid email
-- [x] submissions.create rejects empty name
-- [x] notes.create rejects empty content
-- [x] notes.create rejects rating 0 (out of range)
-- [x] notes.create rejects rating 6 (out of range)
-- [x] talents.upsert rejects empty name
-- [x] talents.upsert rejects empty discipline
-- [x] talents.upsert rejects invalid availability enum
-- [x] shortlists.getByToken throws NOT_FOUND for non-existent token
+## Quality
+- [ ] VCL Studio brand assets applied throughout (logo-dark, logo-white, isotipo)
+- [ ] Responsive: desktop + tablet + mobile (client report)
+- [ ] Accessibility: tier color cells include text label (not color alone)
+- [ ] Vitest tests for all routers
+- [x] Zero TypeScript errors

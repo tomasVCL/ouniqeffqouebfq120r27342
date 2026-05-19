@@ -1,16 +1,16 @@
 import {
-  boolean,
-  float,
   int,
-  json,
   mysqlEnum,
   mysqlTable,
   text,
   timestamp,
   varchar,
+  float,
+  boolean,
+  tinyint,
 } from "drizzle-orm/mysql-core";
 
-// ─── Users ───────────────────────────────────────────────────────────────────
+// ─── Core user table (Manus OAuth — kept for system use) ───────────────────
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
   openId: varchar("openId", { length: 64 }).notNull().unique(),
@@ -26,126 +26,207 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// ─── Talents ─────────────────────────────────────────────────────────────────
-// Approved talent profiles visible in the Discover tab
-export const talents = mysqlTable("talents", {
+// ─── Analyst credentials (shared team login) ──────────────────────────────
+export const analystCredentials = mysqlTable("analyst_credentials", {
   id: int("id").autoincrement().primaryKey(),
-  // Basic info
-  name: varchar("name", { length: 255 }).notNull(),
-  discipline: varchar("discipline", { length: 128 }).notNull(), // e.g. "Actor", "Model", "Photographer"
-  bio: text("bio"),
-  location: varchar("location", { length: 255 }),
-  experienceLevel: mysqlEnum("experienceLevel", ["emerging", "mid", "established", "star"]).default("emerging").notNull(),
-  availability: mysqlEnum("availability", ["available", "busy", "unavailable"]).default("available").notNull(),
-  // Contact & links
-  email: varchar("email", { length: 320 }),
-  phone: varchar("phone", { length: 64 }),
-  portfolioUrl: text("portfolioUrl"),
-  instagramHandle: varchar("instagramHandle", { length: 128 }),
-  tiktokHandle: varchar("tiktokHandle", { length: 128 }),
-  youtubeHandle: varchar("youtubeHandle", { length: 128 }),
-  linkedinUrl: text("linkedinUrl"),
-  // Skills (stored as JSON array of strings)
-  skills: json("skills").$type<string[]>().default([]),
-  // Portfolio media (JSON array of {type: 'image'|'video', url: string, caption?: string})
-  portfolioMedia: json("portfolioMedia").$type<Array<{ type: "image" | "video"; url: string; caption?: string }>>().default([]),
-  // Rates
-  dayRate: float("dayRate"),
-  currency: varchar("currency", { length: 8 }).default("USD"),
-  // Status (admin-controlled)
-  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
-  // Source: submitted via form or manually added by admin
-  source: mysqlEnum("source", ["submission", "manual"]).default("submission").notNull(),
-  // Submission reference (if created from a submission)
-  submissionId: int("submissionId"),
-  // Admin notes
-  adminNotes: text("adminNotes"),
+  username: varchar("username", { length: 64 }).notNull().unique(),
+  passwordHash: varchar("passwordHash", { length: 256 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AnalystCredential = typeof analystCredentials.$inferSelect;
+
+// ─── Projects ─────────────────────────────────────────────────────────────
+export const projects = mysqlTable("projects", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 256 }).notNull(),
+  clientName: varchar("clientName", { length: 256 }).notNull(),
+  industry: varchar("industry", { length: 128 }),
+  geoAllowed: text("geoAllowed"),
+  geoExcluded: text("geoExcluded"),
+  reportDate: varchar("reportDate", { length: 32 }),
+  analystName: varchar("analystName", { length: 128 }),
+  analystEmail: varchar("analystEmail", { length: 320 }),
+  analystPhone: varchar("analystPhone", { length: 64 }),
+  passkeyHash: varchar("passkeyHash", { length: 256 }),
+  published: boolean("published").default(false).notNull(),
+  publishedAt: timestamp("publishedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
-export type Talent = typeof talents.$inferSelect;
-export type InsertTalent = typeof talents.$inferInsert;
+export type Project = typeof projects.$inferSelect;
+export type InsertProject = typeof projects.$inferInsert;
 
-// ─── Talent Submissions (public intake form) ──────────────────────────────────
-export const submissions = mysqlTable("submissions", {
+// ─── Requirements (Step B) ─────────────────────────────────────────────────
+export const requirements = mysqlTable("requirements", {
   id: int("id").autoincrement().primaryKey(),
-  // Submitted data
-  name: varchar("name", { length: 255 }).notNull(),
-  discipline: varchar("discipline", { length: 128 }).notNull(),
-  bio: text("bio"),
-  location: varchar("location", { length: 255 }),
-  email: varchar("email", { length: 320 }).notNull(),
-  phone: varchar("phone", { length: 64 }),
-  portfolioUrl: text("portfolioUrl"),
-  instagramHandle: varchar("instagramHandle", { length: 128 }),
-  skills: json("skills").$type<string[]>().default([]),
-  experienceLevel: mysqlEnum("experienceLevel", ["emerging", "mid", "established", "star"]).default("emerging").notNull(),
-  // Review status
-  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
-  reviewedBy: int("reviewedBy"),
-  reviewedAt: timestamp("reviewedAt"),
-  reviewNotes: text("reviewNotes"),
-  // Resulting talent ID if approved
-  talentId: int("talentId"),
+  projectId: int("projectId").notNull(),
+  name: varchar("name", { length: 256 }).notNull(),
+  category: varchar("category", { length: 128 }),
+  weight: float("weight").default(0).notNull(),
+  mandatory: boolean("mandatory").default(false).notNull(),
+  notes: text("notes"),
+  sortOrder: int("sortOrder").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
-export type Submission = typeof submissions.$inferSelect;
-export type InsertSubmission = typeof submissions.$inferInsert;
+export type Requirement = typeof requirements.$inferSelect;
+export type InsertRequirement = typeof requirements.$inferInsert;
 
-// ─── Scout Notes ─────────────────────────────────────────────────────────────
-// Private notes left by scouts on talent profiles
-export const scoutNotes = mysqlTable("scout_notes", {
+// ─── Formulas (Step C) ────────────────────────────────────────────────────
+export const formulas = mysqlTable("formulas", {
   id: int("id").autoincrement().primaryKey(),
-  talentId: int("talentId").notNull(),
-  scoutId: int("scoutId").notNull(),
-  note: text("note").notNull(),
-  rating: int("rating"), // 1-5 star rating, nullable
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type ScoutNote = typeof scoutNotes.$inferSelect;
-export type InsertScoutNote = typeof scoutNotes.$inferInsert;
-
-// ─── Shortlists ───────────────────────────────────────────────────────────────
-export const shortlists = mysqlTable("shortlists", {
-  id: int("id").autoincrement().primaryKey(),
-  ownerId: int("ownerId").notNull(),
-  name: varchar("name", { length: 255 }).notNull(),
+  projectId: int("projectId").notNull(),
+  name: varchar("name", { length: 256 }).notNull(),
+  type: mysqlEnum("type", ["Revenue", "Cost Savings", "Risk Reduction", "Time Savings"]).notNull(),
+  expression: text("expression").notNull(),
   description: text("description"),
-  // Share token for team sharing (null = private)
-  shareToken: varchar("shareToken", { length: 128 }),
+  result: float("result"),
+  sortOrder: int("sortOrder").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Formula = typeof formulas.$inferSelect;
+export type InsertFormula = typeof formulas.$inferInsert;
+
+export const formulaVariables = mysqlTable("formula_variables", {
+  id: int("id").autoincrement().primaryKey(),
+  formulaId: int("formulaId").notNull(),
+  name: varchar("name", { length: 64 }).notNull(),
+  description: varchar("description", { length: 256 }),
+  unit: varchar("unit", { length: 32 }),
+  value: float("value").default(0).notNull(),
+});
+
+export type FormulaVariable = typeof formulaVariables.$inferSelect;
+export type InsertFormulaVariable = typeof formulaVariables.$inferInsert;
+
+// ─── Clusters (Step E) ────────────────────────────────────────────────────
+export const clusters = mysqlTable("clusters", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  name: varchar("name", { length: 256 }).notNull(),
+  differentiator: text("differentiator"),
+  sortOrder: int("sortOrder").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Cluster = typeof clusters.$inferSelect;
+export type InsertCluster = typeof clusters.$inferInsert;
+
+// ─── Startups (Step D) ────────────────────────────────────────────────────
+export const startups = mysqlTable("startups", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  name: varchar("name", { length: 256 }).notNull(),
+  tagline: varchar("tagline", { length: 512 }),
+  hqCity: varchar("hqCity", { length: 128 }),
+  hqCountry: varchar("hqCountry", { length: 128 }),
+  foundedYear: int("foundedYear"),
+  fundingStage: mysqlEnum("fundingStage", ["Pre-seed", "Seed", "Series A", "Series B", "Series B+"]),
+  trlLevel: tinyint("trlLevel"),
+  employeeRange: varchar("employeeRange", { length: 64 }),
+  eligible: boolean("eligible").default(true).notNull(),
+  excludedReason: text("excludedReason"),
+  clusterId: int("clusterId"),
+  sortOrder: int("sortOrder").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Startup = typeof startups.$inferSelect;
+export type InsertStartup = typeof startups.$inferInsert;
+
+// ─── Capabilities (for Step H) ────────────────────────────────────────────
+export const capabilities = mysqlTable("capabilities", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  name: varchar("name", { length: 256 }).notNull(),
+  description: text("description"),
+  sortOrder: int("sortOrder").default(0).notNull(),
+});
+
+export type Capability = typeof capabilities.$inferSelect;
+export type InsertCapability = typeof capabilities.$inferInsert;
+
+// ─── WSM Scores (Step F) ──────────────────────────────────────────────────
+export const wsmScores = mysqlTable("wsm_scores", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  startupId: int("startupId").notNull(),
+  requirementId: int("requirementId").notNull(),
+  humanScore: float("humanScore"),
+  aiScore: float("aiScore"),
+  justificationNote: text("justificationNote"),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
-export type Shortlist = typeof shortlists.$inferSelect;
-export type InsertShortlist = typeof shortlists.$inferInsert;
+export type WsmScore = typeof wsmScores.$inferSelect;
 
-// ─── Shortlist Members ────────────────────────────────────────────────────────
-export const shortlistMembers = mysqlTable("shortlist_members", {
+// ─── Pugh Scores (Step G) ─────────────────────────────────────────────────
+export const pughScores = mysqlTable("pugh_scores", {
   id: int("id").autoincrement().primaryKey(),
-  shortlistId: int("shortlistId").notNull(),
-  talentId: int("talentId").notNull(),
-  addedBy: int("addedBy").notNull(),
-  note: text("note"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  projectId: int("projectId").notNull(),
+  startupId: int("startupId").notNull(),
+  requirementId: int("requirementId").notNull(),
+  humanScore: tinyint("humanScore"),   // -1, 0, +1
+  aiScore: tinyint("aiScore"),
+  justificationNote: text("justificationNote"),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
-export type ShortlistMember = typeof shortlistMembers.$inferSelect;
-export type InsertShortlistMember = typeof shortlistMembers.$inferInsert;
+export type PughScore = typeof pughScores.$inferSelect;
 
-// ─── Saved Searches ───────────────────────────────────────────────────────────
-export const savedSearches = mysqlTable("saved_searches", {
+// ─── CapFit Scores (Step H) ───────────────────────────────────────────────
+export const capfitScores = mysqlTable("capfit_scores", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  name: varchar("name", { length: 255 }).notNull(),
-  filters: json("filters").$type<Record<string, unknown>>().notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  projectId: int("projectId").notNull(),
+  startupId: int("startupId").notNull(),
+  capabilityId: int("capabilityId").notNull(),
+  humanScore: mysqlEnum("humanScore", ["High", "Med", "Low"]),
+  aiScore: mysqlEnum("aiScore", ["High", "Med", "Low"]),
+  justificationNote: text("justificationNote"),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
-export type SavedSearch = typeof savedSearches.$inferSelect;
-export type InsertSavedSearch = typeof savedSearches.$inferInsert;
+export type CapfitScore = typeof capfitScores.$inferSelect;
+
+// ─── Rankings (Step J) ────────────────────────────────────────────────────
+export const rankings = mysqlTable("rankings", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  startupId: int("startupId").notNull(),
+  rank: int("rank"),
+  compositeScore: float("compositeScore"),
+  wsmScore: float("wsmScore"),
+  pughNormalized: float("pughNormalized"),
+  capfitAvg: float("capfitAvg"),
+  tier: tinyint("tier"),  // 1-4
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Ranking = typeof rankings.$inferSelect;
+
+// ─── Recommendations (Step K) ─────────────────────────────────────────────
+export const recommendations = mysqlTable("recommendations", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  startupId: int("startupId").notNull(),
+  aiDraft: text("aiDraft"),
+  narrative: text("narrative"),
+  decision: mysqlEnum("decision", ["recommended", "not_recommended"]),
+  decisionReason: mysqlEnum("decisionReason", ["below_threshold", "geography", "trl", "other"]),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Recommendation = typeof recommendations.$inferSelect;
+
+// ─── Publish Log (Step L) ─────────────────────────────────────────────────
+export const publishLog = mysqlTable("publish_log", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  action: mysqlEnum("action", ["published", "unpublished"]).notNull(),
+  publishedAt: timestamp("publishedAt").defaultNow().notNull(),
+});
+
+export type PublishLog = typeof publishLog.$inferSelect;
