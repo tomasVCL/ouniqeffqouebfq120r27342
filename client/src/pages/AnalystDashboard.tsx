@@ -1,4 +1,5 @@
 import { trpc } from "@/lib/trpc";
+import AnalystLayout from "@/components/AnalystLayout";
 import { useLocation } from "wouter";
 import { Loader2, FolderOpen, Globe, Clock, Plus, ArrowRight, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,8 @@ export default function AnalystDashboard() {
   const recent = projects?.slice(0, 5) ?? [];
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-8">
+    <AnalystLayout>
+      <div className="p-6 max-w-5xl mx-auto space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
@@ -98,6 +100,7 @@ export default function AnalystDashboard() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </AnalystLayout>
   );
 }

@@ -1,0 +1,10 @@
+import mysql from "mysql2/promise";
+const url = process.env.DATABASE_URL;
+const match = url.match(/mysql:\/\/([^:]+):([^@]+)@([^:\/]+):?(\d+)?\/([^?]+)/);
+const [, user, pass, host, port, dbname] = match;
+const conn = await mysql.createConnection({ host, port: parseInt(port || "4000"), user, password: pass, database: dbname, ssl: { rejectUnauthorized: true } });
+const [cols] = await conn.execute("DESCRIBE formula_variables");
+console.log("formula_variables:", cols.map(c => c.Field).join(", "));
+const [reqCols] = await conn.execute("DESCRIBE requirements");
+console.log("requirements:", reqCols.map(c => c.Field).join(", "));
+await conn.end();

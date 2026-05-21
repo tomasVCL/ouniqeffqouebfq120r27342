@@ -182,12 +182,12 @@ export async function deleteFormulaVariable(id: number) {
   await db.delete(formulaVariables).where(eq(formulaVariables.id, id));
 }
 
-export async function replaceFormulaVariables(formulaId: number, vars: Array<{ name: string; description?: string; unit?: string; value: number }>) {
+export async function replaceFormulaVariables(formulaId: number, vars: Array<{ name: string; description?: string; unit?: string; defaultValue?: number; value?: number }>) {
   const db = await getDb();
   if (!db) return;
   await db.delete(formulaVariables).where(eq(formulaVariables.formulaId, formulaId));
   if (vars.length > 0) {
-    await db.insert(formulaVariables).values(vars.map(v => ({ ...v, formulaId })));
+    await db.insert(formulaVariables).values(vars.map(v => ({ formulaId, name: v.name, description: v.description, unit: v.unit, defaultValue: v.defaultValue ?? v.value ?? 0 })));
   }
 }
 

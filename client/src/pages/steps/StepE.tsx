@@ -21,12 +21,12 @@ export default function StepE({ projectId }: Props) {
   const utils = trpc.useUtils();
   const { data: clusters, isLoading: loadingClusters } = trpc.clusters.list.useQuery({ projectId });
   const { data: startups } = trpc.startups.list.useQuery({ projectId });
-  const [form, setForm] = useState({ name: "", differentiator: "" });
+  const [form, setForm] = useState({ name: "", description: "" });
 
   const addCluster = trpc.clusters.upsert.useMutation({
     onSuccess: () => {
       utils.clusters.list.invalidate({ projectId });
-      setForm({ name: "", differentiator: "" });
+      setForm({ name: "", description: "" });
     },
     onError: (e: { message: string }) => toast.error(e.message),
   });
@@ -59,11 +59,11 @@ export default function StepE({ projectId }: Props) {
           </div>
           <div className="space-y-1">
             <Label>Key Differentiator</Label>
-            <Input value={form.differentiator} onChange={e => setForm(f => ({ ...f, differentiator: e.target.value }))} placeholder="What sets this cluster apart?" />
+            <Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="What sets this cluster apart?" />
           </div>
         </div>
         <Button
-          onClick={() => form.name && addCluster.mutate({ projectId, name: form.name, differentiator: form.differentiator || undefined })}
+          onClick={() => form.name && addCluster.mutate({ projectId, name: form.name, description: form.description || undefined })}
           disabled={!form.name || addCluster.isPending}
           style={{ background: "oklch(62.8% 0.218 38.4)", color: "white" }}
         >
@@ -89,7 +89,7 @@ export default function StepE({ projectId }: Props) {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h4 className="font-semibold text-sm">{cluster.name}</h4>
-                    {cluster.differentiator && <p className="text-xs text-muted-foreground">{cluster.differentiator}</p>}
+                    {cluster.description && <p className="text-xs text-muted-foreground">{cluster.description}</p>}
                   </div>
                   <button onClick={() => removeCluster.mutate({ id: cluster.id })} className="text-muted-foreground hover:text-destructive transition-colors p-1">
                     <Trash2 size={14} />

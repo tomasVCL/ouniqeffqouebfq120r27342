@@ -27,7 +27,8 @@ export default function AnalystLogin() {
 
   const setup = trpc.analyst.setup.useMutation({
     onSuccess: () => {
-      toast.success("Account created. Please sign in.");
+      // Auto-login after setup
+      login.mutate({ username, password });
     },
     onError: (e) => toast.error(e.message),
   });

@@ -35,21 +35,17 @@
 - [x] Step L: Publish (publish/unpublish, publish history log)
 - [ ] Auto-save on every field change (debounced)
 
-## Frontend — Client Portal
+## Frontend — Client Portal (PRIORITY SPRINT)
 - [x] Client passkey entry page (main public URL)
-- [ ] Section 1: Header (VCL logo, report title, client, industry, date)
-- [ ] Section 2: Project Overview
-- [ ] Section 3: Search Constraints (requirements table)
-- [ ] Section 4: Formula Library
-- [ ] Section 5: Startup Universe roster
-- [ ] Section 6: Strategic Clusters cards
-- [ ] Section 7: Composite Evaluation Matrix (interactive cells, sortable columns, sticky startup column, horizontal scroll)
-- [x] Section 8: Rankings & Tiers table
-- [x] Section 9: Final Recommendations cards
-- [ ] Section 10: Methodology Note
+- [x] report.getByPasskey returns project + rankings + startups + recommendations
+- [x] Page 1: Problem/Context intro (project title, client, scope, analyst info, VCL branding)
+- [x] Page 2: Section C ranking table (Rank, Company, Composite, WSM, Pugh, CapFit, Tier, Strategic Fit, Key Differentiator)
+- [x] Hover card on startup name showing: founded year, location, brief, employees, clients/ref, phase, funding, investors
+- [x] Tier badge color coding (Tier 1 green, Tier 2 blue, Tier 3 amber, Tier 4 red/monitor)
+- [x] Navigation between Page 1 and Page 2
 
 ## Quality
-- [ ] VCL Studio brand assets applied throughout (logo-dark, logo-white, isotipo)
+- [x] VCL Studio brand assets applied throughout (logo-dark, logo-white, isotipo)
 - [ ] Responsive: desktop + tablet + mobile (client report)
 - [ ] Accessibility: tier color cells include text label (not color alone)
 - [ ] Vitest tests for all routers

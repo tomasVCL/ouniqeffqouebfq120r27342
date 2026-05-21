@@ -231,7 +231,7 @@ export const appRouter = router({
         category: z.string().optional(),
         weight: z.number().min(0).max(100),
         mandatory: z.boolean().optional(),
-        notes: z.string().optional(),
+        description: z.string().optional(),
         sortOrder: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
@@ -298,7 +298,8 @@ export const appRouter = router({
         id: z.number().optional(),
         projectId: z.number(),
         name: z.string().min(1),
-        differentiator: z.string().optional(),
+        description: z.string().optional(),
+        color: z.string().optional(),
         sortOrder: z.number().optional(),
       }))
       .mutation(async ({ input }) => {

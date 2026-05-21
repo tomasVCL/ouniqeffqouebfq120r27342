@@ -66,9 +66,11 @@ export const requirements = mysqlTable("requirements", {
   category: varchar("category", { length: 128 }),
   weight: float("weight").default(0).notNull(),
   mandatory: boolean("mandatory").default(false).notNull(),
-  notes: text("notes"),
+  description: text("description"),
+  evidence: text("evidence"),
   sortOrder: int("sortOrder").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
 export type Requirement = typeof requirements.$inferSelect;
@@ -96,7 +98,7 @@ export const formulaVariables = mysqlTable("formula_variables", {
   name: varchar("name", { length: 64 }).notNull(),
   description: varchar("description", { length: 256 }),
   unit: varchar("unit", { length: 32 }),
-  value: float("value").default(0).notNull(),
+  defaultValue: float("defaultValue").default(0).notNull(),
 });
 
 export type FormulaVariable = typeof formulaVariables.$inferSelect;
@@ -106,12 +108,12 @@ export type InsertFormulaVariable = typeof formulaVariables.$inferInsert;
 export const clusters = mysqlTable("clusters", {
   id: int("id").autoincrement().primaryKey(),
   projectId: int("projectId").notNull(),
-  name: varchar("name", { length: 256 }).notNull(),
-  differentiator: text("differentiator"),
+    name: varchar("name", { length: 256 }).notNull(),
+  description: text("description"),
+  color: varchar("color", { length: 32 }),
   sortOrder: int("sortOrder").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
-
 export type Cluster = typeof clusters.$inferSelect;
 export type InsertCluster = typeof clusters.$inferInsert;
 
@@ -129,6 +131,10 @@ export const startups = mysqlTable("startups", {
   employeeRange: varchar("employeeRange", { length: 64 }),
   eligible: boolean("eligible").default(true).notNull(),
   excludedReason: text("excludedReason"),
+  strategicFit: text("strategicFit"),
+  keyDifferentiator: text("keyDifferentiator"),
+  clientsRef: varchar("clientsRef", { length: 512 }),
+  investors: varchar("investors", { length: 512 }),
   clusterId: int("clusterId"),
   sortOrder: int("sortOrder").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

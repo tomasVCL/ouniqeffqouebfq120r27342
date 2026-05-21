@@ -4,7 +4,6 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import AnalystLayout from "./components/AnalystLayout";
 import AnalystLogin from "./pages/AnalystLogin";
 import AnalystDashboard from "./pages/AnalystDashboard";
 import AnalystProjects from "./pages/AnalystProjects";
@@ -13,17 +12,15 @@ import ClientPortal from "./pages/ClientPortal";
 
 function AnalystApp() {
   return (
-    <AnalystLayout>
-      <Switch>
-        <Route path="/analyst" component={AnalystDashboard} />
-        <Route path="/analyst/dashboard" component={AnalystDashboard} />
-        <Route path="/analyst/projects" component={AnalystProjects} />
-        <Route path="/analyst/projects/:id" component={ProjectWorkspace} />
-        <Route path="/analyst/projects/:id/step/:step" component={ProjectWorkspace} />
-        <Route path="/404" component={NotFound} />
-        <Route component={NotFound} />
-      </Switch>
-    </AnalystLayout>
+    <Switch>
+      <Route path="/analyst" component={AnalystDashboard} />
+      <Route path="/analyst/dashboard" component={AnalystDashboard} />
+      <Route path="/analyst/projects" component={AnalystProjects} />
+      <Route path="/analyst/projects/:id" component={ProjectWorkspace} />
+      <Route path="/analyst/projects/:id/step/:step" component={ProjectWorkspace} />
+      <Route path="/404" component={NotFound} />
+      <Route component={NotFound} />
+    </Switch>
   );
 }
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -30,10 +30,16 @@ interface Props {
 }
 
 export default function AnalystLayout({ children, projectTitle, projectId, currentStep, totalSteps }: Props) {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { data: meData, isLoading: meLoading } = trpc.analyst.me.useQuery();
+  useEffect(() => {
+    if (!meLoading && meData && !meData.authenticated) {
+      navigate("/login");
+    }
+  }, [meData, meLoading, navigate]);
   const logout = trpc.analyst.logout.useMutation({
-    onSuccess: () => { window.location.href = "/analyst/login"; },
+    onSuccess: () => { navigate("/login"); },
     onError: () => toast.error("Logout failed"),
   });
 
