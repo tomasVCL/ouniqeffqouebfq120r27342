@@ -235,7 +235,7 @@ function StartupHoverCard({ startup, children }: { startup: any; children: React
 }
 
 // ── Page 1: Context ────────────────────────────────────────────────────────
-function PageContext({ data }: { data: any }) {
+function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }) {
   const { project, requirements } = data;
   const mustHave = requirements.filter((r: any) => r.mandatory);
   const shouldHave = requirements.filter((r: any) => !r.mandatory);
@@ -380,22 +380,38 @@ function PageContext({ data }: { data: any }) {
             {FORMULAS.map(f => <FormulaCard key={f.id} f={f} />)}
           </div>
         </div>
+
+        {/* CTA to Page 2 */}
+        <div className="flex justify-center pt-6 pb-2">
+          <button
+            onClick={onNextPage}
+            className="inline-flex items-center gap-2 bg-[#E8521A] hover:bg-[#CC4415] text-white font-semibold px-8 py-3 rounded-xl transition-colors shadow-sm text-sm"
+          >
+            View Final Rankings
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
 // ── Page 2: Rankings ───────────────────────────────────────────────────────
-function PageRankings({ data }: { data: any }) {
-  const { rankings, startups, clusters } = data;
+function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
+  const { rankings, startups, clusters, recommendations } = data;
   const startupMap = Object.fromEntries(startups.map((s: any) => [s.id, s]));
   const clusterMap = Object.fromEntries(clusters.map((c: any) => [c.id, c]));
+
+  const recMap = Object.fromEntries((recommendations ?? []).map((r: any) => [r.startupId, r]));
 
   const enriched = [...rankings]
     .sort((a: any, b: any) => (a.rank ?? 99) - (b.rank ?? 99))
     .map((r: any) => ({
       ...r,
       startup: startupMap[r.startupId],
+      rec: recMap[r.startupId],
     }));
 
   return (
@@ -493,6 +509,52 @@ function PageRankings({ data }: { data: any }) {
           </div>
         </div>
 
+        {/* Analyst Recommendations */}
+        {enriched.some((r: any) => r.rec?.narrative) && (
+          <div className="mt-12">
+            <h3 className="text-lg font-bold text-gray-900 mb-1">Analyst Recommendations</h3>
+            <p className="text-sm text-gray-500 mb-5">Individual assessment and strategic recommendation per evaluated startup.</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {enriched.filter((r: any) => r.rec?.narrative).map((row: any) => {
+                const tierNum = typeof row.tier === "number" ? row.tier : parseInt(row.tier ?? "4", 10);
+                const tier = TIER_CONFIG[tierNum] ?? TIER_CONFIG[4];
+                const borderColor = TIER_BORDER[tierNum] ?? "#e5e7eb";
+                const isRec = row.rec?.decision === "recommended";
+                return (
+                  <div key={row.startupId}
+                    className="bg-white rounded-xl p-5 shadow-sm border-l-4"
+                    style={{ borderColor, borderTopColor: "#e5e7eb", borderRightColor: "#e5e7eb", borderBottomColor: "#e5e7eb" }}
+                  >
+                    <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+                      <span className="font-bold text-sm text-gray-900">#{row.rank} {row.startup?.name}</span>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${tier.bg} ${tier.text}`}>{tier.short}</span>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                          isRec ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
+                        }`}>{isRec ? "✓ Recommended" : "✗ Not Recommended"}</span>
+                      </div>
+                    </div>
+                    <p className="text-xs leading-relaxed text-gray-600">{row.rec.narrative}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* CTA to Page 3 */}
+        <div className="flex justify-center pt-6 pb-2">
+          <button
+            onClick={onNext}
+            className="inline-flex items-center gap-2 bg-[#E8521A] hover:bg-[#CC4415] text-white font-semibold px-8 py-3 rounded-xl transition-colors shadow-sm text-sm"
+          >
+            View Detailed Evaluation Matrix
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+
         {/* Clusters summary */}
         {clusters.length > 0 && (
           <div className="mt-10">
@@ -582,8 +644,8 @@ function PageMatrix({ data }: { data: any }) {
                 <tr className="bg-gray-900 text-white">
                   <th className="text-left px-4 py-3 font-semibold sticky left-0 bg-gray-900 z-10 min-w-[140px]">Startup</th>
                   {requirements.map((r: any) => (
-                    <th key={r.id} className="px-2 py-3 font-semibold text-center min-w-[90px] max-w-[110px]">
-                      <div className="truncate" title={r.name}>{r.name}</div>
+                    <th key={r.id} className="px-2 py-3 font-semibold text-center min-w-[110px]">
+                      <div className="whitespace-normal leading-tight text-center">{r.name}</div>
                       <div className="text-gray-400 font-normal mt-0.5">{(r.weight * 100).toFixed(0)}%</div>
                     </th>
                   ))}
@@ -641,6 +703,14 @@ function PageMatrix({ data }: { data: any }) {
     </div>
   );
 }
+
+// ── Tier border color map ──────────────────────────────────────────────────
+const TIER_BORDER: Record<number, string> = {
+  1: "#10b981",
+  2: "#3b82f6",
+  3: "#f59e0b",
+  4: "#f87171",
+};
 
 // ── Main component ─────────────────────────────────────────────────────────
 export default function ClientPortalV2() {
@@ -763,8 +833,8 @@ export default function ClientPortalV2() {
       </div>
 
       {/* Page content */}
-      {page === "context"  && <PageContext  data={data} />}
-      {page === "rankings" && <PageRankings data={data} />}
+      {page === "context"  && <PageContext  data={data} onNextPage={() => setPage("rankings")} />}
+      {page === "rankings" && <PageRankings data={data} onNext={() => setPage("matrix")} />}
       {page === "matrix"   && <PageMatrix   data={data} />}
 
       {/* Footer */}

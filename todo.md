@@ -62,3 +62,12 @@
 - [x] ClientPortalV2.tsx — Page 3: deep-dive 10×9 scoring matrix with hover rationale tooltips
 - [x] Wire /client/v2/5 route in App.tsx
 - [x] Translate all UI labels to English (passkey gate, nav tabs, section headers, hover cards, legend)
+- [x] Login page full viewport fix (h-screen, no grey gap)
+- [x] Scroll to top on tab change
+- [x] VCL brand color scheme (warm cream #FDF6EE, orange #E8521A, white sections)
+- [x] Must Have / Should Have criteria split (Motor LCA + DPP marked mandatory)
+- [x] Geographic scope excluded = Rest of the World
+- [x] Matrix criterion name column header wraps (no truncation)
+- [x] CTA button at end of Page 1 → Page 2
+- [x] CTA button at end of Page 2 → Page 3
+- [x] Analyst Recommendations section on Page 2 (10 recommendations seeded)
