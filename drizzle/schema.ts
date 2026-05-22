@@ -48,6 +48,10 @@ export const projects = mysqlTable("projects", {
   analystName: varchar("analystName", { length: 128 }),
   analystEmail: varchar("analystEmail", { length: 320 }),
   analystPhone: varchar("analystPhone", { length: 64 }),
+  scopeDescription: text("scopeDescription"),
+  universeSize: int("universeSize"),
+  eligibleCount: int("eligibleCount"),
+  excludedCount: int("excludedCount"),
   passkeyHash: varchar("passkeyHash", { length: 256 }),
   published: boolean("published").default(false).notNull(),
   publishedAt: timestamp("publishedAt"),
@@ -135,6 +139,8 @@ export const startups = mysqlTable("startups", {
   keyDifferentiator: text("keyDifferentiator"),
   clientsRef: varchar("clientsRef", { length: 512 }),
   investors: varchar("investors", { length: 512 }),
+  fundingAmount: varchar("fundingAmount", { length: 64 }),
+  description: varchar("description", { length: 512 }),
   clusterId: int("clusterId"),
   sortOrder: int("sortOrder").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -164,9 +170,9 @@ export const wsmScores = mysqlTable("wsm_scores", {
   humanScore: float("humanScore"),
   aiScore: float("aiScore"),
   justificationNote: text("justificationNote"),
+  rationale: text("rationale"),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
-
 export type WsmScore = typeof wsmScores.$inferSelect;
 
 // ─── Pugh Scores (Step G) ─────────────────────────────────────────────────

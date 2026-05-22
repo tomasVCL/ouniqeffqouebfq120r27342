@@ -50,3 +50,15 @@
 - [ ] Accessibility: tier color cells include text label (not color alone)
 - [ ] Vitest tests for all routers
 - [x] Zero TypeScript errors
+
+## Client Portal V2 — Project 5 (VCL Discover Phase v2)
+- [x] Add rationale column to wsm_scores table
+- [x] Seed project 5: project row, 10 startups, 9 requirements (WSM criteria + weights)
+- [x] Seed WSM scores (10 startups × 9 criteria) with rationale text
+- [x] Seed rankings (10 rows with cluster, tier, differentiator)
+- [x] Update report.getByPasskey to return rationale per score
+- [x] ClientPortalV2.tsx — Page 1: context, scope, methodology, interactive business formulas (F1–F5)
+- [x] ClientPortalV2.tsx — Page 2: final rankings table with cluster column + hover startup cards
+- [x] ClientPortalV2.tsx — Page 3: deep-dive 10×9 scoring matrix with hover rationale tooltips
+- [x] Wire /client/v2/5 route in App.tsx
+- [x] Translate all UI labels to English (passkey gate, nav tabs, section headers, hover cards, legend)

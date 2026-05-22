@@ -9,6 +9,7 @@ import AnalystDashboard from "./pages/AnalystDashboard";
 import AnalystProjects from "./pages/AnalystProjects";
 import ProjectWorkspace from "./pages/ProjectWorkspace";
 import ClientPortal from "./pages/ClientPortal";
+import ClientPortalV2 from "./pages/ClientPortalV2";
 
 function AnalystApp() {
   return (
@@ -28,6 +29,7 @@ function Router() {
   return (
     <Switch>
       {/* Public client portal — accessed via passkey */}
+      <Route path="/client/v2/:projectId" component={ClientPortalV2} />
       <Route path="/client/:projectId" component={ClientPortal} />
       {/* Analyst login */}
       <Route path="/login" component={AnalystLogin} />
