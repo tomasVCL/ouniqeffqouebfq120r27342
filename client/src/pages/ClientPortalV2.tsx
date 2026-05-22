@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams } from "wouter";
 import { trpc } from "@/lib/trpc";
 
@@ -109,11 +109,11 @@ function FormulaCard({ f }: { f: typeof FORMULAS[0] }) {
     <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-3">
         <div>
-          <span className="text-xs font-bold text-[#C0392B] tracking-widest uppercase">{f.id}</span>
+          <span className="text-xs font-bold text-[#E8521A] tracking-widest uppercase">{f.id}</span>
           <h4 className="text-sm font-semibold text-gray-900 mt-0.5">{f.name}</h4>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold text-[#C0392B]">{result}</div>
+          <div className="text-2xl font-bold text-[#E8521A]">{result}</div>
           <div className="text-xs text-gray-400">{f.unit}</div>
         </div>
       </div>
@@ -129,7 +129,7 @@ function FormulaCard({ f }: { f: typeof FORMULAS[0] }) {
               type="number"
               value={vals[inp.key]}
               onChange={e => setVals(v => ({ ...v, [inp.key]: parseFloat(e.target.value) || 0 }))}
-              className="w-28 text-right text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#C0392B] bg-white"
+              className="w-28 text-right text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#E8521A] bg-white"
             />
           </div>
         ))}
@@ -184,7 +184,7 @@ function StartupHoverCard({ startup, children }: { startup: any; children: React
       }}
       onMouseLeave={() => setShow(false)}
     >
-      <span className="underline decoration-dotted underline-offset-2 cursor-pointer text-gray-900 hover:text-[#C0392B] transition-colors font-medium">
+      <span className="underline decoration-dotted underline-offset-2 cursor-pointer text-gray-900 hover:text-[#E8521A] transition-colors font-medium">
         {children}
       </span>
       {show && (
@@ -241,39 +241,39 @@ function PageContext({ data }: { data: any }) {
   const shouldHave = requirements.filter((r: any) => !r.mandatory);
 
   return (
-    <div className="min-h-screen bg-[#F7F7F5]">
+    <div className="min-h-screen bg-[#FDF6EE]">
       {/* Hero */}
-      <div className="bg-[#1A1A1A] text-white">
-        <div className="max-w-5xl mx-auto px-6 py-16">
+      <div className="bg-white border-b border-gray-100">
+        <div className="max-w-5xl mx-auto px-6 py-14">
           <div className="flex items-center gap-3 mb-10">
-            <img src={LOGO_WHITE} alt="VCL Studio" className="h-8" />
+            <img src={LOGO_DARK} alt="VCL Studio" className="h-8" />
           </div>
           <div className="flex items-start justify-between gap-8">
             <div className="flex-1">
-              <div className="text-xs font-semibold tracking-[0.2em] text-[#C0392B] uppercase mb-3">
+              <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-3">
                 Discover Phase — Executive Report
               </div>
-              <h1 className="text-3xl font-bold leading-tight mb-4">{project.title}</h1>
-              <p className="text-gray-400 text-sm leading-relaxed max-w-xl">
+              <h1 className="text-3xl font-bold leading-tight mb-4 text-gray-900">{project.title}</h1>
+              <p className="text-gray-500 text-sm leading-relaxed max-w-xl">
                 {project.scopeDescription}
               </p>
             </div>
-            <div className="bg-white/5 border border-white/10 rounded-xl p-5 min-w-[200px] text-sm space-y-3">
+            <div className="bg-[#FDF6EE] border border-orange-100 rounded-xl p-5 min-w-[200px] text-sm space-y-3">
               <div>
-                <div className="text-gray-500 text-xs uppercase tracking-wide">Client</div>
-                <div className="text-white font-medium mt-0.5">{project.clientName}</div>
+                <div className="text-gray-400 text-xs uppercase tracking-wide">Client</div>
+                <div className="text-gray-900 font-medium mt-0.5">{project.clientName}</div>
               </div>
               <div>
-                <div className="text-gray-500 text-xs uppercase tracking-wide">Industry</div>
-                <div className="text-white font-medium mt-0.5">{project.industry}</div>
+                <div className="text-gray-400 text-xs uppercase tracking-wide">Industry</div>
+                <div className="text-gray-900 font-medium mt-0.5">{project.industry}</div>
               </div>
               <div>
-                <div className="text-gray-500 text-xs uppercase tracking-wide">Analyst</div>
-                <div className="text-white font-medium mt-0.5">{project.analystName}</div>
+                <div className="text-gray-400 text-xs uppercase tracking-wide">Analyst</div>
+                <div className="text-gray-900 font-medium mt-0.5">{project.analystName}</div>
               </div>
               <div>
-                <div className="text-gray-500 text-xs uppercase tracking-wide">Date</div>
-                <div className="text-white font-medium mt-0.5">{project.reportDate}</div>
+                <div className="text-gray-400 text-xs uppercase tracking-wide">Date</div>
+                <div className="text-gray-900 font-medium mt-0.5">{project.reportDate}</div>
               </div>
             </div>
           </div>
@@ -290,7 +290,7 @@ function PageContext({ data }: { data: any }) {
             { label: "Weighted criteria",  value: requirements.length },
           ].map(s => (
             <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-5 text-center shadow-sm">
-              <div className="text-3xl font-bold text-[#C0392B]">{s.value}</div>
+              <div className="text-3xl font-bold text-[#E8521A]">{s.value}</div>
               <div className="text-xs text-gray-500 mt-1">{s.label}</div>
             </div>
           ))}
@@ -317,7 +317,7 @@ function PageContext({ data }: { data: any }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {mustHave.length > 0 && (
               <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                <div className="text-xs font-bold text-[#C0392B] uppercase tracking-widest mb-3">Must Have</div>
+                <div className="text-xs font-bold text-[#E8521A] uppercase tracking-widest mb-3">Must Have</div>
                 <div className="space-y-2">
                   {mustHave.map((r: any) => (
                     <div key={r.id} className="flex items-start justify-between gap-3">
@@ -363,7 +363,7 @@ function PageContext({ data }: { data: any }) {
           <div className="grid grid-cols-3 gap-3">
             {requirements.map((r: any) => (
               <div key={r.id} className="bg-gray-50 rounded-lg p-3 border border-gray-100">
-                <div className="text-lg font-bold text-[#C0392B]">{(r.weight * 100).toFixed(0)}%</div>
+                <div className="text-lg font-bold text-[#E8521A]">{(r.weight * 100).toFixed(0)}%</div>
                 <div className="text-xs text-gray-700 font-medium leading-tight mt-0.5">{r.name}</div>
               </div>
             ))}
@@ -399,17 +399,17 @@ function PageRankings({ data }: { data: any }) {
     }));
 
   return (
-    <div className="min-h-screen bg-[#F7F7F5]">
-      <div className="bg-[#1A1A1A] text-white">
+    <div className="min-h-screen bg-[#FDF6EE]">
+      <div className="bg-white border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6 py-10">
           <div className="flex items-center gap-3 mb-6">
-            <img src={LOGO_WHITE} alt="VCL Studio" className="h-7" />
+            <img src={LOGO_DARK} alt="VCL Studio" className="h-7" />
           </div>
-          <div className="text-xs font-semibold tracking-[0.2em] text-[#C0392B] uppercase mb-2">
+          <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
             Section C — Final Rankings
           </div>
-          <h2 className="text-2xl font-bold">Strategic & Technical Selection</h2>
-          <p className="text-gray-400 text-sm mt-2">
+          <h2 className="text-2xl font-bold text-gray-900">Strategic & Technical Selection</h2>
+          <p className="text-gray-500 text-sm mt-2">
             Final ranking by Weighted Scoring Matrix (WSM). Hover over a startup name to view its profile.
           </p>
         </div>
@@ -449,7 +449,7 @@ function PageRankings({ data }: { data: any }) {
                   return (
                     <tr key={row.id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${idx % 2 === 0 ? "" : "bg-gray-50/30"}`}>
                       <td className="px-4 py-3.5 text-center">
-                        <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${idx === 0 ? "bg-[#C0392B] text-white" : "bg-gray-100 text-gray-600"}`}>
+                        <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${idx === 0 ? "bg-[#E8521A] text-white" : "bg-gray-100 text-gray-600"}`}>
                           {row.rank}
                         </span>
                       </td>
@@ -545,17 +545,17 @@ function PageMatrix({ data }: { data: any }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F7F5]">
-      <div className="bg-[#1A1A1A] text-white">
+    <div className="min-h-screen bg-[#FDF6EE]">
+      <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 py-10">
           <div className="flex items-center gap-3 mb-6">
-            <img src={LOGO_WHITE} alt="VCL Studio" className="h-7" />
+            <img src={LOGO_DARK} alt="VCL Studio" className="h-7" />
           </div>
-          <div className="text-xs font-semibold tracking-[0.2em] text-[#C0392B] uppercase mb-2">
+          <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
             Deep Dive
           </div>
-          <h2 className="text-2xl font-bold">Detailed Evaluation Matrix</h2>
-          <p className="text-gray-400 text-sm mt-2">
+          <h2 className="text-2xl font-bold text-gray-900">Detailed Evaluation Matrix</h2>
+          <p className="text-gray-500 text-sm mt-2">
             Individual scores per criterion. Hover over each cell to view the analyst's rationale.
           </p>
         </div>
@@ -587,7 +587,7 @@ function PageMatrix({ data }: { data: any }) {
                       <div className="text-gray-400 font-normal mt-0.5">{(r.weight * 100).toFixed(0)}%</div>
                     </th>
                   ))}
-                  <th className="px-3 py-3 font-semibold text-center bg-[#C0392B] min-w-[80px]">WSM Total</th>
+                  <th className="px-3 py-3 font-semibold text-center bg-[#E8521A] min-w-[80px]">WSM Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -598,7 +598,7 @@ function PageMatrix({ data }: { data: any }) {
                       <td className="px-4 py-3 sticky left-0 bg-inherit z-10 border-r border-gray-100">
                         <div className="flex items-center gap-2">
                           {ranking && (
-                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${idx === 0 ? "bg-[#C0392B] text-white" : "bg-gray-100 text-gray-600"}`}>
+                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${idx === 0 ? "bg-[#E8521A] text-white" : "bg-gray-100 text-gray-600"}`}>
                               {ranking.rank}
                             </span>
                           )}
@@ -622,7 +622,7 @@ function PageMatrix({ data }: { data: any }) {
                         );
                       })}
                       <td className="px-3 py-3 text-center bg-red-50/30">
-                        <span className="text-sm font-bold text-[#C0392B]">
+                        <span className="text-sm font-bold text-[#E8521A]">
                           {ranking?.wsmScore?.toFixed(2) ?? "—"}
                         </span>
                       </td>
@@ -651,6 +651,11 @@ export default function ClientPortalV2() {
   const [submitted, setSubmitted] = useState("");
   const [page, setPage] = useState<"context" | "rankings" | "matrix">("context");
 
+  // Scroll to top on page change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [page]);
+
   const { data, isLoading, error } = trpc.report.getByPasskey.useQuery(
     { projectId, passkey: submitted },
     { enabled: submitted.length > 0, retry: false }
@@ -664,15 +669,15 @@ export default function ClientPortalV2() {
   // Passkey gate
   if (!submitted || error) {
     return (
-      <div className="min-h-screen bg-[#1A1A1A] flex flex-col items-center justify-center px-4">
+      <div className="h-screen w-full bg-[#FDF6EE] flex flex-col items-center justify-center px-4">
         <div className="mb-10 text-center">
-          <img src={LOGO_WHITE} alt="VCL Studio" className="h-10 mx-auto mb-4" />
-          <p className="text-gray-400 text-sm">Innovation Scouting Platform</p>
+          <img src={LOGO_DARK} alt="VCL Studio" className="h-10 mx-auto mb-4" />
+          <p className="text-gray-500 text-sm">Innovation Scouting Platform</p>
         </div>
         <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm">
           <div className="text-center mb-6">
-            <div className="w-12 h-12 bg-[#C0392B]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-              <svg className="w-6 h-6 text-[#C0392B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 bg-[#E8521A]/10 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg className="w-6 h-6 text-[#E8521A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
@@ -685,7 +690,7 @@ export default function ClientPortalV2() {
               value={passkey}
               onChange={e => setPasskey(e.target.value)}
               placeholder="Access key"
-              className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#C0392B] focus:border-transparent"
+              className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8521A] focus:border-transparent"
               autoFocus
             />
             {error && (
@@ -694,7 +699,7 @@ export default function ClientPortalV2() {
             <button
               type="submit"
               disabled={isLoading || passkey.length === 0}
-              className="w-full bg-[#C0392B] hover:bg-[#A93226] text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 text-sm"
+              className="w-full bg-[#E8521A] hover:bg-[#CC4415] text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 text-sm"
             >
               {isLoading ? "Verifying..." : "Access Report"}
             </button>
@@ -702,7 +707,7 @@ export default function ClientPortalV2() {
         </div>
         <p className="text-gray-600 text-xs mt-6">
           Access issues? Contact{" "}
-          <a href="mailto:innovation@vclstudio.com" className="text-[#C0392B] hover:underline">
+          <a href="mailto:innovation@vclstudio.com" className="text-[#E8521A] hover:underline">
             innovation@vclstudio.com
           </a>
         </p>
@@ -712,10 +717,10 @@ export default function ClientPortalV2() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#1A1A1A] flex items-center justify-center">
+      <div className="min-h-screen bg-[#FDF6EE] flex items-center justify-center">
         <div className="text-center">
           <img src={ISOTIPO} alt="VCL" className="h-12 mx-auto mb-4 animate-pulse" />
-          <p className="text-gray-400 text-sm">Loading report...</p>
+          <p className="text-gray-500 text-sm">Loading report...</p>
         </div>
       </div>
     );
@@ -730,9 +735,9 @@ export default function ClientPortalV2() {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-[#F7F7F5]">
+    <div className="min-h-screen bg-[#FDF6EE]">
       {/* Sticky nav */}
-      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-200 shadow-sm">
+      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
           <div className="flex items-center gap-3">
             <img src={LOGO_DARK} alt="VCL Studio" className="h-6" />
@@ -746,7 +751,7 @@ export default function ClientPortalV2() {
                 onClick={() => setPage(p.id)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                   page === p.id
-                    ? "bg-[#C0392B] text-white"
+                    ? "bg-[#E8521A] text-white"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
@@ -763,10 +768,10 @@ export default function ClientPortalV2() {
       {page === "matrix"   && <PageMatrix   data={data} />}
 
       {/* Footer */}
-      <footer className="bg-[#1A1A1A] text-gray-500 text-xs py-6 mt-0">
+      <footer className="bg-white border-t border-gray-200 text-gray-400 text-xs py-6 mt-0">
         <div className="max-w-5xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={ISOTIPO} alt="VCL" className="h-5 opacity-60" />
+            <img src={ISOTIPO} alt="VCL" className="h-5 opacity-50" />
             <span>© {new Date().getFullYear()} VCL Studio. Confidential.</span>
           </div>
           <span>{data.project.reportDate}</span>
