@@ -79,8 +79,8 @@ export default function AnalystLogin() {
       <div className="relative w-full max-w-md space-y-8">
         {/* Logo */}
         <div className="text-center space-y-3">
-          <img src={ISOTIPO} alt="VCL Studio" className="h-16 w-auto mx-auto" />
-          <img src={LOGO_DARK} alt="VCL Studio" className="h-10 w-auto mx-auto" style={{ filter: "brightness(0) invert(1)" }} />
+          <img src={ISOTIPO} alt="VCL studio" className="h-16 w-auto mx-auto" />
+          <img src={LOGO_DARK} alt="VCL studio" className="h-10 w-auto mx-auto" style={{ filter: "brightness(0) invert(1)" }} />
           <p className="text-sm" style={{ color: "oklch(70% 0.010 280.0)" }}>
             Innovation Scouting Platform
           </p>
@@ -165,7 +165,7 @@ export default function AnalystLogin() {
         </Card>
 
         <p className="text-center text-xs" style={{ color: "oklch(50% 0.010 280.0)" }}>
-          VCL Studio · Innovation Scouting Platform · Confidential
+          VCL studio · Innovation Scouting Platform · Confidential
         </p>
       </div>
     </div>

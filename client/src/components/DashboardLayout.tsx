@@ -56,7 +56,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
       {/* Logo */}
       <div className="px-5 pt-6 pb-5 border-b border-white/10">
         <div className="flex items-center justify-between">
-          <img src={LOGO_WHITE} alt="VCL Studio" className="h-7 object-contain" />
+          <img src={LOGO_WHITE} alt="VCL studio" className="h-7 object-contain" />
           {onClose && (
             <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors lg:hidden">
               <X className="h-5 w-5" />
@@ -111,12 +111,12 @@ function LoginScreen() {
   return (
     <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#F5F5F7" }}>
       <div className="bg-white rounded-2xl border border-border p-10 max-w-sm w-full text-center shadow-sm">
-        <img src="/manus-storage/vcl-logo-dark_4c25d8f0.png" alt="VCL Studio" className="h-10 mx-auto mb-6" />
+        <img src="/manus-storage/vcl-logo-dark_4c25d8f0.png" alt="VCL studio" className="h-10 mx-auto mb-6" />
         <h2 className="text-xl text-[#292432] mb-2" style={{ fontFamily: "'Archivo Black', sans-serif" }}>
           Sign in to continue
         </h2>
         <p className="text-gray-500 text-sm mb-6">
-          Access the VCL Studio Scouting Platform with your Manus account.
+          Access the VCL studio Scouting Platform with your Manus account.
         </p>
         <a href={getLoginUrl()}>
           <Button className="w-full bg-[#FE4E03] hover:bg-[#e04400] text-white font-semibold py-2.5">
@@ -136,7 +136,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#F5F5F7" }}>
         <div className="flex flex-col items-center gap-3">
-          <img src={ISOTIPO} alt="VCL Studio" className="h-12 animate-pulse" />
+          <img src={ISOTIPO} alt="VCL studio" className="h-12 animate-pulse" />
           <p className="text-sm text-gray-400">Loading...</p>
         </div>
       </div>
@@ -169,7 +169,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <button onClick={() => setMobileOpen(true)} className="text-gray-500 hover:text-[#292432] transition-colors">
             <Menu className="h-5 w-5" />
           </button>
-          <img src={ISOTIPO} alt="VCL Studio" className="h-7" />
+          <img src={ISOTIPO} alt="VCL studio" className="h-7" />
         </div>
 
         {/* Page content */}

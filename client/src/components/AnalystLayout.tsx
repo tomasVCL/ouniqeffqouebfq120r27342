@@ -47,7 +47,7 @@ export default function AnalystLayout({ children, projectTitle, projectId, curre
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="px-6 py-5 border-b" style={{ borderColor: "var(--sidebar-border)" }}>
-        <img src={LOGO_WHITE} alt="VCL Studio" className="h-8 w-auto" />
+        <img src={LOGO_WHITE} alt="VCL studio" className="h-8 w-auto" />
       </div>
 
       {/* Nav */}
@@ -140,7 +140,7 @@ export default function AnalystLayout({ children, projectTitle, projectId, curre
           </div>
 
           <div className="ml-auto flex items-center gap-3">
-            <img src={LOGO_DARK} alt="VCL Studio" className="h-6 w-auto opacity-60 hidden sm:block" />
+            <img src={LOGO_DARK} alt="VCL studio" className="h-6 w-auto opacity-60 hidden sm:block" />
           </div>
         </header>
 

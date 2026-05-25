@@ -49,7 +49,7 @@ export default function ReportAccess() {
     >
       {/* Logo */}
       <div className="mb-8 flex flex-col items-center gap-2">
-        <img src={VCL_LOGO_DARK} alt="VCL Studio" className="h-8 object-contain" />
+        <img src={VCL_LOGO_DARK} alt="VCL studio" className="h-8 object-contain" />
         <span className="text-sm tracking-widest uppercase" style={{ color: "#6B6B6B", letterSpacing: "0.18em" }}>
           Scouting
         </span>
@@ -70,7 +70,7 @@ export default function ReportAccess() {
 
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Acceso al Reporte</h1>
-          <p className="text-sm text-gray-500">Ingresa la clave de acceso proporcionada por VCL Studio</p>
+          <p className="text-sm text-gray-500">Ingresa la clave de acceso proporcionada por VCL studio</p>
         </div>
 
         <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3">

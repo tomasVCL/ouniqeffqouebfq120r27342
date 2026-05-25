@@ -259,7 +259,7 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-6 py-14">
           <div className="flex items-center gap-3 mb-10">
-            <img src={LOGO_DARK} alt="VCL Studio" className="h-8" />
+            <img src={LOGO_DARK} alt="VCL studio" className="h-8" />
           </div>
           <div className="flex items-start justify-between gap-8">
             <div className="flex-1">
@@ -416,7 +416,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6 py-10">
           <div className="flex items-center gap-3 mb-6">
-            <img src={LOGO_DARK} alt="VCL Studio" className="h-7" />
+            <img src={LOGO_DARK} alt="VCL studio" className="h-7" />
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
             Sección C — Rankings Finales
@@ -608,7 +608,7 @@ function PageMatrix({ data }: { data: any }) {
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 py-10">
           <div className="flex items-center gap-3 mb-6">
-            <img src={LOGO_DARK} alt="VCL Studio" className="h-7" />
+            <img src={LOGO_DARK} alt="VCL studio" className="h-7" />
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
             Evaluación Detallada
@@ -694,7 +694,7 @@ function PageMatrix({ data }: { data: any }) {
         </div>
 
         <p className="text-xs text-gray-400 mt-4 text-center">
-          Puntuaciones asignadas por el equipo de análisis de VCL Studio. Cada puntuación refleja una evaluación independiente basada en documentación pública, demos y entrevistas con los proveedores.
+          Puntuaciones asignadas por el equipo de análisis de VCL studio. Cada puntuación refleja una evaluación independiente basada en documentación pública, demos y entrevistas con los proveedores.
         </p>
       </div>
     </div>
@@ -710,7 +710,7 @@ function PageAnexos({ data }: { data: any }) {
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-6 py-10">
           <div className="flex items-center gap-3 mb-6">
-            <img src={LOGO_DARK} alt="VCL Studio" className="h-7" />
+            <img src={LOGO_DARK} alt="VCL studio" className="h-7" />
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
             Anexos
@@ -742,10 +742,10 @@ function PageAnexos({ data }: { data: any }) {
               Las fórmulas presentadas en esta sección son herramientas orientativas para facilitar la toma de decisiones. Los valores por defecto están calibrados con benchmarks del sector textil europeo para proyectos de implementación DPP/LCA de escala media.
             </p>
             <p>
-              Los resultados deben interpretarse como estimaciones preliminares. VCL Studio recomienda validar los parámetros con los equipos financieros y técnicos del cliente antes de utilizarlos en decisiones de inversión.
+              Los resultados deben interpretarse como estimaciones preliminares. VCL studio recomienda validar los parámetros con los equipos financieros y técnicos del cliente antes de utilizarlos en decisiones de inversión.
             </p>
             <p className="text-xs text-gray-400 pt-2 border-t border-gray-100">
-              Análisis elaborado por el equipo de Innovación / Venture Clienting de VCL Studio · {project?.reportDate}
+              Análisis elaborado por el equipo de Innovación / Venture Clienting de VCL studio · {project?.reportDate}
             </p>
           </div>
         </div>
@@ -806,7 +806,7 @@ export default function ClientPortalV2() {
     return (
       <div className="h-screen w-full bg-[#FDF6EE] flex flex-col items-center justify-center px-4">
         <div className="mb-10 text-center">
-          <img src={LOGO_DARK} alt="VCL Studio" className="h-10 mx-auto mb-4" />
+          <img src={LOGO_DARK} alt="VCL studio" className="h-10 mx-auto mb-4" />
           <p className="text-gray-500 text-sm">Innovation Scouting Platform</p>
         </div>
         <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm">
@@ -817,7 +817,7 @@ export default function ClientPortalV2() {
               </svg>
             </div>
             <h2 className="text-lg font-bold text-gray-900">Acceso al Reporte</h2>
-            <p className="text-sm text-gray-500 mt-1">Ingresa la clave de acceso proporcionada por VCL Studio</p>
+            <p className="text-sm text-gray-500 mt-1">Ingresa la clave de acceso proporcionada por VCL studio</p>
           </div>
           <form onSubmit={handleUnlock} className="space-y-4">
             <input
@@ -876,7 +876,7 @@ export default function ClientPortalV2() {
       <div className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
           <div className="flex items-center gap-3">
-            <img src={LOGO_DARK} alt="VCL Studio" className="h-6" />
+            <img src={LOGO_DARK} alt="VCL studio" className="h-6" />
             <span className="text-xs text-gray-400 hidden sm:block">|</span>
             <span className="text-xs text-gray-500 hidden sm:block truncate max-w-[200px]">{data.project.title}</span>
           </div>
@@ -909,7 +909,7 @@ export default function ClientPortalV2() {
         <div className="max-w-5xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={ISOTIPO} alt="VCL" className="h-5 opacity-50" />
-            <span>© {new Date().getFullYear()} VCL Studio. Confidencial.</span>
+            <span>© {new Date().getFullYear()} VCL studio. Confidencial.</span>
           </div>
           <span>{data.project.reportDate}</span>
         </div>

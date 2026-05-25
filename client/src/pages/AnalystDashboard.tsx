@@ -23,7 +23,7 @@ export default function AnalystDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <img src={LOGO_DARK} alt="VCL Studio" className="h-8 mb-3" />
+          <img src={LOGO_DARK} alt="VCL studio" className="h-8 mb-3" />
           <h1 className="text-2xl font-display font-black">Innovation Scouting</h1>
           <p className="text-sm text-muted-foreground mt-1">Analyst workspace — manage your scouting engagements</p>
         </div>
