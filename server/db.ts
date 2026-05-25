@@ -109,6 +109,17 @@ export async function deleteProject(id: number) {
   await db.delete(projects).where(eq(projects.id, id));
 }
 
+export async function getProjectBySlug(clientSlug: string, problemId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db
+    .select()
+    .from(projects)
+    .where(and(eq(projects.clientSlug, clientSlug), eq(projects.problemId, problemId)))
+    .limit(1);
+  return result[0];
+}
+
 // ─── Requirements ─────────────────────────────────────────────────────────
 export async function getRequirements(projectId: number) {
   const db = await getDb();

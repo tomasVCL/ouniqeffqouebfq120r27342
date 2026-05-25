@@ -26,6 +26,7 @@ import {
   getFormulas,
   getProject,
   getPublishLog,
+  getProjectBySlug,
   getPublishedProjectByPasskeyHash,
   getPughScores,
   getRankings,
@@ -681,6 +682,25 @@ Return JSON: [{"startupId": N, "capabilityId": N, "aiScore": "High"|"Med"|"Low",
 
   // ─── Client Report (public) ───────────────────────────────────────────
   report: router({
+    // Unified passkey login — finds the project by passkey alone, returns slug+problemId for redirect
+    resolvePasskey: publicProcedure
+      .input(z.object({ passkey: z.string() }))
+      .mutation(async ({ input }) => {
+        const all = await listProjects();
+        const published = all.filter(p => p.published && p.passkeyHash);
+        for (const p of published) {
+          const valid = await bcrypt.compare(input.passkey, p.passkeyHash!);
+          if (valid) {
+            return {
+              clientSlug: p.clientSlug ?? null,
+              problemId: p.problemId ?? null,
+              projectId: p.id,
+            };
+          }
+        }
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "Clave de acceso inválida" });
+      }),
+
     getByPasskey: publicProcedure
       .input(z.object({ projectId: z.number(), passkey: z.string() }))
       .query(async ({ input }) => {
@@ -726,6 +746,63 @@ Return JSON: [{"startupId": N, "capabilityId": N, "aiScore": "High"|"Med"|"Low",
             eligibleCount: project.eligibleCount,
             excludedCount: project.excludedCount,
             publishedAt: project.publishedAt,
+            clientSlug: project.clientSlug,
+            problemId: project.problemId,
+          },
+          requirements: reqs,
+          formulas: formulaList,
+          clusters: clusterList,
+          startups: startupList,
+          capabilities: capList,
+          wsmScores: wsmList,
+          pughScores: pughList,
+          capfitScores: capfitList,
+          rankings: rankingList,
+          recommendations: recList,
+        };
+      }),
+
+    // Load report by clientSlug + problemId (no passkey needed — auth was done at /acceso)
+    getBySlug: publicProcedure
+      .input(z.object({ clientSlug: z.string(), problemId: z.string() }))
+      .query(async ({ input }) => {
+        const project = await getProjectBySlug(input.clientSlug, input.problemId);
+        if (!project || !project.published) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Reporte no encontrado" });
+        }
+
+        const [reqs, formulaList, clusterList, startupList, capList, wsmList, pughList, capfitList, rankingList, recList] = await Promise.all([
+          getRequirements(project.id),
+          getFormulas(project.id),
+          getClusters(project.id),
+          getStartups(project.id),
+          getCapabilities(project.id),
+          getWsmScores(project.id),
+          getPughScores(project.id),
+          getCapfitScores(project.id),
+          getRankings(project.id),
+          getRecommendations(project.id),
+        ]);
+
+        return {
+          project: {
+            id: project.id,
+            title: project.title,
+            clientName: project.clientName,
+            industry: project.industry,
+            geoAllowed: project.geoAllowed,
+            geoExcluded: project.geoExcluded,
+            reportDate: project.reportDate,
+            analystName: project.analystName,
+            analystEmail: project.analystEmail,
+            analystPhone: project.analystPhone,
+            scopeDescription: project.scopeDescription,
+            universeSize: project.universeSize,
+            eligibleCount: project.eligibleCount,
+            excludedCount: project.excludedCount,
+            publishedAt: project.publishedAt,
+            clientSlug: project.clientSlug,
+            problemId: project.problemId,
           },
           requirements: reqs,
           formulas: formulaList,

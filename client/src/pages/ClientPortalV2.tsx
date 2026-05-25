@@ -756,11 +756,25 @@ function PageAnexos({ data }: { data: any }) {
 
 // ── Main component ─────────────────────────────────────────────────────────
 export default function ClientPortalV2() {
-  const params = useParams<{ projectId: string }>();
-  const projectId = parseInt(params.projectId ?? "0", 10);
+  // Supports both /:clientSlug/:problemId (new) and /client/v2/:projectId (legacy)
+  const params = useParams<{ projectId?: string; clientSlug?: string; problemId?: string }>();
+
+  // Read auth data stored by the unified /acceso page
+  const sessionKey = params.clientSlug && params.problemId
+    ? `vcl_report_${params.clientSlug}_${params.problemId}`
+    : params.projectId
+    ? `vcl_report_legacy_${params.projectId}`
+    : null;
+
+  const sessionData = sessionKey ? (() => {
+    try { return JSON.parse(sessionStorage.getItem(sessionKey) ?? ""); } catch { return null; }
+  })() : null;
+
+  const projectId = sessionData?.projectId ?? parseInt(params.projectId ?? "0", 10);
+  const isSlugRoute = !!(params.clientSlug && params.problemId);
 
   const [passkey, setPasskey] = useState("");
-  const [submitted, setSubmitted] = useState("");
+  const [submitted, setSubmitted] = useState<string>(sessionData?.passkey ?? "");
   const [page, setPage] = useState<"context" | "rankings" | "matrix" | "anexos">("context");
 
   // Scroll al tope al cambiar de página
@@ -768,18 +782,27 @@ export default function ClientPortalV2() {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [page]);
 
-  const { data, isLoading, error } = trpc.report.getByPasskey.useQuery(
-    { projectId, passkey: submitted },
-    { enabled: submitted.length > 0, retry: false }
+  // Slug route: load directly by slug (no passkey needed — auth was done at /acceso)
+  const slugQuery = trpc.report.getBySlug.useQuery(
+    { clientSlug: params.clientSlug ?? "", problemId: params.problemId ?? "" },
+    { enabled: isSlugRoute, retry: false }
   );
+
+  // Legacy route: load by projectId + passkey
+  const passkeyQuery = trpc.report.getByPasskey.useQuery(
+    { projectId, passkey: submitted },
+    { enabled: !isSlugRoute && submitted.length > 0 && projectId > 0, retry: false }
+  );
+
+  const { data, isLoading, error } = isSlugRoute ? slugQuery : passkeyQuery;
 
   const handleUnlock = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(passkey.trim());
   };
 
-  // Pantalla de acceso
-  if (!submitted || error) {
+  // Pantalla de acceso — solo para rutas legacy (no slug)
+  if (!isSlugRoute && (!submitted || error)) {
     return (
       <div className="h-screen w-full bg-[#FDF6EE] flex flex-col items-center justify-center px-4">
         <div className="mb-10 text-center">

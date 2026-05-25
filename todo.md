@@ -71,3 +71,25 @@
 - [x] CTA button at end of Page 1 → Page 2
 - [x] CTA button at end of Page 2 → Page 3
 - [x] Analyst Recommendations section on Page 2 (10 recommendations seeded)
+- [x] Todo el portal V2 traducido al español (UI chrome completo)
+- [x] Nueva Página 4 "Anexos" con fórmulas de negocio interactivas y nota metodológica
+- [x] Fórmulas movidas de Página 1 a Página 4 (Anexos)
+- [x] Strategic Clusters movidos al tope de la Página 2 (Rankings)
+- [x] Criterios renombrados: Must Have → Indispensable, Should Have → Deseable
+- [x] TRL movido de Deseable a Indispensable
+- [x] Porcentajes eliminados de la sección de criterios (solo en metodología)
+- [x] Nav actualizada: Contexto, Rankings, Evaluación, Anexos
+
+## Refactor de rutas y acceso unificado
+- [x] Añadir columnas client_slug y problem_id a la tabla projects (DB migration)
+- [x] Actualizar proyecto 5 (WTS Peru v2): client_slug=wts, problem_id=001
+- [x] Actualizar router report.resolvePasskey (busca por passkey, devuelve slug+problemId)
+- [x] Crear pantalla de acceso unificada en /acceso
+- [x] Crear ruta dinámica /:clientSlug/:problemId que renderiza ClientPortalV2
+- [x] Eliminar ClientPortal.tsx (V1) y ruta /client/:projectId de App.tsx
+- [x] ClientPortalV2 lee passkey desde sessionStorage cuando viene de /acceso
+- [x] Redirigir / a /acceso
+- [x] Añadir helper getProjectBySlug(clientSlug, problemId) en db.ts
+- [x] Añadir procedimiento report.getBySlug en routers.ts para cargar reporte sin sessionStorage
+- [x] ClientPortalV2: si hay slug+problemId en URL, usar getBySlug en lugar de getByPasskey
+- [x] Redirigir / a /acceso con Redirect en App.tsx

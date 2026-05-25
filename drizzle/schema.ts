@@ -53,6 +53,8 @@ export const projects = mysqlTable("projects", {
   eligibleCount: int("eligibleCount"),
   excludedCount: int("excludedCount"),
   passkeyHash: varchar("passkeyHash", { length: 256 }),
+  clientSlug: varchar("clientSlug", { length: 64 }),
+  problemId: varchar("problemId", { length: 16 }),
   published: boolean("published").default(false).notNull(),
   publishedAt: timestamp("publishedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
