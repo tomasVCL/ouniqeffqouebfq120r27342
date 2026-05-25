@@ -14,6 +14,13 @@ const TIER_CONFIG: Record<number, { label: string; short: string; bg: string; te
   4: { label: "TIER 4 — MONITOR",  short: "MONITOR",  bg: "bg-red-50",      text: "text-red-800",     dot: "bg-red-400"    },
 };
 
+const TIER_BORDER: Record<number, string> = {
+  1: "#10b981",
+  2: "#3b82f6",
+  3: "#f59e0b",
+  4: "#f87171",
+};
+
 // ── Score cell colour ──────────────────────────────────────────────────────
 function scoreColor(score: number | null | undefined) {
   if (score == null) return "bg-gray-50 text-gray-400";
@@ -27,13 +34,13 @@ function scoreColor(score: number | null | undefined) {
 const FORMULAS = [
   {
     id: "F1",
-    name: "Implementation ROI",
-    description: "Return on investment in DPP/LCA technology during the first operational year.",
-    formula: "(savings + revenue - cost) / cost × 100",
+    name: "ROI de Implementación",
+    description: "Retorno sobre la inversión en tecnología DPP/LCA durante el primer año operativo.",
+    formula: "(ahorros + ingresos - costo) / costo × 100",
     inputs: [
-      { key: "ahorros",  label: "Estimated annual savings (€)",  default: 120000 },
-      { key: "ingresos", label: "Additional revenue (€)",         default: 80000  },
-      { key: "costo",    label: "Total implementation cost (€)",  default: 150000 },
+      { key: "ahorros",  label: "Ahorros anuales estimados (€)",  default: 120000 },
+      { key: "ingresos", label: "Ingresos adicionales (€)",        default: 80000  },
+      { key: "costo",    label: "Costo total de implementación (€)", default: 150000 },
     ],
     compute: (v: Record<string, number>) =>
       ((v.ahorros + v.ingresos - v.costo) / v.costo * 100).toFixed(1) + "%",
@@ -41,14 +48,14 @@ const FORMULAS = [
   },
   {
     id: "F2",
-    name: "Cost per Digital Product Passport (DPP)",
-    description: "Unit cost of issuing a DPP per SKU, including integration and annual maintenance.",
-    formula: "(license + integration + maintenance) / SKUs",
+    name: "Costo por Digital Product Passport (DPP)",
+    description: "Costo unitario de emisión de un DPP por SKU, incluyendo integración y mantenimiento anual.",
+    formula: "(licencia + integración + mantenimiento) / SKUs",
     inputs: [
-      { key: "licencia",       label: "Annual license (€)",          default: 50000 },
-      { key: "integracion",    label: "Integration cost (€)",         default: 30000 },
-      { key: "mantenimiento",  label: "Annual maintenance (€)",       default: 15000 },
-      { key: "skus",           label: "Active SKU count",             default: 5000  },
+      { key: "licencia",       label: "Licencia anual (€)",           default: 50000 },
+      { key: "integracion",    label: "Costo de integración (€)",      default: 30000 },
+      { key: "mantenimiento",  label: "Mantenimiento anual (€)",       default: 15000 },
+      { key: "skus",           label: "Cantidad de SKUs activos",      default: 5000  },
     ],
     compute: (v: Record<string, number>) =>
       "€" + ((v.licencia + v.integracion + v.mantenimiento) / v.skus).toFixed(2),
@@ -56,13 +63,13 @@ const FORMULAS = [
   },
   {
     id: "F3",
-    name: "Technology Maturity Index",
-    description: "Weighted score combining TRL, enterprise adoption, and regulatory coverage.",
-    formula: "(TRL/9 × 0.4) + (adoption/10 × 0.35) + (regulatory/10 × 0.25) × 100",
+    name: "Índice de Madurez Tecnológica",
+    description: "Puntuación ponderada que combina TRL, adopción enterprise y cobertura regulatoria.",
+    formula: "(TRL/9 × 0.4) + (adopción/10 × 0.35) + (regulatorio/10 × 0.25) × 100",
     inputs: [
-      { key: "trl",         label: "TRL (1–9)",                      default: 7  },
-      { key: "adopcion",    label: "Enterprise adoption (0–10)",      default: 7  },
-      { key: "regulatorio", label: "Regulatory coverage (0–10)",      default: 8  },
+      { key: "trl",         label: "TRL (1–9)",                       default: 7  },
+      { key: "adopcion",    label: "Adopción enterprise (0–10)",       default: 7  },
+      { key: "regulatorio", label: "Cobertura regulatoria (0–10)",     default: 8  },
     ],
     compute: (v: Record<string, number>) =>
       ((v.trl / 9 * 0.4) + (v.adopcion / 10 * 0.35) + (v.regulatorio / 10 * 0.25) * 100).toFixed(1),
@@ -70,31 +77,31 @@ const FORMULAS = [
   },
   {
     id: "F4",
-    name: "Payback Period",
-    description: "Months required to recover the initial investment from generated savings.",
-    formula: "investment / (monthly_savings + monthly_revenue)",
+    name: "Período de Recuperación (Payback)",
+    description: "Meses necesarios para recuperar la inversión inicial a partir de los ahorros generados.",
+    formula: "inversión / (ahorros_mensuales + ingresos_mensuales)",
     inputs: [
-      { key: "inversion",          label: "Total investment (€)",              default: 180000 },
-      { key: "ahorros_mensuales",  label: "Monthly savings (€)",               default: 12000  },
-      { key: "ingresos_mensuales", label: "Additional monthly revenue (€)",    default: 5000   },
+      { key: "inversion",          label: "Inversión total (€)",                default: 180000 },
+      { key: "ahorros_mensuales",  label: "Ahorros mensuales (€)",              default: 12000  },
+      { key: "ingresos_mensuales", label: "Ingresos adicionales mensuales (€)", default: 5000   },
     ],
     compute: (v: Record<string, number>) =>
-      (v.inversion / (v.ahorros_mensuales + v.ingresos_mensuales)).toFixed(1) + " months",
-    unit: "months",
+      (v.inversion / (v.ahorros_mensuales + v.ingresos_mensuales)).toFixed(1) + " meses",
+    unit: "meses",
   },
   {
     id: "F5",
-    name: "Compliance Audit Savings",
-    description: "Estimated reduction in CSRD/EUDR audit costs through automation.",
-    formula: "current_cost × (1 - efficiency/100) × frequency",
+    name: "Ahorro en Auditorías de Cumplimiento",
+    description: "Reducción estimada en costos de auditoría CSRD/EUDR mediante automatización.",
+    formula: "costo_actual × (1 - eficiencia/100) × frecuencia",
     inputs: [
-      { key: "costo_actual",  label: "Current cost per audit (€)",         default: 40000 },
-      { key: "eficiencia",    label: "Automation efficiency (%)",           default: 70    },
-      { key: "frecuencia",    label: "Audits per year",                     default: 3     },
+      { key: "costo_actual",  label: "Costo actual por auditoría (€)",   default: 40000 },
+      { key: "eficiencia",    label: "Eficiencia de automatización (%)",  default: 70    },
+      { key: "frecuencia",    label: "Auditorías por año",                default: 3     },
     ],
     compute: (v: Record<string, number>) =>
-      "€" + (v.costo_actual * (1 - v.eficiencia / 100) * v.frecuencia).toLocaleString("en-US"),
-    unit: "€ / year",
+      "€" + (v.costo_actual * (1 - v.eficiencia / 100) * v.frecuencia).toLocaleString("es-ES"),
+    unit: "€ / año",
   },
 ];
 
@@ -204,7 +211,7 @@ function StartupHoverCard({ startup, children }: { startup: any; children: React
           <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs mt-2">
             <div className="text-gray-400">HQ</div>
             <div className="text-gray-700">{startup.hqCity}, {startup.hqCountry}</div>
-            <div className="text-gray-400">Employees</div>
+            <div className="text-gray-400">Empleados</div>
             <div className="text-gray-700">{startup.employeeRange}</div>
             <div className="text-gray-400">Stage</div>
             <div className="text-gray-700">{startup.fundingStage}</div>
@@ -212,13 +219,13 @@ function StartupHoverCard({ startup, children }: { startup: any; children: React
             <div className="text-gray-700">{startup.fundingAmount || "N/A"}</div>
             {startup.clientsRef && (
               <>
-                <div className="text-gray-400">Ref. clients</div>
+                <div className="text-gray-400">Clientes ref.</div>
                 <div className="text-gray-700 truncate">{startup.clientsRef}</div>
               </>
             )}
             {startup.investors && (
               <>
-                <div className="text-gray-400">Investors</div>
+                <div className="text-gray-400">Inversores</div>
                 <div className="text-gray-700 truncate">{startup.investors}</div>
               </>
             )}
@@ -234,11 +241,17 @@ function StartupHoverCard({ startup, children }: { startup: any; children: React
   );
 }
 
-// ── Page 1: Context ────────────────────────────────────────────────────────
+// ── Page 1: Contexto ───────────────────────────────────────────────────────
 function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }) {
   const { project, requirements } = data;
-  const mustHave = requirements.filter((r: any) => r.mandatory);
-  const shouldHave = requirements.filter((r: any) => !r.mandatory);
+
+  // Indispensable: mandatory=true OR name contains "TRL" OR name contains "Madurez"
+  const indispensable = requirements.filter(
+    (r: any) => r.mandatory || r.name?.toLowerCase().includes("trl") || r.name?.toLowerCase().includes("madurez")
+  );
+  const deseable = requirements.filter(
+    (r: any) => !r.mandatory && !r.name?.toLowerCase().includes("trl") && !r.name?.toLowerCase().includes("madurez")
+  );
 
   return (
     <div className="min-h-screen bg-[#FDF6EE]">
@@ -251,7 +264,7 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
           <div className="flex items-start justify-between gap-8">
             <div className="flex-1">
               <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-3">
-                Discover Phase — Executive Report
+                Discover Phase — Reporte Ejecutivo
               </div>
               <h1 className="text-3xl font-bold leading-tight mb-4 text-gray-900">{project.title}</h1>
               <p className="text-gray-500 text-sm leading-relaxed max-w-xl">
@@ -260,19 +273,19 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
             </div>
             <div className="bg-[#FDF6EE] border border-orange-100 rounded-xl p-5 min-w-[200px] text-sm space-y-3">
               <div>
-                <div className="text-gray-400 text-xs uppercase tracking-wide">Client</div>
+                <div className="text-gray-400 text-xs uppercase tracking-wide">Cliente</div>
                 <div className="text-gray-900 font-medium mt-0.5">{project.clientName}</div>
               </div>
               <div>
-                <div className="text-gray-400 text-xs uppercase tracking-wide">Industry</div>
+                <div className="text-gray-400 text-xs uppercase tracking-wide">Industria</div>
                 <div className="text-gray-900 font-medium mt-0.5">{project.industry}</div>
               </div>
               <div>
-                <div className="text-gray-400 text-xs uppercase tracking-wide">Analyst</div>
+                <div className="text-gray-400 text-xs uppercase tracking-wide">Analista</div>
                 <div className="text-gray-900 font-medium mt-0.5">{project.analystName}</div>
               </div>
               <div>
-                <div className="text-gray-400 text-xs uppercase tracking-wide">Date</div>
+                <div className="text-gray-400 text-xs uppercase tracking-wide">Fecha</div>
                 <div className="text-gray-900 font-medium mt-0.5">{project.reportDate}</div>
               </div>
             </div>
@@ -281,13 +294,13 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-12 space-y-12">
-        {/* Scope stats */}
+        {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { label: "Startups evaluated", value: project.universeSize ?? 10 },
-            { label: "Eligible startups",  value: project.eligibleCount ?? 8 },
-            { label: "Excluded",           value: project.excludedCount ?? 2 },
-            { label: "Weighted criteria",  value: requirements.length },
+            { label: "Startups evaluadas",   value: project.universeSize ?? 10 },
+            { label: "Startups elegibles",   value: project.eligibleCount ?? 8 },
+            { label: "Excluidas",            value: project.excludedCount ?? 2 },
+            { label: "Criterios ponderados", value: requirements.length },
           ].map(s => (
             <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-5 text-center shadow-sm">
               <div className="text-3xl font-bold text-[#E8521A]">{s.value}</div>
@@ -296,55 +309,51 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
           ))}
         </div>
 
-        {/* Geography */}
+        {/* Alcance geográfico */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-900 mb-4">Geographic Scope</h2>
+          <h2 className="text-base font-semibold text-gray-900 mb-4">Alcance Geográfico</h2>
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <div className="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-2">Included</div>
+              <div className="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-2">Incluido</div>
               <div className="text-sm text-gray-700">{project.geoAllowed}</div>
             </div>
             <div>
-              <div className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-2">Excluded</div>
+              <div className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-2">Excluido</div>
               <div className="text-sm text-gray-700">{project.geoExcluded}</div>
             </div>
           </div>
         </div>
 
-        {/* Criteria */}
+        {/* Criterios de evaluación */}
         <div>
-          <h2 className="text-base font-semibold text-gray-900 mb-5">Evaluation Criteria</h2>
+          <h2 className="text-base font-semibold text-gray-900 mb-5">Criterios de Evaluación</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {mustHave.length > 0 && (
+            {indispensable.length > 0 && (
               <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                <div className="text-xs font-bold text-[#E8521A] uppercase tracking-widest mb-3">Must Have</div>
-                <div className="space-y-2">
-                  {mustHave.map((r: any) => (
-                    <div key={r.id} className="flex items-start justify-between gap-3">
+                <div className="text-xs font-bold text-[#E8521A] uppercase tracking-widest mb-3">Indispensable</div>
+                <div className="space-y-3">
+                  {indispensable.map((r: any) => (
+                    <div key={r.id} className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#E8521A] mt-1.5 flex-shrink-0" />
                       <div>
                         <div className="text-sm font-medium text-gray-900">{r.name}</div>
                         {r.description && <div className="text-xs text-gray-500 mt-0.5">{r.description}</div>}
-                      </div>
-                      <div className="text-sm font-semibold text-gray-700 whitespace-nowrap">
-                        {(r.weight * 100).toFixed(0)}%
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
             )}
-            {shouldHave.length > 0 && (
+            {deseable.length > 0 && (
               <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                <div className="text-xs font-bold text-blue-700 uppercase tracking-widest mb-3">Should Have</div>
-                <div className="space-y-2">
-                  {shouldHave.map((r: any) => (
-                    <div key={r.id} className="flex items-start justify-between gap-3">
+                <div className="text-xs font-bold text-blue-700 uppercase tracking-widest mb-3">Deseable</div>
+                <div className="space-y-3">
+                  {deseable.map((r: any) => (
+                    <div key={r.id} className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
                       <div>
                         <div className="text-sm font-medium text-gray-900">{r.name}</div>
                         {r.description && <div className="text-xs text-gray-500 mt-0.5">{r.description}</div>}
-                      </div>
-                      <div className="text-sm font-semibold text-gray-700 whitespace-nowrap">
-                        {(r.weight * 100).toFixed(0)}%
                       </div>
                     </div>
                   ))}
@@ -354,11 +363,11 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
           </div>
         </div>
 
-        {/* Methodology */}
+        {/* Metodología */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-900 mb-2">Methodology</h2>
+          <h2 className="text-base font-semibold text-gray-900 mb-2">Metodología</h2>
           <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-            This analysis uses a <strong>Weighted Scoring Matrix (WSM)</strong> with {requirements.length} weighted criteria covering the most relevant technical, regulatory, commercial, and strategic dimensions for DPP/LCA technology adoption in complex textile supply chains. Each startup was independently evaluated with scores from 1 to 10, weighted by the relative importance of each criterion.
+            Este análisis utiliza una <strong>Weighted Scoring Matrix (WSM)</strong> con {requirements.length} criterios ponderados que cubren las dimensiones técnicas, regulatorias, comerciales y estratégicas más relevantes para la adopción de tecnología DPP/LCA en cadenas de suministro textil complejas. Cada startup fue evaluada de forma independiente con puntuaciones del 1 al 10, ponderadas según la importancia relativa de cada criterio.
           </p>
           <div className="grid grid-cols-3 gap-3">
             {requirements.map((r: any) => (
@@ -370,24 +379,13 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
           </div>
         </div>
 
-        {/* Business Formulas */}
-        <div>
-          <h2 className="text-base font-semibold text-gray-900 mb-2">Business Formulas</h2>
-          <p className="text-sm text-gray-500 mb-5">
-            Quantitative tools to evaluate the economic impact of implementation. Adjust the parameters to see live results.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {FORMULAS.map(f => <FormulaCard key={f.id} f={f} />)}
-          </div>
-        </div>
-
-        {/* CTA to Page 2 */}
+        {/* CTA a Página 2 */}
         <div className="flex justify-center pt-6 pb-2">
           <button
             onClick={onNextPage}
             className="inline-flex items-center gap-2 bg-[#E8521A] hover:bg-[#CC4415] text-white font-semibold px-8 py-3 rounded-xl transition-colors shadow-sm text-sm"
           >
-            View Final Rankings
+            Ver Rankings Finales
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
@@ -403,7 +401,6 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
   const { rankings, startups, clusters, recommendations } = data;
   const startupMap = Object.fromEntries(startups.map((s: any) => [s.id, s]));
   const clusterMap = Object.fromEntries(clusters.map((c: any) => [c.id, c]));
-
   const recMap = Object.fromEntries((recommendations ?? []).map((r: any) => [r.startupId, r]));
 
   const enriched = [...rankings]
@@ -422,18 +419,46 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
             <img src={LOGO_DARK} alt="VCL Studio" className="h-7" />
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
-            Section C — Final Rankings
+            Sección C — Rankings Finales
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Strategic & Technical Selection</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Selección Estratégica y Técnica</h2>
           <p className="text-gray-500 text-sm mt-2">
-            Final ranking by Weighted Scoring Matrix (WSM). Hover over a startup name to view its profile.
+            Ranking final por Weighted Scoring Matrix (WSM). Pasa el cursor sobre el nombre de una startup para ver su perfil.
           </p>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-10">
-        {/* Tier legend */}
-        <div className="flex flex-wrap gap-3 mb-6">
+      <div className="max-w-6xl mx-auto px-6 py-10 space-y-10">
+
+        {/* Strategic Clusters — AL TOPE */}
+        {clusters.length > 0 && (
+          <div>
+            <h3 className="text-base font-semibold text-gray-900 mb-1">Strategic Clusters</h3>
+            <p className="text-sm text-gray-500 mb-4">Agrupación estratégica de las startups evaluadas según su perfil tecnológico y de mercado.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {clusters.map((c: any) => {
+                const members = startups.filter((s: any) => s.clusterId === c.id);
+                return (
+                  <div key={c.id} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: c.color || "#C0392B" }} />
+                      <span className="text-sm font-semibold text-gray-900">{c.name}</span>
+                    </div>
+                    {c.description && <p className="text-xs text-gray-500 mb-3">{c.description}</p>}
+                    <div className="flex flex-wrap gap-1.5">
+                      {members.map((s: any) => (
+                        <span key={s.id} className="text-xs bg-gray-100 text-gray-700 rounded-full px-2 py-0.5">{s.name}</span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Leyenda de tiers */}
+        <div className="flex flex-wrap gap-3">
           {Object.entries(TIER_CONFIG).map(([key, cfg]) => (
             <div key={key} className={`flex items-center gap-2 ${cfg.bg} ${cfg.text} text-xs font-semibold px-3 py-1.5 rounded-full border border-current/20`}>
               <span className={`w-2 h-2 rounded-full ${cfg.dot}`} />
@@ -442,18 +467,18 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
           ))}
         </div>
 
-        {/* Table */}
+        {/* Tabla */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-10">#</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Company</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Empresa</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden md:table-cell">Cluster</th>
-                  <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">WSM Score</th>
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Puntuación WSM</th>
                   <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Tier</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden lg:table-cell">Key Differentiator</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden lg:table-cell">Diferenciador Clave</th>
                 </tr>
               </thead>
               <tbody>
@@ -509,11 +534,11 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
           </div>
         </div>
 
-        {/* Analyst Recommendations */}
+        {/* Recomendaciones del analista */}
         {enriched.some((r: any) => r.rec?.narrative) && (
-          <div className="mt-12">
-            <h3 className="text-lg font-bold text-gray-900 mb-1">Analyst Recommendations</h3>
-            <p className="text-sm text-gray-500 mb-5">Individual assessment and strategic recommendation per evaluated startup.</p>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">Recomendaciones del Analista</h3>
+            <p className="text-sm text-gray-500 mb-5">Evaluación individual y recomendación estratégica por cada startup analizada.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {enriched.filter((r: any) => r.rec?.narrative).map((row: any) => {
                 const tierNum = typeof row.tier === "number" ? row.tier : parseInt(row.tier ?? "4", 10);
@@ -531,7 +556,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${tier.bg} ${tier.text}`}>{tier.short}</span>
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                           isRec ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
-                        }`}>{isRec ? "✓ Recommended" : "✗ Not Recommended"}</span>
+                        }`}>{isRec ? "✓ Recomendado" : "✗ No recomendado"}</span>
                       </div>
                     </div>
                     <p className="text-xs leading-relaxed text-gray-600">{row.rec.narrative}</p>
@@ -542,54 +567,27 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
           </div>
         )}
 
-        {/* CTA to Page 3 */}
+        {/* CTA a Página 3 */}
         <div className="flex justify-center pt-6 pb-2">
           <button
             onClick={onNext}
             className="inline-flex items-center gap-2 bg-[#E8521A] hover:bg-[#CC4415] text-white font-semibold px-8 py-3 rounded-xl transition-colors shadow-sm text-sm"
           >
-            View Detailed Evaluation Matrix
+            Ver Matriz de Evaluación Detallada
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>
-
-        {/* Clusters summary */}
-        {clusters.length > 0 && (
-          <div className="mt-10">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Strategic Clusters</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {clusters.map((c: any) => {
-                const members = startups.filter((s: any) => s.clusterId === c.id);
-                return (
-                  <div key={c.id} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="w-3 h-3 rounded-full" style={{ backgroundColor: c.color || "#C0392B" }} />
-                      <span className="text-sm font-semibold text-gray-900">{c.name}</span>
-                    </div>
-                    {c.description && <p className="text-xs text-gray-500 mb-3">{c.description}</p>}
-                    <div className="flex flex-wrap gap-1.5">
-                      {members.map((s: any) => (
-                        <span key={s.id} className="text-xs bg-gray-100 text-gray-700 rounded-full px-2 py-0.5">{s.name}</span>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
 }
 
-// ── Page 3: Deep Dive Matrix ───────────────────────────────────────────────
+// ── Page 3: Matriz de evaluación ───────────────────────────────────────────
 function PageMatrix({ data }: { data: any }) {
   const { requirements, startups, wsmScores, rankings } = data;
 
-  // Sort startups by rank
   const rankMap = Object.fromEntries(rankings.map((r: any) => [r.startupId, r]));
   const sortedStartups = [...startups]
     .filter((s: any) => s.eligible !== false)
@@ -599,7 +597,6 @@ function PageMatrix({ data }: { data: any }) {
       return ra - rb;
     });
 
-  // Build score lookup: [startupId][requirementId] -> score entry
   const scoreMap: Record<number, Record<number, any>> = {};
   for (const score of wsmScores) {
     if (!scoreMap[score.startupId]) scoreMap[score.startupId] = {};
@@ -614,27 +611,27 @@ function PageMatrix({ data }: { data: any }) {
             <img src={LOGO_DARK} alt="VCL Studio" className="h-7" />
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
-            Deep Dive
+            Evaluación Detallada
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Detailed Evaluation Matrix</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Matriz de Evaluación</h2>
           <p className="text-gray-500 text-sm mt-2">
-            Individual scores per criterion. Hover over each cell to view the analyst's rationale.
+            Puntuaciones individuales por criterio. Pasa el cursor sobre cada celda para ver el razonamiento del analista.
           </p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-10">
-        {/* Score legend */}
+        {/* Leyenda */}
         <div className="flex flex-wrap gap-3 mb-6 text-xs">
           {[
-            { label: "9–10 Excellent", bg: "bg-emerald-100", text: "text-emerald-900" },
-            { label: "7–8 Good",       bg: "bg-blue-50",     text: "text-blue-900"    },
-            { label: "5–6 Acceptable", bg: "bg-amber-50",    text: "text-amber-900"   },
-            { label: "1–4 Low",        bg: "bg-red-50",      text: "text-red-900"     },
+            { label: "9–10 Excelente",  bg: "bg-emerald-100", text: "text-emerald-900" },
+            { label: "7–8 Bueno",       bg: "bg-blue-50",     text: "text-blue-900"    },
+            { label: "5–6 Aceptable",   bg: "bg-amber-50",    text: "text-amber-900"   },
+            { label: "1–4 Bajo",        bg: "bg-red-50",      text: "text-red-900"     },
           ].map(l => (
             <span key={l.label} className={`${l.bg} ${l.text} px-3 py-1 rounded-full font-medium`}>{l.label}</span>
           ))}
-          <span className="text-gray-400 ml-2 self-center">Hover over a score to see the rationale</span>
+          <span className="text-gray-400 ml-2 self-center">Pasa el cursor sobre una puntuación para ver el razonamiento</span>
         </div>
 
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -697,20 +694,65 @@ function PageMatrix({ data }: { data: any }) {
         </div>
 
         <p className="text-xs text-gray-400 mt-4 text-center">
-          Scores assigned by the VCL Studio analysis team. Each score reflects an independent assessment based on public documentation, demos, and vendor interviews.
+          Puntuaciones asignadas por el equipo de análisis de VCL Studio. Cada puntuación refleja una evaluación independiente basada en documentación pública, demos y entrevistas con los proveedores.
         </p>
       </div>
     </div>
   );
 }
 
-// ── Tier border color map ──────────────────────────────────────────────────
-const TIER_BORDER: Record<number, string> = {
-  1: "#10b981",
-  2: "#3b82f6",
-  3: "#f59e0b",
-  4: "#f87171",
-};
+// ── Page 4: Anexos ─────────────────────────────────────────────────────────
+function PageAnexos({ data }: { data: any }) {
+  const { project } = data;
+
+  return (
+    <div className="min-h-screen bg-[#FDF6EE]">
+      <div className="bg-white border-b border-gray-100">
+        <div className="max-w-5xl mx-auto px-6 py-10">
+          <div className="flex items-center gap-3 mb-6">
+            <img src={LOGO_DARK} alt="VCL Studio" className="h-7" />
+          </div>
+          <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
+            Anexos
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900">Herramientas y Material de Apoyo</h2>
+          <p className="text-gray-500 text-sm mt-2">
+            Fórmulas de negocio interactivas y material complementario del análisis.
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-6 py-10 space-y-10">
+        {/* Fórmulas de negocio */}
+        <div>
+          <h3 className="text-base font-semibold text-gray-900 mb-1">Fórmulas de Negocio</h3>
+          <p className="text-sm text-gray-500 mb-5">
+            Herramientas cuantitativas para evaluar el impacto económico de la implementación. Ajusta los parámetros para ver los resultados en tiempo real.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {FORMULAS.map(f => <FormulaCard key={f.id} f={f} />)}
+          </div>
+        </div>
+
+        {/* Nota metodológica */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          <h3 className="text-base font-semibold text-gray-900 mb-3">Nota Metodológica</h3>
+          <div className="space-y-3 text-sm text-gray-600 leading-relaxed">
+            <p>
+              Las fórmulas presentadas en esta sección son herramientas orientativas para facilitar la toma de decisiones. Los valores por defecto están calibrados con benchmarks del sector textil europeo para proyectos de implementación DPP/LCA de escala media.
+            </p>
+            <p>
+              Los resultados deben interpretarse como estimaciones preliminares. VCL Studio recomienda validar los parámetros con los equipos financieros y técnicos del cliente antes de utilizarlos en decisiones de inversión.
+            </p>
+            <p className="text-xs text-gray-400 pt-2 border-t border-gray-100">
+              Análisis elaborado por el equipo de Innovación / Venture Clienting de VCL Studio · {project?.reportDate}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ── Main component ─────────────────────────────────────────────────────────
 export default function ClientPortalV2() {
@@ -719,9 +761,9 @@ export default function ClientPortalV2() {
 
   const [passkey, setPasskey] = useState("");
   const [submitted, setSubmitted] = useState("");
-  const [page, setPage] = useState<"context" | "rankings" | "matrix">("context");
+  const [page, setPage] = useState<"context" | "rankings" | "matrix" | "anexos">("context");
 
-  // Scroll to top on page change
+  // Scroll al tope al cambiar de página
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [page]);
@@ -736,7 +778,7 @@ export default function ClientPortalV2() {
     setSubmitted(passkey.trim());
   };
 
-  // Passkey gate
+  // Pantalla de acceso
   if (!submitted || error) {
     return (
       <div className="h-screen w-full bg-[#FDF6EE] flex flex-col items-center justify-center px-4">
@@ -751,32 +793,32 @@ export default function ClientPortalV2() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <h2 className="text-lg font-bold text-gray-900">Report Access</h2>
-            <p className="text-sm text-gray-500 mt-1">Enter the access key provided by VCL Studio</p>
+            <h2 className="text-lg font-bold text-gray-900">Acceso al Reporte</h2>
+            <p className="text-sm text-gray-500 mt-1">Ingresa la clave de acceso proporcionada por VCL Studio</p>
           </div>
           <form onSubmit={handleUnlock} className="space-y-4">
             <input
               type="password"
               value={passkey}
               onChange={e => setPasskey(e.target.value)}
-              placeholder="Access key"
+              placeholder="Clave de acceso"
               className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8521A] focus:border-transparent"
               autoFocus
             />
             {error && (
-              <p className="text-xs text-red-600 text-center">Incorrect key. Please try again.</p>
+              <p className="text-xs text-red-600 text-center">Clave incorrecta. Por favor intenta de nuevo.</p>
             )}
             <button
               type="submit"
               disabled={isLoading || passkey.length === 0}
               className="w-full bg-[#E8521A] hover:bg-[#CC4415] text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 text-sm"
             >
-              {isLoading ? "Verifying..." : "Access Report"}
+              {isLoading ? "Verificando..." : "Acceder al Reporte"}
             </button>
           </form>
         </div>
         <p className="text-gray-600 text-xs mt-6">
-          Access issues? Contact{" "}
+          ¿Problemas de acceso? Contacta a{" "}
           <a href="mailto:innovation@vclstudio.com" className="text-[#E8521A] hover:underline">
             innovation@vclstudio.com
           </a>
@@ -790,7 +832,7 @@ export default function ClientPortalV2() {
       <div className="min-h-screen bg-[#FDF6EE] flex items-center justify-center">
         <div className="text-center">
           <img src={ISOTIPO} alt="VCL" className="h-12 mx-auto mb-4 animate-pulse" />
-          <p className="text-gray-500 text-sm">Loading report...</p>
+          <p className="text-gray-500 text-sm">Cargando reporte...</p>
         </div>
       </div>
     );
@@ -799,14 +841,15 @@ export default function ClientPortalV2() {
   if (!data) return null;
 
   const pages = [
-    { id: "context",  label: "Context & Scope" },
-    { id: "rankings", label: "Final Rankings" },
-    { id: "matrix",   label: "Detailed Analysis" },
+    { id: "context",  label: "Contexto" },
+    { id: "rankings", label: "Rankings" },
+    { id: "matrix",   label: "Evaluación" },
+    { id: "anexos",   label: "Anexos" },
   ] as const;
 
   return (
     <div className="min-h-screen bg-[#FDF6EE]">
-      {/* Sticky nav */}
+      {/* Nav fija */}
       <div className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
           <div className="flex items-center gap-3">
@@ -832,17 +875,18 @@ export default function ClientPortalV2() {
         </div>
       </div>
 
-      {/* Page content */}
+      {/* Contenido de página */}
       {page === "context"  && <PageContext  data={data} onNextPage={() => setPage("rankings")} />}
       {page === "rankings" && <PageRankings data={data} onNext={() => setPage("matrix")} />}
       {page === "matrix"   && <PageMatrix   data={data} />}
+      {page === "anexos"   && <PageAnexos   data={data} />}
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 text-gray-400 text-xs py-6 mt-0">
         <div className="max-w-5xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={ISOTIPO} alt="VCL" className="h-5 opacity-50" />
-            <span>© {new Date().getFullYear()} VCL Studio. Confidential.</span>
+            <span>© {new Date().getFullYear()} VCL Studio. Confidencial.</span>
           </div>
           <span>{data.project.reportDate}</span>
         </div>
