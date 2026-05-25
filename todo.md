@@ -93,3 +93,19 @@
 - [x] Añadir procedimiento report.getBySlug en routers.ts para cargar reporte sin sessionStorage
 - [x] ClientPortalV2: si hay slug+problemId en URL, usar getBySlug en lugar de getByPasskey
 - [x] Redirigir / a /acceso con Redirect en App.tsx
+
+## Mejoras visuales y de contenido (Mayo 2026)
+- [x] Logo WTS en header de las 3 páginas del portal
+- [x] Título cambiado a "Reporte de Scouting"
+- [x] Subtítulo del proyecto sin "— WTS Peru v2"
+- [x] Descripción del problema actualizada (texto real del cliente)
+- [x] "Cliente" → "Empresa", "Área de Innovación..." → "Equipo de Analistas de VCL studio"
+- [x] Stats cards: solo "Startups evaluadas" y "Criterios de evaluación" (eliminadas elegibles/excluidas)
+- [x] Geo excluido hardcodeado como "Rest of the World"
+- [x] Criterios ordenados de mayor a menor peso en metodología (Página 1) y en la matriz (Página 3)
+- [x] Escala de colores con nivel 0 = Nulo (gris) en la matriz
+- [x] Página Anexos eliminada (portal queda con 3 tabs: Contexto, Rankings, Evaluación)
+- [x] Badges de "Recomendado/No recomendado" eliminados de las recomendaciones del analista
+- [x] CTA Página 1 cambiado a "Ver Rankings" (sin "Finales")
+- [x] Columna "Empresa" → "Startup" en la tabla de rankings
+- [x] Sección de rankings: "Sección C — Rankings Finales" → "Rankings Finales"
