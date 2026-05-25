@@ -51,7 +51,7 @@ export default function ReportAccess() {
       <div className="mb-8 flex flex-col items-center gap-2">
         <img src={VCL_LOGO_DARK} alt="VCL Studio" className="h-8 object-contain" />
         <span className="text-sm tracking-widest uppercase" style={{ color: "#6B6B6B", letterSpacing: "0.18em" }}>
-          Innovation Scouting Platform
+          Scouting
         </span>
       </div>
 
@@ -104,13 +104,7 @@ export default function ReportAccess() {
         </form>
       </div>
 
-      {/* Footer */}
-      <p className="mt-6 text-xs text-gray-400">
-        ¿Problemas de acceso? Contacta a{" "}
-        <a href="mailto:innovation@vclstudio.com" className="underline" style={{ color: "#E8521A" }}>
-          innovation@vclstudio.com
-        </a>
-      </p>
+
     </div>
   );
 }
