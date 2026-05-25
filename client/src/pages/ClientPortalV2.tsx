@@ -2,9 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { useParams } from "wouter";
 import { trpc } from "@/lib/trpc";
 
-const LOGO_WHITE = "/manus-storage/vcl-logo-white_96a5cf7b.png";
-const LOGO_DARK  = "/manus-storage/vcl-logo-dark_5aaa0a93.png";
-const ISOTIPO    = "/manus-storage/vcl-isotipo_24d37529.png";
+const LOGO_WHITE  = "/manus-storage/vcl-logo-white_96a5cf7b.png";
+const LOGO_DARK   = "/manus-storage/vcl-logo-dark_5aaa0a93.png";
+const ISOTIPO     = "/manus-storage/vcl-isotipo_24d37529.png";
+const WTS_LOGO    = "/manus-storage/wts-logo_82f3b5ce.png";
 
 // ── Tier config ────────────────────────────────────────────────────────────
 const TIER_CONFIG: Record<number, { label: string; short: string; bg: string; text: string; dot: string }> = {
@@ -21,128 +22,14 @@ const TIER_BORDER: Record<number, string> = {
   4: "#f87171",
 };
 
-// ── Score cell colour ──────────────────────────────────────────────────────
+// ── Score cell colour — escala con nivel 0 = Nulo (gris) ──────────────────
 function scoreColor(score: number | null | undefined) {
   if (score == null) return "bg-gray-50 text-gray-400";
-  if (score >= 9)  return "bg-emerald-100 text-emerald-900 font-semibold";
-  if (score >= 7)  return "bg-blue-50 text-blue-900";
-  if (score >= 5)  return "bg-amber-50 text-amber-900";
+  if (score === 0)   return "bg-gray-200 text-gray-500";
+  if (score >= 9)    return "bg-emerald-100 text-emerald-900 font-semibold";
+  if (score >= 7)    return "bg-blue-50 text-blue-900";
+  if (score >= 5)    return "bg-amber-50 text-amber-900";
   return "bg-red-50 text-red-900";
-}
-
-// ── Business formula definitions ───────────────────────────────────────────
-const FORMULAS = [
-  {
-    id: "F1",
-    name: "ROI de Implementación",
-    description: "Retorno sobre la inversión en tecnología DPP/LCA durante el primer año operativo.",
-    formula: "(ahorros + ingresos - costo) / costo × 100",
-    inputs: [
-      { key: "ahorros",  label: "Ahorros anuales estimados (€)",  default: 120000 },
-      { key: "ingresos", label: "Ingresos adicionales (€)",        default: 80000  },
-      { key: "costo",    label: "Costo total de implementación (€)", default: 150000 },
-    ],
-    compute: (v: Record<string, number>) =>
-      ((v.ahorros + v.ingresos - v.costo) / v.costo * 100).toFixed(1) + "%",
-    unit: "% ROI",
-  },
-  {
-    id: "F2",
-    name: "Costo por Digital Product Passport (DPP)",
-    description: "Costo unitario de emisión de un DPP por SKU, incluyendo integración y mantenimiento anual.",
-    formula: "(licencia + integración + mantenimiento) / SKUs",
-    inputs: [
-      { key: "licencia",       label: "Licencia anual (€)",           default: 50000 },
-      { key: "integracion",    label: "Costo de integración (€)",      default: 30000 },
-      { key: "mantenimiento",  label: "Mantenimiento anual (€)",       default: 15000 },
-      { key: "skus",           label: "Cantidad de SKUs activos",      default: 5000  },
-    ],
-    compute: (v: Record<string, number>) =>
-      "€" + ((v.licencia + v.integracion + v.mantenimiento) / v.skus).toFixed(2),
-    unit: "€ / DPP",
-  },
-  {
-    id: "F3",
-    name: "Índice de Madurez Tecnológica",
-    description: "Puntuación ponderada que combina TRL, adopción enterprise y cobertura regulatoria.",
-    formula: "(TRL/9 × 0.4) + (adopción/10 × 0.35) + (regulatorio/10 × 0.25) × 100",
-    inputs: [
-      { key: "trl",         label: "TRL (1–9)",                       default: 7  },
-      { key: "adopcion",    label: "Adopción enterprise (0–10)",       default: 7  },
-      { key: "regulatorio", label: "Cobertura regulatoria (0–10)",     default: 8  },
-    ],
-    compute: (v: Record<string, number>) =>
-      ((v.trl / 9 * 0.4) + (v.adopcion / 10 * 0.35) + (v.regulatorio / 10 * 0.25) * 100).toFixed(1),
-    unit: "/ 100",
-  },
-  {
-    id: "F4",
-    name: "Período de Recuperación (Payback)",
-    description: "Meses necesarios para recuperar la inversión inicial a partir de los ahorros generados.",
-    formula: "inversión / (ahorros_mensuales + ingresos_mensuales)",
-    inputs: [
-      { key: "inversion",          label: "Inversión total (€)",                default: 180000 },
-      { key: "ahorros_mensuales",  label: "Ahorros mensuales (€)",              default: 12000  },
-      { key: "ingresos_mensuales", label: "Ingresos adicionales mensuales (€)", default: 5000   },
-    ],
-    compute: (v: Record<string, number>) =>
-      (v.inversion / (v.ahorros_mensuales + v.ingresos_mensuales)).toFixed(1) + " meses",
-    unit: "meses",
-  },
-  {
-    id: "F5",
-    name: "Ahorro en Auditorías de Cumplimiento",
-    description: "Reducción estimada en costos de auditoría CSRD/EUDR mediante automatización.",
-    formula: "costo_actual × (1 - eficiencia/100) × frecuencia",
-    inputs: [
-      { key: "costo_actual",  label: "Costo actual por auditoría (€)",   default: 40000 },
-      { key: "eficiencia",    label: "Eficiencia de automatización (%)",  default: 70    },
-      { key: "frecuencia",    label: "Auditorías por año",                default: 3     },
-    ],
-    compute: (v: Record<string, number>) =>
-      "€" + (v.costo_actual * (1 - v.eficiencia / 100) * v.frecuencia).toLocaleString("es-ES"),
-    unit: "€ / año",
-  },
-];
-
-// ── Interactive Formula Card ───────────────────────────────────────────────
-function FormulaCard({ f }: { f: typeof FORMULAS[0] }) {
-  const [vals, setVals] = useState<Record<string, number>>(() =>
-    Object.fromEntries(f.inputs.map(i => [i.key, i.default]))
-  );
-  const result = f.compute(vals);
-
-  return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <span className="text-xs font-bold text-[#E8521A] tracking-widest uppercase">{f.id}</span>
-          <h4 className="text-sm font-semibold text-gray-900 mt-0.5">{f.name}</h4>
-        </div>
-        <div className="text-right">
-          <div className="text-2xl font-bold text-[#E8521A]">{result}</div>
-          <div className="text-xs text-gray-400">{f.unit}</div>
-        </div>
-      </div>
-      <p className="text-xs text-gray-500 mb-4 leading-relaxed">{f.description}</p>
-      <div className="bg-gray-50 rounded-lg px-3 py-2 mb-4">
-        <code className="text-xs text-gray-600 font-mono">{f.formula}</code>
-      </div>
-      <div className="space-y-2">
-        {f.inputs.map(inp => (
-          <div key={inp.key} className="flex items-center gap-3">
-            <label className="text-xs text-gray-600 flex-1 min-w-0 truncate">{inp.label}</label>
-            <input
-              type="number"
-              value={vals[inp.key]}
-              onChange={e => setVals(v => ({ ...v, [inp.key]: parseFloat(e.target.value) || 0 }))}
-              className="w-28 text-right text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#E8521A] bg-white"
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 }
 
 // ── Hover Tooltip ─────────────────────────────────────────────────────────
@@ -253,27 +140,31 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
     (r: any) => !r.mandatory && !r.name?.toLowerCase().includes("trl") && !r.name?.toLowerCase().includes("madurez")
   );
 
+  // Ordenar criterios de metodología de mayor a menor peso
+  const sortedRequirements = [...requirements].sort((a: any, b: any) => (b.weight ?? 0) - (a.weight ?? 0));
+
   return (
     <div className="min-h-screen bg-[#FDF6EE]">
       {/* Hero */}
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-6 py-14">
-          <div className="flex items-center gap-3 mb-10">
+          <div className="flex items-center justify-between gap-3 mb-10">
             <img src={LOGO_DARK} alt="VCL studio" className="h-8" />
+            <img src={WTS_LOGO} alt="WTS" className="h-10 object-contain opacity-80" />
           </div>
           <div className="flex items-start justify-between gap-8">
             <div className="flex-1">
               <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-3">
-                Discover Phase — Reporte Ejecutivo
+                Reporte de Scouting
               </div>
-              <h1 className="text-3xl font-bold leading-tight mb-4 text-gray-900">{project.title}</h1>
+              <h1 className="text-3xl font-bold leading-tight mb-4 text-gray-900">Plataforma Escalable de DPP y LCA</h1>
               <p className="text-gray-500 text-sm leading-relaxed max-w-xl">
-                {project.scopeDescription}
+                World Textile Sourcing Peru requiere una transición de una herramienta interna de cumplimiento hacia una plataforma sólida y lista para el mercado de Pasaporte Digital de Producto (DPP, por sus siglas en inglés). Actualmente, los datos están fragmentados, la documentación se maneja de forma manual y los impactos ambientales se reportan en formatos estáticos que carecen de verificación y comparabilidad.
               </p>
             </div>
             <div className="bg-[#FDF6EE] border border-orange-100 rounded-xl p-5 min-w-[200px] text-sm space-y-3">
               <div>
-                <div className="text-gray-400 text-xs uppercase tracking-wide">Cliente</div>
+                <div className="text-gray-400 text-xs uppercase tracking-wide">Empresa</div>
                 <div className="text-gray-900 font-medium mt-0.5">{project.clientName}</div>
               </div>
               <div>
@@ -282,7 +173,7 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
               </div>
               <div>
                 <div className="text-gray-400 text-xs uppercase tracking-wide">Analista</div>
-                <div className="text-gray-900 font-medium mt-0.5">{project.analystName}</div>
+                <div className="text-gray-900 font-medium mt-0.5">Equipo de Analistas de VCL studio</div>
               </div>
               <div>
                 <div className="text-gray-400 text-xs uppercase tracking-wide">Fecha</div>
@@ -294,13 +185,11 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-12 space-y-12">
-        {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {/* Stats — solo startups evaluadas y criterios de evaluación */}
+        <div className="grid grid-cols-2 gap-4">
           {[
-            { label: "Startups evaluadas",   value: project.universeSize ?? 10 },
-            { label: "Startups elegibles",   value: project.eligibleCount ?? 8 },
-            { label: "Excluidas",            value: project.excludedCount ?? 2 },
-            { label: "Criterios ponderados", value: requirements.length },
+            { label: "Startups evaluadas",       value: project.universeSize ?? 10 },
+            { label: "Criterios de evaluación",  value: requirements.length },
           ].map(s => (
             <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-5 text-center shadow-sm">
               <div className="text-3xl font-bold text-[#E8521A]">{s.value}</div>
@@ -319,7 +208,7 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
             </div>
             <div>
               <div className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-2">Excluido</div>
-              <div className="text-sm text-gray-700">{project.geoExcluded}</div>
+              <div className="text-sm text-gray-700">Rest of the World</div>
             </div>
           </div>
         </div>
@@ -363,14 +252,14 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
           </div>
         </div>
 
-        {/* Metodología */}
+        {/* Metodología — criterios ordenados de mayor a menor peso */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
           <h2 className="text-base font-semibold text-gray-900 mb-2">Metodología</h2>
           <p className="text-sm text-gray-600 mb-4 leading-relaxed">
             Este análisis utiliza una <strong>Weighted Scoring Matrix (WSM)</strong> con {requirements.length} criterios ponderados que cubren las dimensiones técnicas, regulatorias, comerciales y estratégicas más relevantes para la adopción de tecnología DPP/LCA en cadenas de suministro textil complejas. Cada startup fue evaluada de forma independiente con puntuaciones del 1 al 10, ponderadas según la importancia relativa de cada criterio.
           </p>
           <div className="grid grid-cols-3 gap-3">
-            {requirements.map((r: any) => (
+            {sortedRequirements.map((r: any) => (
               <div key={r.id} className="bg-gray-50 rounded-lg p-3 border border-gray-100">
                 <div className="text-lg font-bold text-[#E8521A]">{(r.weight * 100).toFixed(0)}%</div>
                 <div className="text-xs text-gray-700 font-medium leading-tight mt-0.5">{r.name}</div>
@@ -385,7 +274,7 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
             onClick={onNextPage}
             className="inline-flex items-center gap-2 bg-[#E8521A] hover:bg-[#CC4415] text-white font-semibold px-8 py-3 rounded-xl transition-colors shadow-sm text-sm"
           >
-            Ver Rankings Finales
+            Ver Rankings
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
@@ -415,11 +304,12 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
     <div className="min-h-screen bg-[#FDF6EE]">
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6 py-10">
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center justify-between gap-3 mb-6">
             <img src={LOGO_DARK} alt="VCL studio" className="h-7" />
+            <img src={WTS_LOGO} alt="WTS" className="h-9 object-contain opacity-80" />
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
-            Sección C — Rankings Finales
+            Rankings Finales
           </div>
           <h2 className="text-2xl font-bold text-gray-900">Selección Estratégica y Técnica</h2>
           <p className="text-gray-500 text-sm mt-2">
@@ -474,7 +364,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-10">#</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Empresa</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Startup</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden md:table-cell">Cluster</th>
                   <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Puntuación WSM</th>
                   <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Tier</th>
@@ -534,7 +424,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
           </div>
         </div>
 
-        {/* Recomendaciones del analista */}
+        {/* Recomendaciones del analista — sin badges de recomendado/no recomendado */}
         {enriched.some((r: any) => r.rec?.narrative) && (
           <div>
             <h3 className="text-lg font-bold text-gray-900 mb-1">Recomendaciones del Analista</h3>
@@ -544,7 +434,6 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
                 const tierNum = typeof row.tier === "number" ? row.tier : parseInt(row.tier ?? "4", 10);
                 const tier = TIER_CONFIG[tierNum] ?? TIER_CONFIG[4];
                 const borderColor = TIER_BORDER[tierNum] ?? "#e5e7eb";
-                const isRec = row.rec?.decision === "recommended";
                 return (
                   <div key={row.startupId}
                     className="bg-white rounded-xl p-5 shadow-sm border-l-4"
@@ -552,12 +441,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
                   >
                     <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
                       <span className="font-bold text-sm text-gray-900">#{row.rank} {row.startup?.name}</span>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${tier.bg} ${tier.text}`}>{tier.short}</span>
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                          isRec ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
-                        }`}>{isRec ? "✓ Recomendado" : "✗ No recomendado"}</span>
-                      </div>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${tier.bg} ${tier.text}`}>{tier.short}</span>
                     </div>
                     <p className="text-xs leading-relaxed text-gray-600">{row.rec.narrative}</p>
                   </div>
@@ -597,6 +481,9 @@ function PageMatrix({ data }: { data: any }) {
       return ra - rb;
     });
 
+  // Ordenar criterios de mayor a menor peso
+  const sortedRequirements = [...requirements].sort((a: any, b: any) => (b.weight ?? 0) - (a.weight ?? 0));
+
   const scoreMap: Record<number, Record<number, any>> = {};
   for (const score of wsmScores) {
     if (!scoreMap[score.startupId]) scoreMap[score.startupId] = {};
@@ -607,8 +494,9 @@ function PageMatrix({ data }: { data: any }) {
     <div className="min-h-screen bg-[#FDF6EE]">
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 py-10">
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center justify-between gap-3 mb-6">
             <img src={LOGO_DARK} alt="VCL studio" className="h-7" />
+            <img src={WTS_LOGO} alt="WTS" className="h-9 object-contain opacity-80" />
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
             Evaluación Detallada
@@ -621,13 +509,14 @@ function PageMatrix({ data }: { data: any }) {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-10">
-        {/* Leyenda */}
+        {/* Leyenda con nivel 0 */}
         <div className="flex flex-wrap gap-3 mb-6 text-xs">
           {[
-            { label: "9–10 Excelente",  bg: "bg-emerald-100", text: "text-emerald-900" },
-            { label: "7–8 Bueno",       bg: "bg-blue-50",     text: "text-blue-900"    },
-            { label: "5–6 Aceptable",   bg: "bg-amber-50",    text: "text-amber-900"   },
-            { label: "1–4 Bajo",        bg: "bg-red-50",      text: "text-red-900"     },
+            { label: "9–10 Excelente", bg: "bg-emerald-100", text: "text-emerald-900" },
+            { label: "7–8 Bueno",      bg: "bg-blue-50",     text: "text-blue-900"   },
+            { label: "5–6 Aceptable",  bg: "bg-amber-50",    text: "text-amber-900"  },
+            { label: "1–4 Bajo",       bg: "bg-red-50",      text: "text-red-900"    },
+            { label: "0 Nulo",         bg: "bg-gray-200",    text: "text-gray-500"   },
           ].map(l => (
             <span key={l.label} className={`${l.bg} ${l.text} px-3 py-1 rounded-full font-medium`}>{l.label}</span>
           ))}
@@ -640,7 +529,7 @@ function PageMatrix({ data }: { data: any }) {
               <thead>
                 <tr className="bg-gray-900 text-white">
                   <th className="text-left px-4 py-3 font-semibold sticky left-0 bg-gray-900 z-10 min-w-[140px]">Startup</th>
-                  {requirements.map((r: any) => (
+                  {sortedRequirements.map((r: any) => (
                     <th key={r.id} className="px-2 py-3 font-semibold text-center min-w-[110px]">
                       <div className="whitespace-normal leading-tight text-center">{r.name}</div>
                       <div className="text-gray-400 font-normal mt-0.5">{(r.weight * 100).toFixed(0)}%</div>
@@ -667,7 +556,7 @@ function PageMatrix({ data }: { data: any }) {
                           </div>
                         </div>
                       </td>
-                      {requirements.map((r: any) => {
+                      {sortedRequirements.map((r: any) => {
                         const entry = scoreMap[startup.id]?.[r.id];
                         const score = entry?.humanScore ?? entry?.aiScore;
                         return (
@@ -701,59 +590,6 @@ function PageMatrix({ data }: { data: any }) {
   );
 }
 
-// ── Page 4: Anexos ─────────────────────────────────────────────────────────
-function PageAnexos({ data }: { data: any }) {
-  const { project } = data;
-
-  return (
-    <div className="min-h-screen bg-[#FDF6EE]">
-      <div className="bg-white border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-6 py-10">
-          <div className="flex items-center gap-3 mb-6">
-            <img src={LOGO_DARK} alt="VCL studio" className="h-7" />
-          </div>
-          <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
-            Anexos
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900">Herramientas y Material de Apoyo</h2>
-          <p className="text-gray-500 text-sm mt-2">
-            Fórmulas de negocio interactivas y material complementario del análisis.
-          </p>
-        </div>
-      </div>
-
-      <div className="max-w-5xl mx-auto px-6 py-10 space-y-10">
-        {/* Fórmulas de negocio */}
-        <div>
-          <h3 className="text-base font-semibold text-gray-900 mb-1">Fórmulas de Negocio</h3>
-          <p className="text-sm text-gray-500 mb-5">
-            Herramientas cuantitativas para evaluar el impacto económico de la implementación. Ajusta los parámetros para ver los resultados en tiempo real.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {FORMULAS.map(f => <FormulaCard key={f.id} f={f} />)}
-          </div>
-        </div>
-
-        {/* Nota metodológica */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <h3 className="text-base font-semibold text-gray-900 mb-3">Nota Metodológica</h3>
-          <div className="space-y-3 text-sm text-gray-600 leading-relaxed">
-            <p>
-              Las fórmulas presentadas en esta sección son herramientas orientativas para facilitar la toma de decisiones. Los valores por defecto están calibrados con benchmarks del sector textil europeo para proyectos de implementación DPP/LCA de escala media.
-            </p>
-            <p>
-              Los resultados deben interpretarse como estimaciones preliminares. VCL studio recomienda validar los parámetros con los equipos financieros y técnicos del cliente antes de utilizarlos en decisiones de inversión.
-            </p>
-            <p className="text-xs text-gray-400 pt-2 border-t border-gray-100">
-              Análisis elaborado por el equipo de Innovación / Venture Clienting de VCL studio · {project?.reportDate}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Main component ─────────────────────────────────────────────────────────
 export default function ClientPortalV2() {
   // Supports both /:clientSlug/:problemId (new) and /client/v2/:projectId (legacy)
@@ -775,7 +611,7 @@ export default function ClientPortalV2() {
 
   const [passkey, setPasskey] = useState("");
   const [submitted, setSubmitted] = useState<string>(sessionData?.passkey ?? "");
-  const [page, setPage] = useState<"context" | "rankings" | "matrix" | "anexos">("context");
+  const [page, setPage] = useState<"context" | "rankings" | "matrix">("context");
 
   // Scroll al tope al cambiar de página
   useEffect(() => {
@@ -807,7 +643,7 @@ export default function ClientPortalV2() {
       <div className="h-screen w-full bg-[#FDF6EE] flex flex-col items-center justify-center px-4">
         <div className="mb-10 text-center">
           <img src={LOGO_DARK} alt="VCL studio" className="h-10 mx-auto mb-4" />
-          <p className="text-gray-500 text-sm">Innovation Scouting Platform</p>
+          <p className="text-gray-500 text-sm">Scouting</p>
         </div>
         <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm">
           <div className="text-center mb-6">
@@ -840,12 +676,6 @@ export default function ClientPortalV2() {
             </button>
           </form>
         </div>
-        <p className="text-gray-600 text-xs mt-6">
-          ¿Problemas de acceso? Contacta a{" "}
-          <a href="mailto:innovation@vclstudio.com" className="text-[#E8521A] hover:underline">
-            innovation@vclstudio.com
-          </a>
-        </p>
       </div>
     );
   }
@@ -867,7 +697,6 @@ export default function ClientPortalV2() {
     { id: "context",  label: "Contexto" },
     { id: "rankings", label: "Rankings" },
     { id: "matrix",   label: "Evaluación" },
-    { id: "anexos",   label: "Anexos" },
   ] as const;
 
   return (
@@ -902,7 +731,6 @@ export default function ClientPortalV2() {
       {page === "context"  && <PageContext  data={data} onNextPage={() => setPage("rankings")} />}
       {page === "rankings" && <PageRankings data={data} onNext={() => setPage("matrix")} />}
       {page === "matrix"   && <PageMatrix   data={data} />}
-      {page === "anexos"   && <PageAnexos   data={data} />}
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 text-gray-400 text-xs py-6 mt-0">
