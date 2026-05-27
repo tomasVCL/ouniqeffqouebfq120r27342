@@ -79,11 +79,9 @@ export default function ReportAccess() {
             placeholder="Clave de acceso"
             value={passkey}
             onChange={(e) => setPasskey(e.target.value)}
-            className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:ring-2 transition-all"
-            style={{ focusRingColor: "#E8521A" } as React.CSSProperties}
-            onFocus={(e) => (e.target.style.borderColor = "#E8521A")}
-            onBlur={(e) => (e.target.style.borderColor = "#E5E7EB")}
+            className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#E8521A] focus:border-[#E8521A] transition-all"
             autoComplete="current-password"
+            autoFocus
           />
 
           {error && (
