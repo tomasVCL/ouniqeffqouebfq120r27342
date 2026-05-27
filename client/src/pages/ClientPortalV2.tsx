@@ -157,10 +157,10 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
               <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-3">
                 Reporte de Scouting
               </div>
-              <h1 className="text-3xl font-bold leading-tight mb-4 text-gray-900">Plataforma Escalable de DPP y LCA</h1>
-              <p className="text-gray-500 text-sm leading-relaxed max-w-xl">
-                World Textile Sourcing Peru requiere una transición de una herramienta interna de cumplimiento hacia una plataforma sólida y lista para el mercado de Pasaporte Digital de Producto (DPP, por sus siglas en inglés). Actualmente, los datos están fragmentados, la documentación se maneja de forma manual y los impactos ambientales se reportan en formatos estáticos que carecen de verificación y comparabilidad.
-              </p>
+              <h1 className="text-3xl font-bold leading-tight mb-4 text-gray-900">{project.title}</h1>
+              {project.scopeDescription && (
+                <p className="text-gray-500 text-sm leading-relaxed max-w-xl">{project.scopeDescription}</p>
+              )}
             </div>
             <div className="bg-[#FDF6EE] border border-orange-100 rounded-xl p-5 min-w-[200px] text-sm space-y-3">
               <div>
@@ -173,7 +173,7 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
               </div>
               <div>
                 <div className="text-gray-400 text-xs uppercase tracking-wide">Analista</div>
-                <div className="text-gray-900 font-medium mt-0.5">Equipo de Analistas de VCL studio</div>
+                <div className="text-gray-900 font-medium mt-0.5">{project.analystName ?? "Equipo de Analistas de VCL studio"}</div>
               </div>
               <div>
                 <div className="text-gray-400 text-xs uppercase tracking-wide">Fecha</div>
@@ -208,7 +208,7 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
             </div>
             <div>
               <div className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-2">Excluido</div>
-              <div className="text-sm text-gray-700">Rest of the World</div>
+              <div className="text-sm text-gray-700">{project.geoExcluded ?? "Rest of the World"}</div>
             </div>
           </div>
         </div>
@@ -256,7 +256,7 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
           <h2 className="text-base font-semibold text-gray-900 mb-2">Metodología</h2>
           <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-            Este análisis utiliza una <strong>Weighted Scoring Matrix (WSM)</strong> con {requirements.length} criterios ponderados que cubren las dimensiones técnicas, regulatorias, comerciales y estratégicas más relevantes para la adopción de tecnología DPP/LCA en cadenas de suministro textil complejas. Cada startup fue evaluada de forma independiente con puntuaciones del 1 al 10, ponderadas según la importancia relativa de cada criterio.
+            Este análisis utiliza una <strong>Weighted Scoring Matrix (WSM)</strong> con {requirements.length} criterios ponderados. Cada startup fue evaluada de forma independiente con puntuaciones del 1 al 10, ponderadas según la importancia relativa de cada criterio.
           </p>
           <div className="grid grid-cols-3 gap-3">
             {sortedRequirements.map((r: any) => (
@@ -618,10 +618,11 @@ export default function ClientPortalV2() {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [page]);
 
-  // Slug route: load directly by slug (no passkey needed — auth was done at /acceso)
+  // Slug route: send passkey stored by /acceso so the server can verify it
+  const slugPasskey = sessionData?.passkey ?? "";
   const slugQuery = trpc.report.getBySlug.useQuery(
-    { clientSlug: params.clientSlug ?? "", problemId: params.problemId ?? "" },
-    { enabled: isSlugRoute, retry: false }
+    { clientSlug: params.clientSlug ?? "", problemId: params.problemId ?? "", passkey: slugPasskey },
+    { enabled: isSlugRoute && slugPasskey.length > 0, retry: false }
   );
 
   // Legacy route: load by projectId + passkey
@@ -636,6 +637,17 @@ export default function ClientPortalV2() {
     e.preventDefault();
     setSubmitted(passkey.trim());
   };
+
+  // Slug route without a stored session — user needs to authenticate first
+  if (isSlugRoute && !slugPasskey) {
+    return (
+      <div className="h-screen bg-[#FDF6EE] flex flex-col items-center justify-center px-4">
+        <img src={LOGO_DARK} alt="VCL studio" className="h-8 mx-auto mb-4" />
+        <p className="text-gray-600 text-sm mb-4 text-center">Sesión expirada. Vuelve a ingresar tu clave de acceso.</p>
+        <a href="/acceso" className="text-[#E8521A] font-semibold text-sm underline">Acceder al reporte</a>
+      </div>
+    );
+  }
 
   // Pantalla de acceso — solo para rutas legacy (no slug)
   if (!isSlugRoute && (!submitted || error)) {
@@ -691,7 +703,18 @@ export default function ClientPortalV2() {
     );
   }
 
-  if (!data) return null;
+  if (!data) {
+    if (error) {
+      return (
+        <div className="h-screen bg-[#FDF6EE] flex flex-col items-center justify-center px-4">
+          <img src={LOGO_DARK} alt="VCL studio" className="h-8 mx-auto mb-4" />
+          <p className="text-gray-600 text-sm mb-4 text-center">No se pudo cargar el reporte. Verifica tu clave de acceso.</p>
+          <a href="/acceso" className="text-[#E8521A] font-semibold text-sm underline">Volver al acceso</a>
+        </div>
+      );
+    }
+    return null;
+  }
 
   const pages = [
     { id: "context",  label: "Contexto" },
