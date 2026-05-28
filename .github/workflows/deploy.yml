@@ -14,13 +14,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # version comes from packageManager field in package.json
-      - uses: pnpm/action-setup@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'pnpm'
+
+      - name: Enable corepack (uses pnpm version from package.json)
+        run: corepack enable && corepack prepare --activate
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -88,9 +87,9 @@ jobs:
               > /dev/null && echo "✅ $KEY set" || echo "⚠️  $KEY failed (may already exist)"
           }
 
-          upsert_env "DATABASE_URL"         "$DATABASE_URL"
+          upsert_env "DATABASE_URL"           "$DATABASE_URL"
           upsert_env "BUILT_IN_FORGE_API_KEY" "$FORGE_API_KEY"
-          upsert_env "JWT_SECRET"            "$JWT_SECRET"
+          upsert_env "JWT_SECRET"             "$JWT_SECRET"
           upsert_env "BUILT_IN_FORGE_API_URL" "https://forge.manus.ai" "plain"
 
       # ── Build & deploy ───────────────────────────────────────────────
