@@ -143,6 +143,7 @@ export const startups = mysqlTable("startups", {
   investors: varchar("investors", { length: 512 }),
   fundingAmount: varchar("fundingAmount", { length: 64 }),
   description: varchar("description", { length: 512 }),
+  websiteUrl: varchar("websiteUrl", { length: 512 }),
   clusterId: int("clusterId"),
   sortOrder: int("sortOrder").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
