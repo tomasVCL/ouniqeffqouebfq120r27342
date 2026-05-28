@@ -3,9 +3,24 @@ import { useParams } from "wouter";
 import { trpc } from "@/lib/trpc";
 
 const LOGO_WHITE  = "/manus-storage/vcl-logo-white_96a5cf7b.png";
-const LOGO_DARK   = "/manus-storage/vcl-logo-dark_5aaa0a93.png";
+const LOGO_DARK   = "https://images.squarespace-cdn.com/content/v1/6966cefb09b55d2220261038/fb7ff39c-ecbb-4870-be2e-af36f239bbc2/01-VCLstudio-Logotipo.png?format=1500w";
 const ISOTIPO     = "/manus-storage/vcl-isotipo_24d37529.png";
 const BAC_LOGO    = "https://upload.wikimedia.org/wikipedia/commons/8/8a/Bac_credomatic_logo.png";
+
+const STARTUP_LOGOS: Record<string, string> = {
+  "DispatchTrack": "https://www.suiteapp.com/SSP%20Applications/SDN%20SuiteApp.com/suiteappcom/img/items/DispatchTrack_01.png",
+  "FarEye":        "https://play-lh.googleusercontent.com/bCIYElymG0CA07n2SaifOctjueJDotL9rRZJOHqCpnnQgSVdimmrbsvCcx3QsnvV4AY",
+  "Bringg":        "https://play-lh.googleusercontent.com/tyZZHZuenzCd730izQcp96k_Tg7Mc_SM1H1FARzf-sHUq4Ms4jojPO0-KlI4XL2jS6w=w600-h300-pc0xffffff-pd",
+  "Wise Systems":  "https://media.licdn.com/dms/image/v2/C560BAQENp5DGJh3utA/company-logo_200_200/company-logo_200_200/0/1630613990712/wise_systems___logistics_solutions_logo?e=2147483647&v=beta&t=AilRw1KD3G4X-fy0KxUhsuohdbNhRs7HqQmv5IVFX-I",
+  "Routific":      "https://images.crunchbase.com/image/upload/c_pad,h_256,w_256,f_auto,q_auto:eco,dpr_1/vefax3wsfjg8ydqskhz3?ik-sanitizeSvg=true",
+  "SimpliRoute":   "https://play-lh.googleusercontent.com/F9kPDYF3A-xiDehoNAfhxW4igJUbxMq6GvxPhOVzH2DaJP62qvyU1qgClPDx-BphZg",
+  "OneRail":       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgwHGgbBdZraSLTxwolSV6k2eBPIT8eKwDbA&s",
+  "SmartQuick":    "https://play-lh.googleusercontent.com/pRXOW0UOd1LI-gfGR6hv0q1ZsYO6noZ95giA2aoYAWJce8qA8NgzRcJSejLRVc6xDpU",
+  "Moova":         "https://play-lh.googleusercontent.com/Zn5mVyfgY0zWuH7s5GT2NDXaNIMTYWXPEDKWMPU4yAY27LT5RnJ-Y3OVvDFyPgOKP_s",
+  "Mienvío":       "https://pbs.twimg.com/profile_images/1494125766656856065/hE1CLRVg_400x400.jpg",
+  "Cubbo":         "https://i.tracxn.com/logo/company/cubbo.com_Logo_bfde9e3b-bce2-40e4-b56b-aadd56d6b608.jpg",
+  "boxful":        "https://images.crunchbase.com/image/upload/c_pad,f_auto,q_auto:eco,dpr_1/4921daf8d89545f9b33c04364e23e919?ik-sanitizeSvg=true",
+};
 
 // ── Tier config ────────────────────────────────────────────────────────────
 const TIER_CONFIG: Record<number, { label: string; short: string; bg: string; text: string; dot: string }> = {
@@ -206,7 +221,7 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-6 py-14">
           <div className="flex items-center justify-between gap-3 mb-10">
-            <img src={LOGO_DARK} alt="VCL studio" className="h-8" />
+            <img src={LOGO_DARK} alt="VCL studio" className="h-14 object-contain" />
             <img src={BAC_LOGO} alt="BAC Credomatic" className="h-10 object-contain opacity-90" />
           </div>
           <div className="flex items-start justify-between gap-8">
@@ -362,7 +377,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6 py-10">
           <div className="flex items-center justify-between gap-3 mb-6">
-            <img src={LOGO_DARK} alt="VCL studio" className="h-7" />
+            <img src={LOGO_DARK} alt="VCL studio" className="h-12 object-contain" />
             <img src={BAC_LOGO} alt="BAC Credomatic" className="h-9 object-contain opacity-90" />
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
@@ -380,7 +395,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
         {/* Clusteres Estratégicos */}
         {clusters.length > 0 && (
           <div>
-            <h3 className="text-base font-semibold text-gray-900 mb-1">Clusteres Estratégicos</h3>
+            <h3 className="text-base font-semibold text-gray-900 mb-1">Clústeres Estratégicos</h3>
             <p className="text-sm text-gray-500 mb-4">Agrupación estratégica de las startups evaluadas según su perfil tecnológico y de mercado.</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {clusters.map((c: any) => {
@@ -442,16 +457,28 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
                         </span>
                       </td>
                       <td className="px-4 py-3.5">
-                        {startup ? (
-                          <StartupHoverCard startup={startup}>
-                            {startup.name}
-                          </StartupHoverCard>
-                        ) : (
-                          <span className="font-medium text-gray-900">—</span>
-                        )}
-                        {startup?.description && (
-                          <div className="text-xs text-gray-400 mt-0.5">{startup.description}</div>
-                        )}
+                        <div className="flex items-center gap-2.5">
+                          {startup && STARTUP_LOGOS[startup.name] && (
+                            <img
+                              src={STARTUP_LOGOS[startup.name]}
+                              alt={startup.name}
+                              className="w-8 h-8 rounded-lg object-contain flex-shrink-0 border border-gray-100 bg-white p-0.5"
+                              onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                            />
+                          )}
+                          <div>
+                            {startup ? (
+                              <StartupHoverCard startup={startup}>
+                                {startup.name}
+                              </StartupHoverCard>
+                            ) : (
+                              <span className="font-medium text-gray-900">—</span>
+                            )}
+                            {startup?.description && (
+                              <div className="text-xs text-gray-400 mt-0.5">{startup.description}</div>
+                            )}
+                          </div>
+                        </div>
                       </td>
                       <td className="px-4 py-3.5 hidden md:table-cell">
                         {cluster ? (
@@ -551,7 +578,7 @@ function PageMatrix({ data }: { data: any }) {
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 py-10">
           <div className="flex items-center justify-between gap-3 mb-6">
-            <img src={LOGO_DARK} alt="VCL studio" className="h-7" />
+            <img src={LOGO_DARK} alt="VCL studio" className="h-12 object-contain" />
             <img src={BAC_LOGO} alt="BAC Credomatic" className="h-9 object-contain opacity-90" />
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
@@ -608,6 +635,14 @@ function PageMatrix({ data }: { data: any }) {
                               {ranking.rank}
                             </span>
                           )}
+                          {STARTUP_LOGOS[startup.name] && (
+                            <img
+                              src={STARTUP_LOGOS[startup.name]}
+                              alt={startup.name}
+                              className="w-6 h-6 rounded object-contain flex-shrink-0 border border-gray-100 bg-white p-0.5"
+                              onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                            />
+                          )}
                           <div>
                             <div className="font-semibold text-gray-900">{startup.name}</div>
                             <div className="text-gray-400 truncate max-w-[100px]">{startup.hqCountry}</div>
@@ -643,7 +678,7 @@ function PageMatrix({ data }: { data: any }) {
         </div>
 
         <p className="text-xs text-gray-400 mt-4 text-center">
-          Puntuaciones asignadas por el equipo de análisis de VCL studio. Cada puntuación refleja una evaluación independiente basada en documentación pública, demos y entrevistas con los proveedores.
+          Puntuaciones asignadas por el equipo de análisis de VCL studio. Cada puntuación refleja una evaluación independiente basada en documentación pública.
         </p>
       </div>
     </div>
@@ -696,7 +731,7 @@ export default function ClientPortalV2() {
   if (isSlugRoute && !slugPasskey) {
     return (
       <div className="h-screen bg-[#FDF6EE] flex flex-col items-center justify-center px-4">
-        <img src={LOGO_DARK} alt="VCL studio" className="h-8 mx-auto mb-4" />
+        <img src={LOGO_DARK} alt="VCL studio" className="h-16 object-contain mx-auto mb-4" />
         <p className="text-gray-600 text-sm mb-4 text-center">Sesión expirada. Vuelve a ingresar tu clave de acceso.</p>
         <a href="/acceso" className="text-[#E8521A] font-semibold text-sm underline">Acceder al reporte</a>
       </div>
@@ -707,7 +742,7 @@ export default function ClientPortalV2() {
     return (
       <div className="h-screen w-full bg-[#FDF6EE] flex flex-col items-center justify-center px-4">
         <div className="mb-10 text-center">
-          <img src={LOGO_DARK} alt="VCL studio" className="h-10 mx-auto mb-4" />
+          <img src={LOGO_DARK} alt="VCL studio" className="h-16 object-contain mx-auto mb-4" />
           <p className="text-gray-500 text-sm">Scouting</p>
         </div>
         <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm">
@@ -781,7 +816,7 @@ export default function ClientPortalV2() {
       <div className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
           <div className="flex items-center gap-3">
-            <img src={LOGO_DARK} alt="VCL studio" className="h-6" />
+            <img src={LOGO_DARK} alt="VCL studio" className="h-8 object-contain" />
             <span className="text-xs text-gray-400 hidden sm:block">|</span>
             <span className="text-xs text-gray-500 hidden sm:block truncate max-w-[200px]">{data.project.title}</span>
           </div>
