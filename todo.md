@@ -109,3 +109,9 @@
 - [x] CTA Página 1 cambiado a "Ver Rankings" (sin "Finales")
 - [x] Columna "Empresa" → "Startup" en la tabla de rankings
 - [x] Sección de rankings: "Sección C — Rankings Finales" → "Rankings Finales"
+
+## Correcciones urgentes (Mayo 28, 2026)
+- [ ] URL: cambiar /bac/retana-001 → /bac/001 (actualizar DB problem_id de BAC)
+- [ ] Favicon: verificar que el isotipo VCL aparezca en la viñeta del navegador
+- [ ] Título de página: cambiar "VCL studio Scouting" → "VCL studio scout"
+- [ ] Logo en login: agrandar el logo de VCL en la pantalla de acceso ReportAccess.tsx

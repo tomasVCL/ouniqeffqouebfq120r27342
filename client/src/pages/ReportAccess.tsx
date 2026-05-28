@@ -49,7 +49,7 @@ export default function ReportAccess() {
     >
       {/* Logo */}
       <div className="mb-8 flex flex-col items-center gap-2">
-        <img src={VCL_LOGO_DARK} alt="VCL studio" className="h-8 object-contain" />
+        <img src={VCL_LOGO_DARK} alt="VCL studio" className="h-16 object-contain" />
         <span className="text-sm tracking-widest uppercase" style={{ color: "#6B6B6B", letterSpacing: "0.18em" }}>
           Scouting
         </span>

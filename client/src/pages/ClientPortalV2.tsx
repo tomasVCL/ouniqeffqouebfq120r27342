@@ -700,8 +700,6 @@ export default function ClientPortalV2() {
   })() : null;
 
   const projectId = sessionData?.projectId ?? parseInt(params.projectId ?? "0", 10);
-  // Normalizar problemId: si es "001", buscar "retana-001" en la DB
-  const normalizedProblemId = params.problemId === "001" ? "retana-001" : params.problemId;
   const isSlugRoute = !!(params.clientSlug && params.problemId);
 
   const [passkey, setPasskey] = useState("");
@@ -714,7 +712,7 @@ export default function ClientPortalV2() {
 
   const slugPasskey = sessionData?.passkey ?? "";
   const slugQuery = trpc.report.getBySlug.useQuery(
-    { clientSlug: params.clientSlug ?? "", problemId: normalizedProblemId ?? "", passkey: slugPasskey },
+    { clientSlug: params.clientSlug ?? "", problemId: params.problemId ?? "", passkey: slugPasskey },
     { enabled: isSlugRoute && slugPasskey.length > 0, retry: false }
   );
 
