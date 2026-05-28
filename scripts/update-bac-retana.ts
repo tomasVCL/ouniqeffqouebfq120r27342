@@ -8,6 +8,7 @@
  */
 
 // dotenv not needed — DATABASE_URL passed via env directly
+import mysql2 from "mysql2/promise";
 import { and, eq } from "drizzle-orm";
 import { getDb } from "../server/db.js";
 import { projects, requirements, clusters, startups, wsmScores, recommendations } from "../drizzle/schema.js";
@@ -15,6 +16,15 @@ import { projects, requirements, clusters, startups, wsmScores, recommendations 
 if (!process.env.DATABASE_URL) {
   console.error("❌  DATABASE_URL not set.");
   process.exit(1);
+}
+
+// ── Ensure websiteUrl column exists ───────────────────────────────────────
+const rawConn = await mysql2.createConnection(process.env.DATABASE_URL);
+try {
+  await rawConn.execute("ALTER TABLE startups ADD COLUMN IF NOT EXISTS websiteUrl varchar(512)");
+  console.log("✅  websiteUrl column ready");
+} finally {
+  await rawConn.end();
 }
 
 const db = await getDb();
