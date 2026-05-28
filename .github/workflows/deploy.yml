@@ -1,0 +1,118 @@
+name: 🚀 Deploy to Vercel
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.4.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ── Restore cached Vercel project link ──────────────────────────
+      - name: Cache Vercel project link
+        id: vercel-cache
+        uses: actions/cache@v4
+        with:
+          path: .vercel
+          key: vercel-project-${{ github.repository_id }}
+
+      # ── Install Vercel CLI ───────────────────────────────────────────
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      # ── Create / link Vercel project (only needed once) ─────────────
+      - name: Link Vercel project
+        if: steps.vercel-cache.outputs.cache-hit != 'true'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          vercel link \
+            --yes \
+            --token="$VERCEL_TOKEN" 2>&1 | tail -5
+
+      # ── Set all runtime env vars via Vercel API ──────────────────────
+      - name: Configure environment variables
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          FORGE_API_KEY: ${{ secrets.FORGE_API_KEY }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          PROJECT_ID=$(node -p "require('./.vercel/project.json').projectId")
+          echo "Project ID: $PROJECT_ID"
+
+          upsert_env() {
+            local KEY="$1"
+            local VALUE="$2"
+            local TYPE="${3:-encrypted}"
+
+            # Remove existing entry for this key (ignore errors)
+            EXISTING_ID=$(curl -sf \
+              "https://api.vercel.com/v9/projects/$PROJECT_ID/env?target=production" \
+              -H "Authorization: Bearer $VERCEL_TOKEN" | \
+              node -e "
+                let d=''; process.stdin.on('data',c=>d+=c).on('end',()=>{
+                  const e=(JSON.parse(d).envs||[]).find(x=>x.key==='$KEY');
+                  if(e) process.stdout.write(e.id);
+                })
+              " 2>/dev/null || true)
+
+            if [ -n "$EXISTING_ID" ]; then
+              curl -sf -X DELETE \
+                "https://api.vercel.com/v9/projects/$PROJECT_ID/env/$EXISTING_ID" \
+                -H "Authorization: Bearer $VERCEL_TOKEN" > /dev/null || true
+            fi
+
+            curl -sf -X POST \
+              "https://api.vercel.com/v9/projects/$PROJECT_ID/env" \
+              -H "Authorization: Bearer $VERCEL_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d "{\"key\":\"$KEY\",\"value\":\"$(echo "$VALUE" | sed 's/"/\\"/g')\",\"type\":\"$TYPE\",\"target\":[\"production\"]}" \
+              > /dev/null && echo "✅ $KEY set" || echo "⚠️  $KEY failed (may already exist)"
+          }
+
+          upsert_env "DATABASE_URL"         "$DATABASE_URL"
+          upsert_env "BUILT_IN_FORGE_API_KEY" "$FORGE_API_KEY"
+          upsert_env "JWT_SECRET"            "$JWT_SECRET"
+          upsert_env "BUILT_IN_FORGE_API_URL" "https://forge.manus.ai" "plain"
+
+      # ── Build & deploy ───────────────────────────────────────────────
+      - name: Build project
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+
+      - name: Deploy to production
+        id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          URL=$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo ""
+          echo "══════════════════════════════════════════"
+          echo "  ✅ DEPLOYED: $URL"
+          echo "  🔐 Login:    $URL/acceso"
+          echo "══════════════════════════════════════════"
+
+      # ── Seed BAC Credomatic data ─────────────────────────────────────
+      - name: Seed BAC Credomatic project
+        run: pnpm tsx scripts/seed-bac-retana.ts
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        continue-on-error: true   # idempotent — skip silently if already seeded
