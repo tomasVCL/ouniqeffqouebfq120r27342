@@ -1,0 +1,36 @@
+name: 🌱 Seed Database
+
+on:
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Enable corepack
+        run: corepack enable && corepack prepare --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Seed BAC Credomatic project
+        run: pnpm tsx scripts/seed-bac-retana.ts
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Done
+        run: |
+          echo "══════════════════════════════"
+          echo "  ✅ BAC seed complete"
+          echo "  URL: /bac/retana-001"
+          echo "  Passkey: BAC2@26-qweyukc"
+          echo "══════════════════════════════"

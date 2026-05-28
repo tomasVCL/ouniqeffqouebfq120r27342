@@ -1,0 +1,160 @@
+name: 🚀 Deploy to Vercel
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  VERCEL_PROJECT_NAME: vclstudio-scouting-platform
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Enable corepack
+        run: corepack enable && corepack prepare --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ── Verify token & resolve Vercel org ────────────────────────────
+      - name: Resolve Vercel account
+        id: vercel-account
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          RESPONSE=$(curl -sf \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v2/user")
+          echo "$RESPONSE" | node -e "
+            let d=''; process.stdin.on('data',c=>d+=c).on('end',()=>{
+              const u = JSON.parse(d).user;
+              if (!u) { console.error('❌ Invalid token - check VERCEL_TOKEN secret'); process.exit(1); }
+              console.log('✅ Authenticated as: ' + (u.username || u.email));
+              const fs = require('fs');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'team_id=' + (u.id || '') + '\n');
+            })
+          "
+
+      # ── Create or fetch Vercel project ───────────────────────────────
+      - name: Ensure Vercel project exists
+        id: vercel-project
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          # Try to find existing project first
+          EXISTING=$(curl -sf \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_NAME" 2>/dev/null || echo "null")
+
+          PROJECT_ID=$(echo "$EXISTING" | node -e "
+            let d=''; process.stdin.on('data',c=>d+=c).on('end',()=>{
+              try { const p=JSON.parse(d); if(p.id) process.stdout.write(p.id); } catch(e){}
+            })")
+
+          if [ -z "$PROJECT_ID" ]; then
+            echo "Creating new Vercel project..."
+            CREATED=$(curl -sf -X POST \
+              -H "Authorization: Bearer $VERCEL_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d "{\"name\":\"$VERCEL_PROJECT_NAME\",\"framework\":null}" \
+              "https://api.vercel.com/v9/projects")
+            PROJECT_ID=$(echo "$CREATED" | node -e "
+              let d=''; process.stdin.on('data',c=>d+=c).on('end',()=>{
+                const p=JSON.parse(d);
+                if(!p.id){ console.error('Failed to create project:',JSON.stringify(p)); process.exit(1); }
+                process.stdout.write(p.id);
+              })")
+            echo "✅ Project created: $PROJECT_ID"
+          else
+            echo "✅ Project found: $PROJECT_ID"
+          fi
+
+          echo "project_id=$PROJECT_ID" >> "$GITHUB_OUTPUT"
+
+          # Write .vercel/project.json for the Vercel CLI
+          mkdir -p .vercel
+          node -e "
+            const fs = require('fs');
+            fs.writeFileSync('.vercel/project.json',
+              JSON.stringify({projectId:'$PROJECT_ID',orgId:'',settings:{}}));
+          "
+
+      # ── Set environment variables ─────────────────────────────────────
+      - name: Configure environment variables
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          PROJECT_ID: ${{ steps.vercel-project.outputs.project_id }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          FORGE_API_KEY: ${{ secrets.FORGE_API_KEY }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          upsert_env() {
+            local KEY="$1" VALUE="$2" TYPE="${3:-encrypted}"
+
+            # Delete existing
+            EXISTING_ID=$(curl -sf \
+              "https://api.vercel.com/v9/projects/$PROJECT_ID/env?target=production" \
+              -H "Authorization: Bearer $VERCEL_TOKEN" | \
+              node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{
+                const e=(JSON.parse(d).envs||[]).find(x=>x.key==='$KEY');
+                if(e) process.stdout.write(e.id);
+              })" 2>/dev/null || true)
+
+            [ -n "$EXISTING_ID" ] && curl -sf -X DELETE \
+              "https://api.vercel.com/v9/projects/$PROJECT_ID/env/$EXISTING_ID" \
+              -H "Authorization: Bearer $VERCEL_TOKEN" > /dev/null || true
+
+            # Encode value as JSON string safely
+            ENCODED=$(node -e "process.stdout.write(JSON.stringify('$VALUE'.replace(/\\\\n/g,'\n')))")
+
+            curl -sf -X POST \
+              "https://api.vercel.com/v9/projects/$PROJECT_ID/env" \
+              -H "Authorization: Bearer $VERCEL_TOKEN" \
+              -H "Content-Type: application/json" \
+              --data-binary "{\"key\":\"$KEY\",\"value\":$ENCODED,\"type\":\"$TYPE\",\"target\":[\"production\"]}" \
+              > /dev/null && echo "✅ $KEY" || echo "⚠️  $KEY (failed)"
+          }
+
+          upsert_env "DATABASE_URL"           "$DATABASE_URL"
+          upsert_env "BUILT_IN_FORGE_API_KEY" "$FORGE_API_KEY"
+          upsert_env "JWT_SECRET"             "$JWT_SECRET"
+          upsert_env "BUILT_IN_FORGE_API_URL" "https://forge.manus.ai" "plain"
+          upsert_env "NODE_ENV"               "production" "plain"
+
+      # ── Build & deploy ────────────────────────────────────────────────
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Build project
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+
+      - name: Deploy to production
+        id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          URL=$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo ""
+          echo "══════════════════════════════════════════"
+          echo "  ✅ DEPLOYED: $URL"
+          echo "  🔐 Login:    $URL/acceso"
+          echo "══════════════════════════════════════════"
+
+      # ── Seed BAC Credomatic data ──────────────────────────────────────
+      - name: Seed BAC Credomatic project
+        run: pnpm tsx scripts/seed-bac-retana.ts
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        continue-on-error: true
