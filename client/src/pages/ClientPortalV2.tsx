@@ -5,7 +5,7 @@ import { trpc } from "@/lib/trpc";
 const LOGO_WHITE  = "/manus-storage/vcl-logo-white_96a5cf7b.png";
 const LOGO_DARK   = "/manus-storage/vcl-logo-dark_5aaa0a93.png";
 const ISOTIPO     = "/manus-storage/vcl-isotipo_24d37529.png";
-const WTS_LOGO    = "/manus-storage/wts-logo_82f3b5ce.png";
+const BAC_LOGO    = "https://upload.wikimedia.org/wikipedia/commons/8/8a/Bac_credomatic_logo.png";
 
 // ── Tier config ────────────────────────────────────────────────────────────
 const TIER_CONFIG: Record<number, { label: string; short: string; bg: string; text: string; dot: string }> = {
@@ -22,17 +22,17 @@ const TIER_BORDER: Record<number, string> = {
   4: "#f87171",
 };
 
-// ── Score cell colour — escala con nivel 0 = Nulo (gris) ──────────────────
+// ── Score cell colour — escala 0-4 ────────────────────────────────────────
 function scoreColor(score: number | null | undefined) {
   if (score == null) return "bg-gray-50 text-gray-400";
   if (score === 0)   return "bg-gray-200 text-gray-500";
-  if (score >= 9)    return "bg-emerald-100 text-emerald-900 font-semibold";
-  if (score >= 7)    return "bg-blue-50 text-blue-900";
-  if (score >= 5)    return "bg-amber-50 text-amber-900";
+  if (score === 4)   return "bg-emerald-100 text-emerald-900 font-semibold";
+  if (score === 3)   return "bg-blue-50 text-blue-900";
+  if (score === 2)   return "bg-amber-50 text-amber-900";
   return "bg-red-50 text-red-900";
 }
 
-// ── Hover Tooltip ─────────────────────────────────────────────────────────
+// ── Hover Tooltip (rationale) ──────────────────────────────────────────────
 function RationaleTooltip({ children, rationale }: { children: React.ReactNode; rationale: string | null | undefined }) {
   const [show, setShow] = useState(false);
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -63,28 +63,87 @@ function RationaleTooltip({ children, rationale }: { children: React.ReactNode; 
   );
 }
 
-// ── Startup Hover Card ─────────────────────────────────────────────────────
-function StartupHoverCard({ startup, children }: { startup: any; children: React.ReactNode }) {
+// ── Requirement header tooltip ─────────────────────────────────────────────
+function ReqHeaderTooltip({ req, children }: { req: any; children: React.ReactNode }) {
   const [show, setShow] = useState(false);
   const [pos, setPos] = useState({ x: 0, y: 0 });
 
   return (
     <span
-      className="relative inline-block"
+      className="inline-block cursor-help w-full"
       onMouseEnter={e => {
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-        setPos({ x: rect.left, y: rect.bottom });
+        setPos({ x: rect.left + rect.width / 2, y: rect.top });
         setShow(true);
       }}
       onMouseLeave={() => setShow(false)}
     >
-      <span className="underline decoration-dotted underline-offset-2 cursor-pointer text-gray-900 hover:text-[#E8521A] transition-colors font-medium">
-        {children}
-      </span>
+      {children}
+      {show && req.description && (
+        <div
+          className="fixed z-50 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-xl max-w-xs pointer-events-none"
+          style={{ left: Math.min(Math.max(pos.x - 100, 8), window.innerWidth - 228), top: pos.y - 8, transform: "translateY(-100%)" }}
+        >
+          {req.description}
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900" />
+        </div>
+      )}
+    </span>
+  );
+}
+
+// ── Startup Hover Card ─────────────────────────────────────────────────────
+function StartupHoverCard({ startup, children }: { startup: any; children: React.ReactNode }) {
+  const [show, setShow] = useState(false);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function clearTimer() {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+  }
+
+  function scheduleHide() {
+    clearTimer();
+    hideTimer.current = setTimeout(() => setShow(false), 150);
+  }
+
+  function handleEnterTrigger(e: React.MouseEvent) {
+    clearTimer();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setPos({ x: rect.left, y: rect.bottom });
+    setShow(true);
+  }
+
+  const nameClass = "underline decoration-dotted underline-offset-2 cursor-pointer text-gray-900 hover:text-[#E8521A] transition-colors font-medium";
+
+  return (
+    <span className="relative inline-block">
+      {startup?.websiteUrl ? (
+        <a
+          href={startup.websiteUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={nameClass}
+          onMouseEnter={handleEnterTrigger}
+          onMouseLeave={scheduleHide}
+        >
+          {children}
+        </a>
+      ) : (
+        <span
+          className={nameClass}
+          onMouseEnter={handleEnterTrigger}
+          onMouseLeave={scheduleHide}
+        >
+          {children}
+        </span>
+      )}
       {show && (
         <div
-          className="fixed z-50 bg-white border border-gray-200 rounded-xl shadow-2xl p-4 w-72 pointer-events-none"
+          className="fixed z-50 bg-white border border-gray-200 rounded-xl shadow-2xl p-4 w-72"
           style={{ left: Math.min(pos.x, window.innerWidth - 300), top: pos.y + 4 }}
+          onMouseEnter={clearTimer}
+          onMouseLeave={scheduleHide}
         >
           <div className="flex items-start justify-between mb-2">
             <div>
@@ -132,7 +191,6 @@ function StartupHoverCard({ startup, children }: { startup: any; children: React
 function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }) {
   const { project, requirements } = data;
 
-  // Indispensable: mandatory=true OR name contains "TRL" OR name contains "Madurez"
   const indispensable = requirements.filter(
     (r: any) => r.mandatory || r.name?.toLowerCase().includes("trl") || r.name?.toLowerCase().includes("madurez")
   );
@@ -140,7 +198,6 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
     (r: any) => !r.mandatory && !r.name?.toLowerCase().includes("trl") && !r.name?.toLowerCase().includes("madurez")
   );
 
-  // Ordenar criterios de metodología de mayor a menor peso
   const sortedRequirements = [...requirements].sort((a: any, b: any) => (b.weight ?? 0) - (a.weight ?? 0));
 
   return (
@@ -150,7 +207,7 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
         <div className="max-w-5xl mx-auto px-6 py-14">
           <div className="flex items-center justify-between gap-3 mb-10">
             <img src={LOGO_DARK} alt="VCL studio" className="h-8" />
-            <img src={WTS_LOGO} alt="WTS" className="h-10 object-contain opacity-80" />
+            <img src={BAC_LOGO} alt="BAC Credomatic" className="h-10 object-contain opacity-90" />
           </div>
           <div className="flex items-start justify-between gap-8">
             <div className="flex-1">
@@ -185,7 +242,7 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-12 space-y-12">
-        {/* Stats — solo startups evaluadas y criterios de evaluación */}
+        {/* Stats */}
         <div className="grid grid-cols-2 gap-4">
           {[
             { label: "Startups evaluadas",       value: project.universeSize ?? 10 },
@@ -208,7 +265,7 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
             </div>
             <div>
               <div className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-2">Excluido</div>
-              <div className="text-sm text-gray-700">{project.geoExcluded ?? "Rest of the World"}</div>
+              <div className="text-sm text-gray-700">{project.geoExcluded || "—"}</div>
             </div>
           </div>
         </div>
@@ -252,11 +309,11 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
           </div>
         </div>
 
-        {/* Metodología — criterios ordenados de mayor a menor peso */}
+        {/* Metodología */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
           <h2 className="text-base font-semibold text-gray-900 mb-2">Metodología</h2>
           <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-            Este análisis utiliza una <strong>Weighted Scoring Matrix (WSM)</strong> con {requirements.length} criterios ponderados. Cada startup fue evaluada de forma independiente con puntuaciones del 1 al 10, ponderadas según la importancia relativa de cada criterio.
+            Este análisis utiliza una <strong>Weighted Scoring Matrix (WSM)</strong> con {requirements.length} criterios ponderados. Cada startup fue evaluada de forma independiente con puntuaciones del 0 al 4, ponderadas según la importancia relativa de cada criterio.
           </p>
           <div className="grid grid-cols-3 gap-3">
             {sortedRequirements.map((r: any) => (
@@ -306,24 +363,24 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
         <div className="max-w-6xl mx-auto px-6 py-10">
           <div className="flex items-center justify-between gap-3 mb-6">
             <img src={LOGO_DARK} alt="VCL studio" className="h-7" />
-            <img src={WTS_LOGO} alt="WTS" className="h-9 object-contain opacity-80" />
+            <img src={BAC_LOGO} alt="BAC Credomatic" className="h-9 object-contain opacity-90" />
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
             Rankings Finales
           </div>
           <h2 className="text-2xl font-bold text-gray-900">Selección Estratégica y Técnica</h2>
           <p className="text-gray-500 text-sm mt-2">
-            Ranking final por Weighted Scoring Matrix (WSM). Pasa el cursor sobre el nombre de una startup para ver su perfil.
+            Ranking final por Weighted Scoring Matrix (WSM). Pasa el cursor sobre el nombre de una startup para ver su perfil, o haz clic para visitar su sitio web.
           </p>
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-10 space-y-10">
 
-        {/* Strategic Clusters — AL TOPE */}
+        {/* Clusteres Estratégicos */}
         {clusters.length > 0 && (
           <div>
-            <h3 className="text-base font-semibold text-gray-900 mb-1">Strategic Clusters</h3>
+            <h3 className="text-base font-semibold text-gray-900 mb-1">Clusteres Estratégicos</h3>
             <p className="text-sm text-gray-500 mb-4">Agrupación estratégica de las startups evaluadas según su perfil tecnológico y de mercado.</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {clusters.map((c: any) => {
@@ -424,7 +481,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
           </div>
         </div>
 
-        {/* Recomendaciones del analista — sin badges de recomendado/no recomendado */}
+        {/* Recomendaciones del analista */}
         {enriched.some((r: any) => r.rec?.narrative) && (
           <div>
             <h3 className="text-lg font-bold text-gray-900 mb-1">Recomendaciones del Analista</h3>
@@ -481,7 +538,6 @@ function PageMatrix({ data }: { data: any }) {
       return ra - rb;
     });
 
-  // Ordenar criterios de mayor a menor peso
   const sortedRequirements = [...requirements].sort((a: any, b: any) => (b.weight ?? 0) - (a.weight ?? 0));
 
   const scoreMap: Record<number, Record<number, any>> = {};
@@ -496,27 +552,27 @@ function PageMatrix({ data }: { data: any }) {
         <div className="max-w-7xl mx-auto px-6 py-10">
           <div className="flex items-center justify-between gap-3 mb-6">
             <img src={LOGO_DARK} alt="VCL studio" className="h-7" />
-            <img src={WTS_LOGO} alt="WTS" className="h-9 object-contain opacity-80" />
+            <img src={BAC_LOGO} alt="BAC Credomatic" className="h-9 object-contain opacity-90" />
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
             Evaluación Detallada
           </div>
           <h2 className="text-2xl font-bold text-gray-900">Matriz de Evaluación</h2>
           <p className="text-gray-500 text-sm mt-2">
-            Puntuaciones individuales por criterio. Pasa el cursor sobre cada celda para ver el razonamiento del analista.
+            Puntuaciones individuales por criterio (escala 0–4). Pasa el cursor sobre el nombre de un criterio para ver su descripción, o sobre una puntuación para ver el razonamiento del analista.
           </p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-10">
-        {/* Leyenda con nivel 0 */}
+        {/* Leyenda escala 0-4 */}
         <div className="flex flex-wrap gap-3 mb-6 text-xs">
           {[
-            { label: "9–10 Excelente", bg: "bg-emerald-100", text: "text-emerald-900" },
-            { label: "7–8 Bueno",      bg: "bg-blue-50",     text: "text-blue-900"   },
-            { label: "5–6 Aceptable",  bg: "bg-amber-50",    text: "text-amber-900"  },
-            { label: "1–4 Bajo",       bg: "bg-red-50",      text: "text-red-900"    },
-            { label: "0 Nulo",         bg: "bg-gray-200",    text: "text-gray-500"   },
+            { label: "4 — Excelente", bg: "bg-emerald-100", text: "text-emerald-900" },
+            { label: "3 — Bueno",     bg: "bg-blue-50",     text: "text-blue-900"   },
+            { label: "2 — Regular",   bg: "bg-amber-50",    text: "text-amber-900"  },
+            { label: "1 — Débil",     bg: "bg-red-50",      text: "text-red-900"    },
+            { label: "0 — Ausente",   bg: "bg-gray-200",    text: "text-gray-500"   },
           ].map(l => (
             <span key={l.label} className={`${l.bg} ${l.text} px-3 py-1 rounded-full font-medium`}>{l.label}</span>
           ))}
@@ -531,8 +587,10 @@ function PageMatrix({ data }: { data: any }) {
                   <th className="text-left px-4 py-3 font-semibold sticky left-0 bg-gray-900 z-10 min-w-[140px]">Startup</th>
                   {sortedRequirements.map((r: any) => (
                     <th key={r.id} className="px-2 py-3 font-semibold text-center min-w-[110px]">
-                      <div className="whitespace-normal leading-tight text-center">{r.name}</div>
-                      <div className="text-gray-400 font-normal mt-0.5">{(r.weight * 100).toFixed(0)}%</div>
+                      <ReqHeaderTooltip req={r}>
+                        <div className="whitespace-normal leading-tight text-center">{r.name}</div>
+                        <div className="text-gray-400 font-normal mt-0.5">{(r.weight * 100).toFixed(0)}%</div>
+                      </ReqHeaderTooltip>
                     </th>
                   ))}
                   <th className="px-3 py-3 font-semibold text-center bg-[#E8521A] min-w-[80px]">WSM Total</th>
@@ -558,12 +616,14 @@ function PageMatrix({ data }: { data: any }) {
                       </td>
                       {sortedRequirements.map((r: any) => {
                         const entry = scoreMap[startup.id]?.[r.id];
-                        const score = entry?.humanScore ?? entry?.aiScore;
+                        const rawScore = entry?.humanScore ?? entry?.aiScore;
+                        // Convert stored 0-10 scale back to 0-4 for display
+                        const displayScore = rawScore != null ? Math.round(rawScore / 2.5) : null;
                         return (
                           <td key={r.id} className="px-1 py-1 text-center">
                             <RationaleTooltip rationale={entry?.rationale}>
-                              <span className={`inline-flex items-center justify-center w-full h-8 rounded text-sm font-semibold ${scoreColor(score)}`}>
-                                {score != null ? score : "—"}
+                              <span className={`inline-flex items-center justify-center w-full h-8 rounded text-sm font-semibold ${scoreColor(displayScore)}`}>
+                                {displayScore != null ? displayScore : "—"}
                               </span>
                             </RationaleTooltip>
                           </td>
@@ -592,10 +652,8 @@ function PageMatrix({ data }: { data: any }) {
 
 // ── Main component ─────────────────────────────────────────────────────────
 export default function ClientPortalV2() {
-  // Supports both /:clientSlug/:problemId (new) and /client/v2/:projectId (legacy)
   const params = useParams<{ projectId?: string; clientSlug?: string; problemId?: string }>();
 
-  // Read auth data stored by the unified /acceso page
   const sessionKey = params.clientSlug && params.problemId
     ? `vcl_report_${params.clientSlug}_${params.problemId}`
     : params.projectId
@@ -613,19 +671,16 @@ export default function ClientPortalV2() {
   const [submitted, setSubmitted] = useState<string>(sessionData?.passkey ?? "");
   const [page, setPage] = useState<"context" | "rankings" | "matrix">("context");
 
-  // Scroll al tope al cambiar de página
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [page]);
 
-  // Slug route: send passkey stored by /acceso so the server can verify it
   const slugPasskey = sessionData?.passkey ?? "";
   const slugQuery = trpc.report.getBySlug.useQuery(
     { clientSlug: params.clientSlug ?? "", problemId: params.problemId ?? "", passkey: slugPasskey },
     { enabled: isSlugRoute && slugPasskey.length > 0, retry: false }
   );
 
-  // Legacy route: load by projectId + passkey
   const passkeyQuery = trpc.report.getByPasskey.useQuery(
     { projectId, passkey: submitted },
     { enabled: !isSlugRoute && submitted.length > 0 && projectId > 0, retry: false }
@@ -638,7 +693,6 @@ export default function ClientPortalV2() {
     setSubmitted(passkey.trim());
   };
 
-  // Slug route without a stored session — user needs to authenticate first
   if (isSlugRoute && !slugPasskey) {
     return (
       <div className="h-screen bg-[#FDF6EE] flex flex-col items-center justify-center px-4">
@@ -649,7 +703,6 @@ export default function ClientPortalV2() {
     );
   }
 
-  // Pantalla de acceso — solo para rutas legacy (no slug)
   if (!isSlugRoute && (!submitted || error)) {
     return (
       <div className="h-screen w-full bg-[#FDF6EE] flex flex-col items-center justify-center px-4">
@@ -750,7 +803,6 @@ export default function ClientPortalV2() {
         </div>
       </div>
 
-      {/* Contenido de página */}
       {page === "context"  && <PageContext  data={data} onNextPage={() => setPage("rankings")} />}
       {page === "rankings" && <PageRankings data={data} onNext={() => setPage("matrix")} />}
       {page === "matrix"   && <PageMatrix   data={data} />}
