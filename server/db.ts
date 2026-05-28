@@ -288,7 +288,7 @@ export async function getWsmScores(projectId: number) {
   return db.select().from(wsmScores).where(eq(wsmScores.projectId, projectId));
 }
 
-export async function upsertWsmScore(data: { projectId: number; startupId: number; requirementId: number; humanScore?: number | null; aiScore?: number | null; justificationNote?: string | null }) {
+export async function upsertWsmScore(data: { projectId: number; startupId: number; requirementId: number; humanScore?: number | null; aiScore?: number | null; justificationNote?: string | null; rationale?: string | null }) {
   const db = await getDb();
   if (!db) return;
   const existing = await db.select().from(wsmScores).where(and(eq(wsmScores.projectId, data.projectId), eq(wsmScores.startupId, data.startupId), eq(wsmScores.requirementId, data.requirementId))).limit(1);
