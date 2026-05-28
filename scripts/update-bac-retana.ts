@@ -7,7 +7,7 @@
  * Run with: DATABASE_URL=<url> tsx scripts/update-bac-retana.ts
  */
 
-import "dotenv/config";
+// dotenv not needed — DATABASE_URL passed via env directly
 import { and, eq } from "drizzle-orm";
 import { getDb } from "../server/db.js";
 import { projects, requirements, clusters, startups, wsmScores, recommendations } from "../drizzle/schema.js";
