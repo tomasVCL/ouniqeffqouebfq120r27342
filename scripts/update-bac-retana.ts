@@ -11,7 +11,7 @@
 import mysql2 from "mysql2/promise";
 import { and, eq } from "drizzle-orm";
 import { getDb } from "../server/db.js";
-import { projects, requirements, clusters, startups, wsmScores, recommendations } from "../drizzle/schema.js";
+import { projects, requirements, clusters, startups, wsmScores, recommendations, rankings } from "../drizzle/schema.js";
 
 if (!process.env.DATABASE_URL) {
   console.error("❌  DATABASE_URL not set.");
@@ -40,9 +40,9 @@ const projectId = project.id;
 console.log(`✅  Found project ID ${projectId}`);
 
 // ── Update geo ─────────────────────────────────────────────────────────────
-await db.update(projects).set({ geoAllowed: "Todo el mundo", geoExcluded: "Ninguna" })
+await db.update(projects).set({ geoAllowed: "Todo el mundo", geoExcluded: "Ninguna", analystName: "Tomás Valles" })
   .where(eq(projects.id, projectId));
-console.log("✅  Updated geo values");
+console.log("✅  Updated geo values + analystName");
 
 // ── Update requirement descriptions ───────────────────────────────────────
 const reqUpdates: Record<string, string> = {
@@ -130,7 +130,7 @@ const rationaleData: Record<string, string[]> = {
     "Comunicación con el cliente durante la entrega (superficie de marca); branding en la entrega.",
     "Ruteo con IA para última milla a escala enterprise.",
     "Asignación y orquestación de conductores/flota (propios y 3PL) con dispatch inteligente.",
-    "Gestión de excepciones y comunicación al cliente con cumplimiento de SLA en tiempo real; priorización específica de riesgo parcial, cliende puede reagendar entregas.",
+    "Gestión de excepciones y comunicación al cliente con cumplimiento de SLA en tiempo real; priorización específica de riesgo parcial, cliente puede reagendar entregas.",
     "Certificaciónes ISO/IEC 27001 (renovada anualmente) y SOC 2 Tipo 2, más controles HIPAA (Trust Center de Bringg). Nivel adecuado para entorno financiero.",
     "Dashboards y analítica de orquestación con visibilidad en tiempo real.",
     "Integraciónes enterprise (respaldo de Salesforce Ventures) y modelo multi-fuente (propio + 3PL).",
@@ -198,8 +198,8 @@ const rationaleData: Record<string, string[]> = {
   "Mienvío": [
     "Optimiza recursos a nivel multi paquetería, no flota propia. Incluyen la selección automática del mejor carrier por costo, SLA y capacidad. Mencionan 15-25% de ahorro en costos de envío.",
     "Ofrecen entregas de \"Kits de bienvenida\" Por ejemplo, la tarjeta, tokens de seguridad y material promocional",
-    "Ruteo desarrollado por la paquetería/carrier seleccionada, no por Mienvío.",
-    "Asigna a paqueterías, no a formalizadores en campo; no cuenta con balanceo de carga entre repartidores propios.",
+    "Ruteo automático por costo, SLA y zona",
+    "Asigna inteligente de carriers, Reportes de dependencia para migrar entre flotilla propia y terceros.",
     "Se menciona \"Configuramos reglas + SLAs definido como un motor de reglas para OTD, prioridades, restricciones y gestión de excepciones.\" También cuentan con analítica de pre incidencias para prevenir fallas de entrega.",
     "Mienvío menciona experiencia con el manejo de documentos sensibles: Contratos, estados de cuenta y correspondencia regulatoria con cadena de custodia y confirmación de recepción. También se menciona cumplimiento de estándares enterprise, control de acceso y encriptación de datos.",
     "Gestión de incidencias, auditoría continua y reportes de performance.",
@@ -261,7 +261,7 @@ const narrativeData: Record<string, string> = {
   "Moova":
     "Moova es el único especialista del universo evaluado en logística fintech: opera entrega de tarjetas bancarias y POS, exactamente el problema de BAC. Su ruteo inteligente con panel de control en tiempo real es robusto (puntaje 4 en rutas y optimización), aunque no detalla certificaciones bancarias estándar — punto a validar en due diligence. Respaldo de Toyota Tsusho y Wayra (Telefónica) le da estabilidad. Se recomienda fuertemente como piloto vertical: ningún otro proveedor tiene experiencia 1:1 con entrega de plásticos bancarios en LATAM.",
   "Mienvío":
-    "Mienvío opera un Control Tower multi-paquetería con 30+ paqueterías y 40,000+ códigos postales México, con experiencia documentada en entrega de contratos, estados de cuenta y certificados — análogo al caso de BAC. Su motor de reglas configurable cubre SLAs, prioridades y restricciones de entrega, y su capacidad de integrar convenios existentes facilita el onboarding. Sin motor propio de ruteo (depende del carrier) y sin asignación a formalizadores en campo. Se recomienda como orquestador documental si BAC prefiere tercerizar la última milla.",
+    "Mienvío opera un Control Tower multi-paquetería con 30+ paqueterías y 40,000+ códigos postales, con cobertura existente en Centroamérica y experiencia documentada en entrega de contratos, estados de cuenta y certificados — análogo al caso de BAC. Su motor de reglas configurable cubre SLAs, prioridades y restricciones de entrega, y su capacidad de integrar convenios existentes facilita el onboarding. Ruteo automático por costo, SLA y zona, es un buen fit para BAC si se trata especialmente de tarjetas.",
   "Routific":
     "Routific destaca por su API de optimización de rutas líder en el mercado, elegida por integradores de software por su facilidad de embebido. Reduce 30% km, 25% combustible y 50% tiempo de planificación, con validación de direcciones y prueba de entrega con foto/firma. Su debilidad principal es la profundidad en cumplimiento y trazas de auditoría de largo plazo, sin certificaciones específicas para entorno bancario — un riesgo a evaluar. Se recomienda como motor de ruteo embebido en una plataforma BAC existente, no como solución end-to-end.",
   "SmartQuick":
@@ -283,15 +283,52 @@ for (const rec of allRecs) {
   }
 }
 
+// ── Update Mienvío scores (new evaluation: 3,3,3,4,4,4,4,4) ──────────────
+const mienvio = allStartups.find(s => s.name === "Mienvío");
+if (mienvio) {
+  const newHumanScores = [7.5, 7.5, 7.5, 10, 10, 10, 10, 10]; // 0-4 × 2.5 stored as 0-10
+  const mienvioScoreRows = await db.select().from(wsmScores)
+    .where(and(eq(wsmScores.projectId, projectId), eq(wsmScores.startupId, mienvio.id)));
+  for (let i = 0; i < sortedReqs.length && i < newHumanScores.length; i++) {
+    const row = mienvioScoreRows.find(sc => sc.requirementId === sortedReqs[i].id);
+    if (row) {
+      await db.update(wsmScores).set({ humanScore: newHumanScores[i] }).where(eq(wsmScores.id, row.id));
+    }
+  }
+  console.log("✅  Updated Mienvío WSM scores → 9.25");
+
+  // Update Mienvío ranking: rank 5, wsmScore 9.25, tier 2
+  const mienvioRankRows = await db.select().from(rankings)
+    .where(and(eq(rankings.projectId, projectId), eq(rankings.startupId, mienvio.id)));
+  if (mienvioRankRows.length > 0) {
+    await db.update(rankings).set({ rank: 5, wsmScore: 9.25, tier: 2 }).where(eq(rankings.id, mienvioRankRows[0].id));
+    console.log("✅  Mienvío → rank 5 / tier 2");
+  }
+}
+
+// ── DispatchTrack moves to rank 6 ─────────────────────────────────────────
+const dt = allStartups.find(s => s.name === "DispatchTrack");
+if (dt) {
+  const dtRankRows = await db.select().from(rankings)
+    .where(and(eq(rankings.projectId, projectId), eq(rankings.startupId, dt.id)));
+  if (dtRankRows.length > 0) {
+    await db.update(rankings).set({ rank: 6 }).where(eq(rankings.id, dtRankRows[0].id));
+    console.log("✅  DispatchTrack → rank 6");
+  }
+}
+
 console.log(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ✅  Update BAC Retana completado
 
   Geo: Todo el mundo / Ninguna
+  Analista: Tomás Valles
   Requirements: descripciones actualizadas
   Clusters: nombres en español
   Startups: websiteUrls agregados
   WSM rationales: texto exacto del Excel
-  Recommendations: narrativas exactas del Excel
+  Mienvío: scores actualizados → rank 5 / tier 2
+  DispatchTrack: rank 6
+  Recommendations: narrativas actualizadas
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `);
