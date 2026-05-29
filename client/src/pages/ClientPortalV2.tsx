@@ -19,7 +19,7 @@ const STARTUP_LOGOS: Record<string, string> = {
   "Moova":         "https://play-lh.googleusercontent.com/Zn5mVyfgY0zWuH7s5GT2NDXaNIMTYWXPEDKWMPU4yAY27LT5RnJ-Y3OVvDFyPgOKP_s",
   "Mienvío":       "https://pbs.twimg.com/profile_images/1494125766656856065/hE1CLRVg_400x400.jpg",
   "Cubbo":         "https://i.tracxn.com/logo/company/cubbo.com_Logo_bfde9e3b-bce2-40e4-b56b-aadd56d6b608.jpg",
-  "boxful":        "https://images.crunchbase.com/image/upload/c_pad,f_auto,q_auto:eco,dpr_1/4921daf8d89545f9b33c04364e23e919?ik-sanitizeSvg=true",
+  "Ravent":        "/ravent-logo.jpg",
 };
 
 // ── Tier config ────────────────────────────────────────────────────────────
