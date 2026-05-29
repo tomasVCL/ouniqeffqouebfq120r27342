@@ -19,7 +19,7 @@ const STARTUP_LOGOS: Record<string, string> = {
   "Moova":         "https://play-lh.googleusercontent.com/Zn5mVyfgY0zWuH7s5GT2NDXaNIMTYWXPEDKWMPU4yAY27LT5RnJ-Y3OVvDFyPgOKP_s",
   "Mienvío":       "https://pbs.twimg.com/profile_images/1494125766656856065/hE1CLRVg_400x400.jpg",
   "Cubbo":         "https://i.tracxn.com/logo/company/cubbo.com_Logo_bfde9e3b-bce2-40e4-b56b-aadd56d6b608.jpg",
-  "boxful":        "https://images.crunchbase.com/image/upload/c_pad,f_auto,q_auto:eco,dpr_1/4921daf8d89545f9b33c04364e23e919?ik-sanitizeSvg=true",
+  "Ravent":        "/ravent-logo.jpg",
 };
 
 // ── Tier config ────────────────────────────────────────────────────────────
@@ -710,10 +710,9 @@ export default function ClientPortalV2() {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [page]);
 
-  const slugPasskey = sessionData?.passkey ?? "";
   const slugQuery = trpc.report.getBySlug.useQuery(
-    { clientSlug: params.clientSlug ?? "", problemId: params.problemId ?? "", passkey: slugPasskey },
-    { enabled: isSlugRoute && slugPasskey.length > 0, retry: false }
+    { clientSlug: params.clientSlug ?? "", problemId: params.problemId ?? "" },
+    { enabled: isSlugRoute, retry: false }
   );
 
   const passkeyQuery = trpc.report.getByPasskey.useQuery(
@@ -728,15 +727,7 @@ export default function ClientPortalV2() {
     setSubmitted(passkey.trim());
   };
 
-  if (isSlugRoute && !slugPasskey) {
-    return (
-      <div className="h-screen bg-[#FDF6EE] flex flex-col items-center justify-center px-4">
-        <img src={LOGO_DARK} alt="VCL studio" className="h-16 object-contain mx-auto mb-4" />
-        <p className="text-gray-600 text-sm mb-4 text-center">Sesión expirada. Vuelve a ingresar tu clave de acceso.</p>
-        <a href="/acceso" className="text-[#E8521A] font-semibold text-sm underline">Acceder al reporte</a>
-      </div>
-    );
-  }
+
 
   if (!isSlugRoute && (!submitted || error)) {
     return (

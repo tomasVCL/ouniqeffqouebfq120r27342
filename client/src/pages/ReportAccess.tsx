@@ -49,7 +49,7 @@ export default function ReportAccess() {
     >
       {/* Logo */}
       <div className="mb-8 flex flex-col items-center gap-2">
-        <img src={VCL_LOGO_DARK} alt="VCL studio" className="h-16 object-contain" />
+        <img src={VCL_LOGO_DARK} alt="VCL studio" className="h-8 object-contain" />
         <span className="text-sm tracking-widest uppercase" style={{ color: "#6B6B6B", letterSpacing: "0.18em" }}>
           Scouting
         </span>
@@ -79,9 +79,11 @@ export default function ReportAccess() {
             placeholder="Clave de acceso"
             value={passkey}
             onChange={(e) => setPasskey(e.target.value)}
-            className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#E8521A] focus:border-[#E8521A] transition-all"
+            className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:ring-2 transition-all"
+            style={{ focusRingColor: "#E8521A" } as React.CSSProperties}
+            onFocus={(e) => (e.target.style.borderColor = "#E8521A")}
+            onBlur={(e) => (e.target.style.borderColor = "#E5E7EB")}
             autoComplete="current-password"
-            autoFocus
           />
 
           {error && (

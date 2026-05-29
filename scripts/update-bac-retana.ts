@@ -32,10 +32,10 @@ if (!db) { console.error("❌  DB unavailable"); process.exit(1); }
 
 // ── Find project ───────────────────────────────────────────────────────────
 const [project] = await db.select().from(projects)
-  .where(and(eq(projects.clientSlug, "bac"), eq(projects.problemId, "retana-001")))
+  .where(and(eq(projects.clientSlug, "bac"), eq(projects.problemId, "001")))
   .limit(1);
 
-if (!project) { console.error("❌  Project bac/retana-001 not found"); process.exit(1); }
+if (!project) { console.error("❌  Project bac/001 not found"); process.exit(1); }
 const projectId = project.id;
 console.log(`✅  Found project ID ${projectId}`);
 
@@ -90,7 +90,7 @@ const websiteUrls: Record<string, string> = {
   "Moova":         "https://moova.io/",
   "Mienvío":       "https://www.mienvio.mx/",
   "Cubbo":         "https://www.cubbo.com/",
-  "boxful":        "https://goboxful.com/guatemala/",
+  "Ravent":        "https://ravent.com/",
 };
 
 const allStartups = await db.select().from(startups).where(eq(startups.projectId, projectId));
@@ -141,7 +141,7 @@ const rationaleData: Record<string, string[]> = {
     "Plataforma de última milla con optimización de rutas por IA y mejor ruta por camión; geolocalización en tiempo real.",
     "Determina la mejor ruta y carga por camión y gestióna el dispatch (Driver AI); asignación por conductor sólida.",
     "Track & Trace con traza de auditoría que combate falsa responsabilidad, gestión de excepciones desde el dashboard y prueba de entrega geoetiquetada/fechada.",
-    "Posicionamiento enterprise (2,500+ clientes, 180M entregas/año); certificación de seguridad específica no encontrada.",
+    "Enterprise-grade best practices to protect customers. SOC 2 compliant",
     "Dashboard en tiempo real con KPIs personalizables y reportes; conecta con Power BI/Tableau y compara planificado vs. real.",
     "Buena integración con sistemas; Total Visibility unifica datos propios y de 3PL en un solo panel.",
   ],
@@ -215,15 +215,15 @@ const rationaleData: Record<string, string[]> = {
     "Muestra dashboards para el manejo de paquetería y cliente, invoices, rendimiento de carriers y desempeño en tiempos de entrega",
     "Cuentan con integraciónes hacia diferentes plataformas, integración directa a la app del cliente para desplegar el estatus del envío",
   ],
-  "boxful": [
-    "Plataforma que selecciona automáticamente paquetería + fulfillment. Implementan la optimización de recursos a nivel envío, no para flota propia.",
-    "Boxful se especializa en simplificar la logística de envíos y fulfillment. Sin cross selling como area de enfoque.",
-    "Ruteo desarrollado por la paquetería/carrier seleccionada, no por boxful.",
-    "Asigna a paqueterías, no a formalizadores en campo; no cuenta con balanceo de carga entre repartidores propios, si no eso se gestión por parte de la paquetería de manera interna.",
-    "Boxful permite gestiónar envíos con entrega el mismo día. Al tercerizar la logística, no cuenta con métodos de gestión de casos de alto riesgo, ni mdición de SLA's.",
-    "Debido a su naturaleza con enfoque en logística de e-commerce, no se enfocan en manejo de información sensible.",
-    "Plataforma integral de gestión y seguimiento de envíos. El seguimiento del proceso se puede ver directamente en la plataforma sin necesidad de acudir a los portales de los distintos proveedores de logística.",
-    "boxful facilita la conexión de su servicio con sistemas existentes a través de su API. Permitiendo obtener información de envío, cotizaciônes al igual que información general del historial del cliente.",
+  "Ravent": [
+    "RAVENT tiene capacidades sólidas de orchestration logística y fulfillment end-to-end. Su plataforma optimiza asignaciones, automatiza workflows, coordina recursos y mejora la utilización operativa mediante routing inteligente, automatización de tareas y monitoreo centralizado.",
+    "La solución incorpora capacidades de customer communication omnicanal, workflows automatizados y engagement contextual durante el proceso de entrega/formalización. Aunque no es una plataforma comercial especializada, sí podría habilitar oportunidades de cross-selling o comunicación comercial contextualizada.",
+    "RAVENT incluye optimización de rutas, tracking en tiempo real, ETAs dinámicos, geofencing y navegación integrada. La plataforma está diseñada específicamente para coordinar operaciones de campo y entregas con visibilidad en tiempo real.",
+    "La plataforma cuenta con capacidades de task assignment, dispatching y workload orchestration. Permite distribuir órdenes/casos entre distintos operadores o equipos, monitorear productividad y coordinar ejecución operativa de manera balanceada.",
+    "Este es uno de los puntos más fuertes de RAVENT. La solución incorpora SLA monitoring, exception management, customer re-engagement, alertas automáticas, workflows de seguimiento, ETAs dinámicos y automatización de excepciones para mitigar reprocesos y entregas fallidas.",
+    "No cuentan con informacion detallando el manejo de la informacion ni hacen alusion a poseer una certificacion que los respalde",
+    "Tienen dashboards operativos, KPIs, analytics de utilización, live tracking, exception management, workflow builder y monitoreo de productividad. Muy alineado al requerimiento.",
+    "Muy fuerte. APIs centralizadas, multi-provider orchestration e integración omnicanal son prácticamente core del producto.",
   ],
 };
 
@@ -268,8 +268,8 @@ const narrativeData: Record<string, string> = {
     "SmartQuick es un TMS colombiano con cubicaje 3D, RNDC automático y selección predictiva de flota. Su torre de control con monitoreo predictivo reclama -40% en fallas y dispone de OCR para documentos — útil para la formalización en campo que BAC requiere. Cuenta con encriptación AES-256 y TLS 1.3, aunque sin certificaciones bancarias estándar (puntaje 2 en confidencialidad). Se recomienda como opción LATAM de menor costo si el piloto se acota a optimización de rutas y no a manejo profundo de información confidencial.",
   "Cubbo":
     "Cubbo se especializa en fulfillment urbano que convierte espacios en microbodegas logísticas same-day desde CDMX y Bogotá. Tiene experiencia directa con 4 bancos a nivel LATAM (puntaje 3 en confidencialidad), pero su modelo de última milla se ejecuta vía carriers terceros y carece de motor propio de ruteo o geolocalización — un gap importante frente al requisito explícito de capacidad tipo Waze. Se recomienda monitorear su evolución o evaluar para escenarios de almacenamiento de tarjetas pre-entrega, no como solución integral.",
-  "boxful":
-    "boxful muestra el puntaje más bajo del comparativo (38.75): es una solución pre-seed centroamericana enfocada en e-commerce y vendedores sociales, sin experiencia ni capacidades para entorno financiero. Carece de cross-selling, de manejo confidencial de información (puntaje 0) y no tiene motor propio de ruteo. Su valor estaría limitado a entregas en El Salvador a través de lockers inteligentes. No se recomienda para este caso de uso; podría reevaluarse en 12-18 meses si madura su oferta enterprise.",
+  "Ravent":
+    "Ravent ingresa al comparativo en el sexto lugar (WSM 9.25) con desempeño sobresaliente en 7 de 8 criterios. Su plataforma de fulfillment orchestration centraliza pedidos multi-canal, automatiza el flujo order-to-cash y coordina recursos de campo con routing inteligente, ETAs dinámicos, SLA monitoring y exception management automatizado — una cobertura end-to-end directamente alineada al problema de entrega de BAC. Cuenta con task dispatching, workload balancing, geofencing y APIs multi-proveedor que facilitan la integración con el ecosistema tecnológico existente. Su único punto débil es la ausencia de certificaciones de seguridad documentadas (ISO 27001 / SOC 2), elemento crítico para el manejo de información bancaria sensible que deberá validarse en due diligence. Empresa joven (2019, 6 empleados), sin funding externo, lo que implica riesgo adicional de escalabilidad y soporte. Se recomienda considerar para piloto dentro del Cluster Enterprise una vez que presente evidencia de controles de seguridad certificados.",
 };
 
 const allRecs = await db.select().from(recommendations).where(eq(recommendations.projectId, projectId));
@@ -283,37 +283,162 @@ for (const rec of allRecs) {
   }
 }
 
-// ── Update Mienvío scores (new evaluation: 3,3,3,4,4,4,4,4) ──────────────
-const mienvio = allStartups.find(s => s.name === "Mienvío");
-if (mienvio) {
-  const newHumanScores = [7.5, 7.5, 7.5, 10, 10, 10, 10, 10]; // 0-4 × 2.5 stored as 0-10
-  const mienvioScoreRows = await db.select().from(wsmScores)
-    .where(and(eq(wsmScores.projectId, projectId), eq(wsmScores.startupId, mienvio.id)));
-  for (let i = 0; i < sortedReqs.length && i < newHumanScores.length; i++) {
-    const row = mienvioScoreRows.find(sc => sc.requirementId === sortedReqs[i].id);
-    if (row) {
-      await db.update(wsmScores).set({ humanScore: newHumanScores[i] }).where(eq(wsmScores.id, row.id));
-    }
-  }
-  console.log("✅  Updated Mienvío WSM scores → 9.25");
+// ── Update individual WSM scores (score-only changes from new Excel) ───────
+// req2 = Cross-Selling (sortOrder index 1), req6 = Confidencialidad (sortOrder index 5)
+const scoreUpdates: Record<string, { reqIndex: number; humanScore: number }[]> = {
+  "FarEye":       [{ reqIndex: 1, humanScore: 7.5  }],
+  "Wise Systems": [{ reqIndex: 1, humanScore: 2.5  }],
+  "Bringg":       [{ reqIndex: 1, humanScore: 2.5  }],
+  "DispatchTrack":[{ reqIndex: 1, humanScore: 2.5  }, { reqIndex: 5, humanScore: 10 }],
+  "Mienvío":      [{ reqIndex: 1, humanScore: 5    }],
+};
 
-  // Update Mienvío ranking: rank 5, wsmScore 9.25, tier 2
-  const mienvioRankRows = await db.select().from(rankings)
-    .where(and(eq(rankings.projectId, projectId), eq(rankings.startupId, mienvio.id)));
-  if (mienvioRankRows.length > 0) {
-    await db.update(rankings).set({ rank: 5, wsmScore: 9.25, tier: 2 }).where(eq(rankings.id, mienvioRankRows[0].id));
-    console.log("✅  Mienvío → rank 5 / tier 2");
+for (const [startupName, updates] of Object.entries(scoreUpdates)) {
+  const s = allStartups.find(x => x.name === startupName);
+  if (!s) { console.warn(`  ⚠  ${startupName} not found`); continue; }
+  const scoreRows = await db.select().from(wsmScores)
+    .where(and(eq(wsmScores.projectId, projectId), eq(wsmScores.startupId, s.id)));
+  for (const { reqIndex, humanScore } of updates) {
+    const reqId = sortedReqs[reqIndex]?.id;
+    if (!reqId) continue;
+    const row = scoreRows.find(sc => sc.requirementId === reqId);
+    if (row) {
+      await db.update(wsmScores).set({ humanScore }).where(eq(wsmScores.id, row.id));
+      console.log(`  ✓ Score: ${startupName} req[${reqIndex + 1}] → ${humanScore}`);
+    }
   }
 }
 
-// ── DispatchTrack moves to rank 6 ─────────────────────────────────────────
-const dt = allStartups.find(s => s.name === "DispatchTrack");
-if (dt) {
-  const dtRankRows = await db.select().from(rankings)
-    .where(and(eq(rankings.projectId, projectId), eq(rankings.startupId, dt.id)));
-  if (dtRankRows.length > 0) {
-    await db.update(rankings).set({ rank: 6 }).where(eq(rankings.id, dtRankRows[0].id));
-    console.log("✅  DispatchTrack → rank 6");
+// ── Mienvío full scores (req2 now 5 instead of 7.5) ─────────────────────
+const mienvio = allStartups.find(s => s.name === "Mienvío");
+if (mienvio) {
+  // Scores already handled above via scoreUpdates; just confirm
+  console.log("✅  Mienvío req2 score updated → 5 (WSM 9.125)");
+}
+
+// ── Mark boxful as ineligible (removing from analysis) ───────────────────
+const boxful = allStartups.find(s => s.name === "boxful");
+if (boxful) {
+  await db.update(startups).set({ eligible: false, excludedReason: "Reemplazado por Ravent en la evaluación final" } as any)
+    .where(eq(startups.id, boxful.id));
+  console.log("✅  boxful → ineligible (excluido del análisis)");
+}
+
+// ── Insert Ravent startup (skip if already exists) ────────────────────────
+let ravent = allStartups.find(s => s.name === "Ravent");
+if (!ravent) {
+  const enterpriseCluster = allClusters.find(
+    c => c.name === "Plataformas Enterprise de Última Milla" || c.name === "Enterprise Full-Service Platforms"
+  );
+  const [inserted] = await db.insert(startups).values({
+    projectId,
+    name: "Ravent",
+    description: "Plataforma para gestión de cumplimiento de servicios (fulfillment), órdenes y transporte. Centraliza pedidos de múltiples canales y orquesta el fulfillment entre equipos y ubicaciones. Automatiza el proceso order-to-cash.",
+    hqCity: "Miguel Hidalgo, Ciudad de México",
+    hqCountry: "México",
+    foundedYear: 2019,
+    fundingAmount: "N/A",
+    employeeRange: "6",
+    eligible: true,
+    websiteUrl: "https://ravent.com/",
+    clusterId: enterpriseCluster?.id ?? null,
+    sortOrder: 6,
+  } as any);
+  // Fetch the inserted startup
+  const freshStartups = await db.select().from(startups).where(eq(startups.projectId, projectId));
+  ravent = freshStartups.find(s => s.name === "Ravent")!;
+  console.log(`✅  Ravent startup inserted (id ${ravent.id})`);
+} else {
+  console.log(`✅  Ravent already exists (id ${ravent.id}), skipping insert`);
+}
+
+// ── Insert Ravent WSM scores ───────────────────────────────────────────────
+const raventScores = [10, 10, 10, 10, 10, 2.5, 10, 10]; // 0-4 × 2.5 stored as 0-10
+const raventRationales = [
+  "RAVENT tiene capacidades sólidas de orchestration logística y fulfillment end-to-end. Su plataforma optimiza asignaciones, automatiza workflows, coordina recursos y mejora la utilización operativa mediante routing inteligente, automatización de tareas y monitoreo centralizado.",
+  "La solución incorpora capacidades de customer communication omnicanal, workflows automatizados y engagement contextual durante el proceso de entrega/formalización. Aunque no es una plataforma comercial especializada, sí podría habilitar oportunidades de cross-selling o comunicación comercial contextualizada.",
+  "RAVENT incluye optimización de rutas, tracking en tiempo real, ETAs dinámicos, geofencing y navegación integrada. La plataforma está diseñada específicamente para coordinar operaciones de campo y entregas con visibilidad en tiempo real.",
+  "La plataforma cuenta con capacidades de task assignment, dispatching y workload orchestration. Permite distribuir órdenes/casos entre distintos operadores o equipos, monitorear productividad y coordinar ejecución operativa de manera balanceada.",
+  "Este es uno de los puntos más fuertes de RAVENT. La solución incorpora SLA monitoring, exception management, customer re-engagement, alertas automáticas, workflows de seguimiento, ETAs dinámicos y automatización de excepciones para mitigar reprocesos y entregas fallidas.",
+  "No cuentan con informacion detallando el manejo de la informacion ni hacen alusion a poseer una certificacion que los respalde",
+  "Tienen dashboards operativos, KPIs, analytics de utilización, live tracking, exception management, workflow builder y monitoreo de productividad. Muy alineado al requerimiento.",
+  "Muy fuerte. APIs centralizadas, multi-provider orchestration e integración omnicanal son prácticamente core del producto.",
+];
+
+const existingRaventScores = await db.select().from(wsmScores)
+  .where(and(eq(wsmScores.projectId, projectId), eq(wsmScores.startupId, ravent.id)));
+
+for (let i = 0; i < sortedReqs.length && i < raventScores.length; i++) {
+  const reqId = sortedReqs[i].id;
+  const existing = existingRaventScores.find(sc => sc.requirementId === reqId);
+  if (existing) {
+    await db.update(wsmScores).set({ humanScore: raventScores[i], rationale: raventRationales[i] })
+      .where(eq(wsmScores.id, existing.id));
+  } else {
+    await db.insert(wsmScores).values({
+      projectId,
+      startupId: ravent.id,
+      requirementId: reqId,
+      humanScore: raventScores[i],
+      rationale: raventRationales[i],
+    });
+  }
+}
+console.log("✅  Ravent WSM scores & rationales upserted");
+
+// ── Insert/update Ravent recommendation ──────────────────────────────────
+const allRecs2 = await db.select().from(recommendations).where(eq(recommendations.projectId, projectId));
+const raventRec = allRecs2.find(r => r.startupId === ravent!.id);
+const raventNarrative = "Ravent ingresa al comparativo en el sexto lugar (WSM 9.25) con desempeño sobresaliente en 7 de 8 criterios. Su plataforma de fulfillment orchestration centraliza pedidos multi-canal, automatiza el flujo order-to-cash y coordina recursos de campo con routing inteligente, ETAs dinámicos, SLA monitoring y exception management automatizado — una cobertura end-to-end directamente alineada al problema de entrega de BAC. Cuenta con task dispatching, workload balancing, geofencing y APIs multi-proveedor que facilitan la integración con el ecosistema tecnológico existente. Su único punto débil es la ausencia de certificaciones de seguridad documentadas (ISO 27001 / SOC 2), elemento crítico para el manejo de información bancaria sensible que deberá validarse en due diligence. Empresa joven (2019, 6 empleados), sin funding externo, lo que implica riesgo adicional de escalabilidad y soporte. Se recomienda considerar para piloto dentro del Cluster Enterprise una vez que presente evidencia de controles de seguridad certificados.";
+if (raventRec) {
+  await db.update(recommendations).set({ narrative: raventNarrative, decision: "recommended" })
+    .where(eq(recommendations.id, raventRec.id));
+} else {
+  await db.insert(recommendations).values({
+    projectId,
+    startupId: ravent.id,
+    narrative: raventNarrative,
+    decision: "recommended",
+  });
+}
+console.log("✅  Ravent recommendation upserted");
+
+// ── Update all rankings (new scores after Excel revision) ─────────────────
+const newRankings: { name: string; rank: number; wsmScore: number; tier: number }[] = [
+  { name: "FarEye",         rank: 1,  wsmScore: 9.875, tier: 1 },
+  { name: "DispatchTrack",  rank: 2,  wsmScore: 9.625, tier: 2 },
+  { name: "SimpliRoute",    rank: 3,  wsmScore: 9.5,   tier: 2 },
+  { name: "Wise Systems",   rank: 4,  wsmScore: 9.375, tier: 2 },
+  { name: "Bringg",         rank: 5,  wsmScore: 9.375, tier: 2 },
+  { name: "Ravent",         rank: 6,  wsmScore: 9.25,  tier: 2 },
+  { name: "Mienvío",        rank: 7,  wsmScore: 9.125, tier: 2 },
+  { name: "OneRail",        rank: 8,  wsmScore: 8.625, tier: 2 },
+  { name: "Moova",          rank: 9,  wsmScore: 8.125, tier: 3 },
+  { name: "Routific",       rank: 10, wsmScore: 7.75,  tier: 3 },
+  { name: "SmartQuick",     rank: 11, wsmScore: 7.625, tier: 3 },
+  { name: "Cubbo",          rank: 12, wsmScore: 6.875, tier: 4 },
+];
+
+const freshStartupsAll = await db.select().from(startups).where(eq(startups.projectId, projectId));
+const allRankings = await db.select().from(rankings).where(eq(rankings.projectId, projectId));
+
+for (const entry of newRankings) {
+  const s = freshStartupsAll.find(x => x.name === entry.name);
+  if (!s) { console.warn(`  ⚠  ${entry.name} not found for ranking`); continue; }
+  const existing = allRankings.find(r => r.startupId === s.id);
+  if (existing) {
+    await db.update(rankings).set({ rank: entry.rank, wsmScore: entry.wsmScore, tier: entry.tier })
+      .where(eq(rankings.id, existing.id));
+    console.log(`  ✓ Rank: ${entry.name} → #${entry.rank} (WSM ${entry.wsmScore})`);
+  } else {
+    await db.insert(rankings).values({
+      projectId,
+      startupId: s.id,
+      rank: entry.rank,
+      wsmScore: entry.wsmScore,
+      tier: entry.tier,
+    });
+    console.log(`  ✓ Rank (insert): ${entry.name} → #${entry.rank} (WSM ${entry.wsmScore})`);
   }
 }
 
@@ -325,10 +450,12 @@ console.log(`
   Analista: Tomás Valles
   Requirements: descripciones actualizadas
   Clusters: nombres en español
-  Startups: websiteUrls agregados
+  Startups: websiteUrls actualizados
   WSM rationales: texto exacto del Excel
-  Mienvío: scores actualizados → rank 5 / tier 2
-  DispatchTrack: rank 6
-  Recommendations: narrativas actualizadas
+  Scores req2: FarEye/WS/Bringg/DispatchTrack/Mienvío actualizados
+  DispatchTrack req6: score 10 + SOC 2 rationale
+  boxful: marcado como ineligible
+  Ravent: startup insertada, scores, ranking, recomendación
+  Rankings: 12 startups actualizados
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `);

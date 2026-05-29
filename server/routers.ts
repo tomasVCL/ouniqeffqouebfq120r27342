@@ -77,18 +77,11 @@ export const appRouter = router({
 
     // Load report by clientSlug + problemId (new slug route /:clientSlug/:problemId)
     getBySlug: publicProcedure
-      .input(z.object({ clientSlug: z.string(), problemId: z.string(), passkey: z.string() }))
+      .input(z.object({ clientSlug: z.string(), problemId: z.string() }))
       .query(async ({ input }) => {
         const project = await getProjectBySlug(input.clientSlug, input.problemId);
         if (!project || !project.published) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Reporte no encontrado" });
-        }
-        if (!project.passkeyHash) {
-          throw new TRPCError({ code: "UNAUTHORIZED", message: "Sin clave de acceso configurada" });
-        }
-        const valid = await bcrypt.compare(input.passkey, project.passkeyHash);
-        if (!valid) {
-          throw new TRPCError({ code: "UNAUTHORIZED", message: "Clave de acceso inválida" });
         }
 
         return buildReportPayload(project, project.id);

@@ -150,13 +150,7 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-// Skip Manus-specific plugins when building for Vercel
-const isVercel = !!process.env.VERCEL;
-const plugins = [
-  react(),
-  tailwindcss(),
-  ...(!isVercel ? [jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()] : []),
-];
+const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
 
 export default defineConfig({
   plugins,

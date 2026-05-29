@@ -33,7 +33,7 @@
 - [x] Step J: Rankings & Tiers (auto-calculated, tier badges)
 - [x] Step K: Recommendations (AI draft per startup, inline edit, decision + reason)
 - [x] Step L: Publish (publish/unpublish, publish history log)
-- [x] Auto-save on every field change (N/A — portal de analistas eliminado)
+- [ ] Auto-save on every field change (debounced)
 
 ## Frontend — Client Portal (PRIORITY SPRINT)
 - [x] Client passkey entry page (main public URL)
@@ -46,9 +46,9 @@
 
 ## Quality
 - [x] VCL Studio brand assets applied throughout (logo-dark, logo-white, isotipo)
-- [x] Responsive: desktop + tablet + mobile (client report)
-- [x] Accessibility: tier color cells include text label (not color alone)
-- [x] Vitest tests for all routers (N/A — routers simplificados a solo report.*)
+- [ ] Responsive: desktop + tablet + mobile (client report)
+- [ ] Accessibility: tier color cells include text label (not color alone)
+- [ ] Vitest tests for all routers
 - [x] Zero TypeScript errors
 
 ## Client Portal V2 — Project 5 (VCL Discover Phase v2)
@@ -109,9 +109,3 @@
 - [x] CTA Página 1 cambiado a "Ver Rankings" (sin "Finales")
 - [x] Columna "Empresa" → "Startup" en la tabla de rankings
 - [x] Sección de rankings: "Sección C — Rankings Finales" → "Rankings Finales"
-
-## Correcciones urgentes (Mayo 28, 2026)
-- [ ] URL: cambiar /bac/retana-001 → /bac/001 (actualizar DB problem_id de BAC)
-- [ ] Favicon: verificar que el isotipo VCL aparezca en la viñeta del navegador
-- [ ] Título de página: cambiar "VCL studio Scouting" → "VCL studio scout"
-- [ ] Logo en login: agrandar el logo de VCL en la pantalla de acceso ReportAccess.tsx

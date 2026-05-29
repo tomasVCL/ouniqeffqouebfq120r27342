@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, analystCredentials, projects, requirements, formulas, formulaVariables, clusters, startups, capabilities, wsmScores, pughScores, capfitScores, rankings, recommendations, publishLog } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -150,14 +150,12 @@ export async function getFormulas(projectId: number) {
   const db = await getDb();
   if (!db) return [];
   const fList = await db.select().from(formulas).where(eq(formulas.projectId, projectId)).orderBy(asc(formulas.sortOrder));
-  if (fList.length === 0) return [];
-  const allVars = await db.select().from(formulaVariables).where(inArray(formulaVariables.formulaId, fList.map(f => f.id)));
-  const varsByFormula = new Map<number, typeof allVars>();
-  for (const v of allVars) {
-    if (!varsByFormula.has(v.formulaId)) varsByFormula.set(v.formulaId, []);
-    varsByFormula.get(v.formulaId)!.push(v);
+  const result = [];
+  for (const f of fList) {
+    const vars = await db.select().from(formulaVariables).where(eq(formulaVariables.formulaId, f.id));
+    result.push({ ...f, variables: vars });
   }
-  return fList.map(f => ({ ...f, variables: varsByFormula.get(f.id) ?? [] }));
+  return result;
 }
 
 export async function upsertFormula(data: typeof formulas.$inferInsert) {
@@ -288,7 +286,7 @@ export async function getWsmScores(projectId: number) {
   return db.select().from(wsmScores).where(eq(wsmScores.projectId, projectId));
 }
 
-export async function upsertWsmScore(data: { projectId: number; startupId: number; requirementId: number; humanScore?: number | null; aiScore?: number | null; justificationNote?: string | null; rationale?: string | null }) {
+export async function upsertWsmScore(data: { projectId: number; startupId: number; requirementId: number; humanScore?: number | null; aiScore?: number | null; justificationNote?: string | null }) {
   const db = await getDb();
   if (!db) return;
   const existing = await db.select().from(wsmScores).where(and(eq(wsmScores.projectId, data.projectId), eq(wsmScores.startupId, data.startupId), eq(wsmScores.requirementId, data.requirementId))).limit(1);
