@@ -32,10 +32,10 @@ if (!db) { console.error("❌  DB unavailable"); process.exit(1); }
 
 // ── Find project ───────────────────────────────────────────────────────────
 const [project] = await db.select().from(projects)
-  .where(and(eq(projects.clientSlug, "bac"), eq(projects.problemId, "retana-001")))
+  .where(and(eq(projects.clientSlug, "bac"), eq(projects.problemId, "001")))
   .limit(1);
 
-if (!project) { console.error("❌  Project bac/retana-001 not found"); process.exit(1); }
+if (!project) { console.error("❌  Project bac/001 not found"); process.exit(1); }
 const projectId = project.id;
 console.log(`✅  Found project ID ${projectId}`);
 
