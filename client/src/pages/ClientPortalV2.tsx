@@ -498,7 +498,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
                         </span>
                       </td>
                       <td className="px-4 py-3.5 hidden lg:table-cell">
-                        <span className="text-xs text-gray-600 leading-relaxed">{startup?.strategicFit ?? "—"}</span>
+                        <span className="text-xs text-gray-600 leading-relaxed">{startup?.keyDifferentiator ?? "—"}</span>
                       </td>
                     </tr>
                   );
