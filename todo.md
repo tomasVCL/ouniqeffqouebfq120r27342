@@ -33,7 +33,7 @@
 - [x] Step J: Rankings & Tiers (auto-calculated, tier badges)
 - [x] Step K: Recommendations (AI draft per startup, inline edit, decision + reason)
 - [x] Step L: Publish (publish/unpublish, publish history log)
-- [ ] Auto-save on every field change (debounced)
+- [x] Auto-save on every field change (debounced)
 
 ## Frontend — Client Portal (PRIORITY SPRINT)
 - [x] Client passkey entry page (main public URL)
@@ -46,9 +46,9 @@
 
 ## Quality
 - [x] VCL Studio brand assets applied throughout (logo-dark, logo-white, isotipo)
-- [ ] Responsive: desktop + tablet + mobile (client report)
-- [ ] Accessibility: tier color cells include text label (not color alone)
-- [ ] Vitest tests for all routers
+- [x] Responsive: desktop + tablet + mobile (client report)
+- [x] Accessibility: tier color cells include text label (not color alone)
+- [x] Vitest tests for all routers
 - [x] Zero TypeScript errors
 
 ## Client Portal V2 — Project 5 (VCL Discover Phase v2)
