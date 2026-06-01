@@ -2,12 +2,8 @@ import { TRPCError } from "@trpc/server";
 import * as bcrypt from "bcryptjs";
 import { z } from "zod";
 import { publicProcedure, router } from "./_core/trpc";
-import { systemRouter } from "./_core/systemRouter";
-import { COOKIE_NAME } from "@shared/const";
-import { getSessionCookieOptions } from "./_core/cookies";
 import {
   getProjectBySlug,
-  getPublishedProjectByPasskeyHash,
   getClusters,
   getRankings,
   getRecommendations,
@@ -19,19 +15,6 @@ import {
 } from "./db";
 
 export const appRouter = router({
-  system: systemRouter,
-
-  // ─── Manus OAuth (kept for system) ──────────────────────────────────
-  auth: router({
-    me: publicProcedure.query(opts => opts.ctx.user),
-    logout: publicProcedure.mutation(({ ctx }) => {
-      const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      return { success: true } as const;
-    }),
-  }),
-
-  // ─── Client Report (public) ───────────────────────────────────────────
   report: router({
     // Unified passkey login — finds the project by passkey alone, returns slug+problemId for redirect
     resolvePasskey: publicProcedure
@@ -67,7 +50,6 @@ export const appRouter = router({
         if (!valid) {
           throw new TRPCError({ code: "UNAUTHORIZED", message: "Clave de acceso inválida" });
         }
-
         return buildReportPayload(project, input.projectId);
       }),
 
@@ -79,7 +61,6 @@ export const appRouter = router({
         if (!project || !project.published) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Reporte no encontrado" });
         }
-
         return buildReportPayload(project, project.id);
       }),
 
