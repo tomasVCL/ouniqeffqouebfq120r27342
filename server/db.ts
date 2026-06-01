@@ -1,6 +1,6 @@
 import { and, asc, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, analystCredentials, projects, requirements, formulas, formulaVariables, clusters, startups, capabilities, wsmScores, pughScores, capfitScores, rankings, recommendations, publishLog } from "../drizzle/schema";
+import { InsertUser, users, analystCredentials, projects, requirements, clusters, startups, wsmScores, rankings, recommendations, publishLog } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -145,63 +145,6 @@ export async function deleteRequirement(id: number) {
   await db.delete(requirements).where(eq(requirements.id, id));
 }
 
-// ─── Formulas ─────────────────────────────────────────────────────────────
-export async function getFormulas(projectId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  const fList = await db.select().from(formulas).where(eq(formulas.projectId, projectId)).orderBy(asc(formulas.sortOrder));
-  const result = [];
-  for (const f of fList) {
-    const vars = await db.select().from(formulaVariables).where(eq(formulaVariables.formulaId, f.id));
-    result.push({ ...f, variables: vars });
-  }
-  return result;
-}
-
-export async function upsertFormula(data: typeof formulas.$inferInsert) {
-  const db = await getDb();
-  if (!db) return 0;
-  if (data.id) {
-    await db.update(formulas).set(data).where(eq(formulas.id, data.id));
-    return data.id;
-  } else {
-    const [result] = await db.insert(formulas).values(data).$returningId();
-    return result.id;
-  }
-}
-
-export async function deleteFormula(id: number) {
-  const db = await getDb();
-  if (!db) return;
-  await db.delete(formulaVariables).where(eq(formulaVariables.formulaId, id));
-  await db.delete(formulas).where(eq(formulas.id, id));
-}
-
-export async function upsertFormulaVariable(data: typeof formulaVariables.$inferInsert) {
-  const db = await getDb();
-  if (!db) return;
-  if (data.id) {
-    await db.update(formulaVariables).set(data).where(eq(formulaVariables.id, data.id));
-  } else {
-    await db.insert(formulaVariables).values(data);
-  }
-}
-
-export async function deleteFormulaVariable(id: number) {
-  const db = await getDb();
-  if (!db) return;
-  await db.delete(formulaVariables).where(eq(formulaVariables.id, id));
-}
-
-export async function replaceFormulaVariables(formulaId: number, vars: Array<{ name: string; description?: string; unit?: string; defaultValue?: number; value?: number }>) {
-  const db = await getDb();
-  if (!db) return;
-  await db.delete(formulaVariables).where(eq(formulaVariables.formulaId, formulaId));
-  if (vars.length > 0) {
-    await db.insert(formulaVariables).values(vars.map(v => ({ formulaId, name: v.name, description: v.description, unit: v.unit, defaultValue: v.defaultValue ?? v.value ?? 0 })));
-  }
-}
-
 // ─── Clusters ─────────────────────────────────────────────────────────────
 export async function getClusters(projectId: number) {
   const db = await getDb();
@@ -254,31 +197,6 @@ export async function deleteStartup(id: number) {
   await db.delete(startups).where(eq(startups.id, id));
 }
 
-// ─── Capabilities ─────────────────────────────────────────────────────────
-export async function getCapabilities(projectId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  return db.select().from(capabilities).where(eq(capabilities.projectId, projectId)).orderBy(asc(capabilities.sortOrder));
-}
-
-export async function upsertCapability(data: typeof capabilities.$inferInsert) {
-  const db = await getDb();
-  if (!db) return 0;
-  if (data.id) {
-    await db.update(capabilities).set(data).where(eq(capabilities.id, data.id));
-    return data.id;
-  } else {
-    const [result] = await db.insert(capabilities).values(data).$returningId();
-    return result.id;
-  }
-}
-
-export async function deleteCapability(id: number) {
-  const db = await getDb();
-  if (!db) return;
-  await db.delete(capabilities).where(eq(capabilities.id, id));
-}
-
 // ─── WSM Scores ───────────────────────────────────────────────────────────
 export async function getWsmScores(projectId: number) {
   const db = await getDb();
@@ -294,42 +212,6 @@ export async function upsertWsmScore(data: { projectId: number; startupId: numbe
     await db.update(wsmScores).set(data).where(eq(wsmScores.id, existing[0].id));
   } else {
     await db.insert(wsmScores).values(data);
-  }
-}
-
-// ─── Pugh Scores ──────────────────────────────────────────────────────────
-export async function getPughScores(projectId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  return db.select().from(pughScores).where(eq(pughScores.projectId, projectId));
-}
-
-export async function upsertPughScore(data: { projectId: number; startupId: number; requirementId: number; humanScore?: number | null; aiScore?: number | null; justificationNote?: string | null }) {
-  const db = await getDb();
-  if (!db) throw new Error("DB not available");
-  const existing = await db.select().from(pughScores).where(and(eq(pughScores.projectId, data.projectId), eq(pughScores.startupId, data.startupId), eq(pughScores.requirementId, data.requirementId))).limit(1);
-  if (existing.length > 0) {
-    await db.update(pughScores).set(data).where(eq(pughScores.id, existing[0].id));
-  } else {
-    await db.insert(pughScores).values(data);
-  }
-}
-
-// ─── CapFit Scores ────────────────────────────────────────────────────────
-export async function getCapfitScores(projectId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  return db.select().from(capfitScores).where(eq(capfitScores.projectId, projectId));
-}
-
-export async function upsertCapfitScore(data: { projectId: number; startupId: number; capabilityId: number; humanScore?: "High" | "Med" | "Low" | null; aiScore?: "High" | "Med" | "Low" | null; justificationNote?: string | null }) {
-  const db = await getDb();
-  if (!db) throw new Error("DB not available");
-  const existing = await db.select().from(capfitScores).where(and(eq(capfitScores.projectId, data.projectId), eq(capfitScores.startupId, data.startupId), eq(capfitScores.capabilityId, data.capabilityId))).limit(1);
-  if (existing.length > 0) {
-    await db.update(capfitScores).set(data).where(eq(capfitScores.id, existing[0].id));
-  } else {
-    await db.insert(capfitScores).values(data);
   }
 }
 

@@ -9,10 +9,6 @@ import {
   getProjectBySlug,
   getPublishedProjectByPasskeyHash,
   getClusters,
-  getFormulas,
-  getCapabilities,
-  getCapfitScores,
-  getPughScores,
   getRankings,
   getRecommendations,
   getRequirements,
@@ -103,15 +99,11 @@ export const appRouter = router({
 
 // ─── Shared report payload builder ───────────────────────────────────────────
 async function buildReportPayload(project: Awaited<ReturnType<typeof getProject>>, projectId: number) {
-  const [reqs, formulaList, clusterList, startupList, capList, wsmList, pughList, capfitList, rankingList, recList] = await Promise.all([
+  const [reqs, clusterList, startupList, wsmList, rankingList, recList] = await Promise.all([
     getRequirements(projectId),
-    getFormulas(projectId),
     getClusters(projectId),
     getStartups(projectId),
-    getCapabilities(projectId),
     getWsmScores(projectId),
-    getPughScores(projectId),
-    getCapfitScores(projectId),
     getRankings(projectId),
     getRecommendations(projectId),
   ]);
@@ -137,13 +129,9 @@ async function buildReportPayload(project: Awaited<ReturnType<typeof getProject>
       problemId: project!.problemId,
     },
     requirements: reqs,
-    formulas: formulaList,
     clusters: clusterList,
     startups: startupList,
-    capabilities: capList,
     wsmScores: wsmList,
-    pughScores: pughList,
-    capfitScores: capfitList,
     rankings: rankingList,
     recommendations: recList,
   };
