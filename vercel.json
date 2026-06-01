@@ -15,10 +15,6 @@
       "destination": "/api/index"
     },
     {
-      "source": "/manus-storage/:path*",
-      "destination": "/api/index"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

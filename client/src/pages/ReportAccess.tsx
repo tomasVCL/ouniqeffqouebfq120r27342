@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 
-const VCL_LOGO_DARK = "/manus-storage/vcl-logo-dark_5aaa0a93.png";
+const VCL_LOGO_DARK = "/vcl-logo-dark.webp";
 
 export default function ReportAccess() {
   const [passkey, setPasskey] = useState("");

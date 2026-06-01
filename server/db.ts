@@ -1,14 +1,24 @@
 import { and, asc, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
+import mysql from "mysql2";
 import { projects, requirements, clusters, startups, wsmScores, rankings, recommendations, publishLog } from "../drizzle/schema";
-import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
+// Reuse a small connection pool across warm serverless invocations. Cloud MySQL
+// providers (TiDB Cloud, PlanetScale) require TLS; it is enabled automatically
+// for any non-local host so local development keeps working without SSL.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      const url = new URL(process.env.DATABASE_URL);
+      const isLocal = ["localhost", "127.0.0.1", "::1"].includes(url.hostname);
+      const pool = mysql.createPool({
+        uri: process.env.DATABASE_URL,
+        connectionLimit: 5,
+        ...(isLocal ? {} : { ssl: { minVersion: "TLSv1.2", rejectUnauthorized: true } }),
+      });
+      _db = drizzle(pool);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;

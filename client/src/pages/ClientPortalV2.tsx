@@ -2,9 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { useParams } from "wouter";
 import { trpc } from "@/lib/trpc";
 
-const LOGO_WHITE  = "/manus-storage/vcl-logo-white_96a5cf7b.png";
-const LOGO_DARK   = "https://images.squarespace-cdn.com/content/v1/6966cefb09b55d2220261038/fb7ff39c-ecbb-4870-be2e-af36f239bbc2/01-VCLstudio-Logotipo.png?format=1500w";
-const ISOTIPO     = "/manus-storage/vcl-isotipo_24d37529.png";
+const LOGO_DARK   = "/vcl-logo-dark.webp";
+const ISOTIPO     = "/vcl-isotipo.webp";
 const BAC_LOGO    = "https://upload.wikimedia.org/wikipedia/commons/8/8a/Bac_credomatic_logo.png";
 
 const STARTUP_LOGOS: Record<string, string> = {
