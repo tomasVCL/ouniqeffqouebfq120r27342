@@ -113,6 +113,10 @@ function StartupHoverCard({ startup, children }: { startup: any; children: React
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useEffect(() => {
+    return () => { if (hideTimer.current) clearTimeout(hideTimer.current); };
+  }, []);
+
   function clearTimer() {
     if (hideTimer.current) clearTimeout(hideTimer.current);
   }
@@ -652,8 +656,7 @@ function PageMatrix({ data }: { data: any }) {
                       {sortedRequirements.map((r: any) => {
                         const entry = scoreMap[startup.id]?.[r.id];
                         const rawScore = entry?.humanScore ?? entry?.aiScore;
-                        // Convert stored 0-10 scale back to 0-4 for display
-                        const displayScore = rawScore != null ? Math.round(rawScore / 2.5) : null;
+                        const displayScore = rawScore != null ? Math.min(4, Math.max(0, Math.round(rawScore / 2.5))) : null;
                         return (
                           <td key={r.id} className="px-1 py-1 text-center">
                             <RationaleTooltip rationale={entry?.rationale}>

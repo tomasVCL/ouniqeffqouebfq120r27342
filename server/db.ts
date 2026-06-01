@@ -288,7 +288,7 @@ export async function getWsmScores(projectId: number) {
 
 export async function upsertWsmScore(data: { projectId: number; startupId: number; requirementId: number; humanScore?: number | null; aiScore?: number | null; justificationNote?: string | null }) {
   const db = await getDb();
-  if (!db) return;
+  if (!db) throw new Error("DB not available");
   const existing = await db.select().from(wsmScores).where(and(eq(wsmScores.projectId, data.projectId), eq(wsmScores.startupId, data.startupId), eq(wsmScores.requirementId, data.requirementId))).limit(1);
   if (existing.length > 0) {
     await db.update(wsmScores).set(data).where(eq(wsmScores.id, existing[0].id));
@@ -306,7 +306,7 @@ export async function getPughScores(projectId: number) {
 
 export async function upsertPughScore(data: { projectId: number; startupId: number; requirementId: number; humanScore?: number | null; aiScore?: number | null; justificationNote?: string | null }) {
   const db = await getDb();
-  if (!db) return;
+  if (!db) throw new Error("DB not available");
   const existing = await db.select().from(pughScores).where(and(eq(pughScores.projectId, data.projectId), eq(pughScores.startupId, data.startupId), eq(pughScores.requirementId, data.requirementId))).limit(1);
   if (existing.length > 0) {
     await db.update(pughScores).set(data).where(eq(pughScores.id, existing[0].id));
@@ -324,7 +324,7 @@ export async function getCapfitScores(projectId: number) {
 
 export async function upsertCapfitScore(data: { projectId: number; startupId: number; capabilityId: number; humanScore?: "High" | "Med" | "Low" | null; aiScore?: "High" | "Med" | "Low" | null; justificationNote?: string | null }) {
   const db = await getDb();
-  if (!db) return;
+  if (!db) throw new Error("DB not available");
   const existing = await db.select().from(capfitScores).where(and(eq(capfitScores.projectId, data.projectId), eq(capfitScores.startupId, data.startupId), eq(capfitScores.capabilityId, data.capabilityId))).limit(1);
   if (existing.length > 0) {
     await db.update(capfitScores).set(data).where(eq(capfitScores.id, existing[0].id));
@@ -342,7 +342,7 @@ export async function getRankings(projectId: number) {
 
 export async function upsertRanking(data: typeof rankings.$inferInsert) {
   const db = await getDb();
-  if (!db) return;
+  if (!db) throw new Error("DB not available");
   const existing = await db.select().from(rankings).where(and(eq(rankings.projectId, data.projectId!), eq(rankings.startupId, data.startupId!))).limit(1);
   if (existing.length > 0) {
     await db.update(rankings).set(data).where(eq(rankings.id, existing[0].id));
@@ -360,7 +360,7 @@ export async function getRecommendations(projectId: number) {
 
 export async function upsertRecommendation(data: typeof recommendations.$inferInsert) {
   const db = await getDb();
-  if (!db) return;
+  if (!db) throw new Error("DB not available");
   const existing = await db.select().from(recommendations).where(and(eq(recommendations.projectId, data.projectId!), eq(recommendations.startupId, data.startupId!))).limit(1);
   if (existing.length > 0) {
     await db.update(recommendations).set(data).where(eq(recommendations.id, existing[0].id));

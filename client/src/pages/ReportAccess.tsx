@@ -11,15 +11,18 @@ export default function ReportAccess() {
 
   const resolvePasskey = trpc.report.resolvePasskey.useMutation({
     onSuccess: (data) => {
+      // Clear any stale session entries before writing the new one
+      for (let i = sessionStorage.length - 1; i >= 0; i--) {
+        const k = sessionStorage.key(i);
+        if (k?.startsWith("vcl_report_")) sessionStorage.removeItem(k);
+      }
       if (data.clientSlug && data.problemId) {
-        // Store passkey + projectId in sessionStorage so the report page can authenticate
         sessionStorage.setItem(
           `vcl_report_${data.clientSlug}_${data.problemId}`,
           JSON.stringify({ passkey, projectId: data.projectId })
         );
         navigate(`/${data.clientSlug}/${data.problemId}`);
       } else {
-        // Fallback: legacy route without slug
         sessionStorage.setItem(
           `vcl_report_legacy_${data.projectId}`,
           JSON.stringify({ passkey, projectId: data.projectId })
@@ -28,7 +31,11 @@ export default function ReportAccess() {
       }
     },
     onError: (err) => {
-      setError(err.message || "Clave de acceso inválida. Verifica e intenta de nuevo.");
+      if (err.data?.code === "UNAUTHORIZED") {
+        setError("Clave de acceso inválida. Verifica e intenta de nuevo.");
+      } else {
+        setError("Error de conexión. Verifica tu red e intenta de nuevo.");
+      }
     },
   });
 
