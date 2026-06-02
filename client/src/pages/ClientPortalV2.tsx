@@ -4,7 +4,6 @@ import { trpc } from "@/lib/trpc";
 
 const LOGO_DARK   = "/vcl-logo-dark.webp";
 const ISOTIPO     = "/vcl-isotipo.webp";
-const BAC_LOGO    = "https://upload.wikimedia.org/wikipedia/commons/8/8a/Bac_credomatic_logo.png";
 
 const STARTUP_LOGOS: Record<string, string> = {
   "DispatchTrack": "https://www.suiteapp.com/SSP%20Applications/SDN%20SuiteApp.com/suiteappcom/img/items/DispatchTrack_01.png",
@@ -225,7 +224,9 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
         <div className="max-w-5xl mx-auto px-6 py-14">
           <div className="flex items-center justify-between gap-3 mb-10">
             <img src={LOGO_DARK} alt="VCL studio" className="h-14 object-contain" />
-            <img src={BAC_LOGO} alt="BAC Credomatic" className="h-10 object-contain opacity-90" />
+            {project.clientLogoUrl && (
+              <img src={project.clientLogoUrl} alt={project.clientName} className="h-10 object-contain opacity-90" />
+            )}
           </div>
           <div className="flex items-start justify-between gap-8">
             <div className="flex-1">
@@ -381,7 +382,9 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
         <div className="max-w-6xl mx-auto px-6 py-10">
           <div className="flex items-center justify-between gap-3 mb-6">
             <img src={LOGO_DARK} alt="VCL studio" className="h-12 object-contain" />
-            <img src={BAC_LOGO} alt="BAC Credomatic" className="h-9 object-contain opacity-90" />
+            {data.project.clientLogoUrl && (
+              <img src={data.project.clientLogoUrl} alt={data.project.clientName} className="h-9 object-contain opacity-90" />
+            )}
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
             Rankings Finales
@@ -582,7 +585,9 @@ function PageMatrix({ data }: { data: any }) {
         <div className="max-w-7xl mx-auto px-6 py-10">
           <div className="flex items-center justify-between gap-3 mb-6">
             <img src={LOGO_DARK} alt="VCL studio" className="h-12 object-contain" />
-            <img src={BAC_LOGO} alt="BAC Credomatic" className="h-9 object-contain opacity-90" />
+            {data.project.clientLogoUrl && (
+              <img src={data.project.clientLogoUrl} alt={data.project.clientName} className="h-9 object-contain opacity-90" />
+            )}
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
             Evaluación Detallada

@@ -207,13 +207,14 @@ try {
 
   const passkeyHash = await bcrypt.hash(args.passkey, 10);
   const [projRes] = await conn.query(
-    `INSERT INTO projects (title, clientName, industry, geoAllowed, geoExcluded, reportDate, analystName, scopeDescription, universeSize, eligibleCount, passkeyHash, clientSlug, problemId, published, publishedAt)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())`,
+    `INSERT INTO projects (title, clientName, industry, geoAllowed, geoExcluded, reportDate, analystName, scopeDescription, universeSize, eligibleCount, passkeyHash, clientLogoUrl, clientSlug, problemId, published, publishedAt)
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())`,
     [
       project.title, project.clientName, args.industry ?? null,
       args["geo-allowed"] ?? null, args["geo-excluded"] ?? null,
       project.reportDate, project.analystName, project.scopeDescription,
       startupBase.length, startupBase.length, passkeyHash,
+      args["client-logo"] ?? null,
       args.slug, args.problem, 1,
     ]
   );

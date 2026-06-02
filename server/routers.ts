@@ -106,6 +106,7 @@ async function buildReportPayload(project: Awaited<ReturnType<typeof getProject>
       eligibleCount: project!.eligibleCount,
       excludedCount: project!.excludedCount,
       publishedAt: project!.publishedAt,
+      clientLogoUrl: project!.clientLogoUrl,
       clientSlug: project!.clientSlug,
       problemId: project!.problemId,
     },
