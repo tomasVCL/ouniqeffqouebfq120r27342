@@ -48,9 +48,18 @@ su reporte (contexto, rankings y matriz de evaluación). Multi-tenant por
 El panel de analista no existe; los reportes se cargan desde el **Excel template
 VCL Discover** con el importador.
 
-1. Llena el Excel (`VCL_Template_Evaluacion_Vendors.xlsx`): hoja **Configuración**
-   (datos del proyecto, criterios+pesos, clusters, startups+cluster+síntesis),
-   hoja **Perfiles** y hoja **Matriz de Evaluación** (scores 0–4 + justificación).
+1. Llena el Excel (usa **`VCL_Template_Evaluacion_Vendors_v2.xlsx`**): hoja
+   **Configuración** (datos del proyecto, criterios+pesos, **Tipo**
+   Indispensable/Deseable, clusters, startups+cluster+síntesis), hoja
+   **Perfiles**, hoja **Matriz de Evaluación** (scores 0–4 + justificación) y,
+   opcionalmente, hoja **08 · Análisis Cualitativo** (post-evaluación, por
+   startup: Diferenciador Clave y Recomendación del Analista).
+   - El **Tipo** del criterio define el split Indispensable/Deseable del portal.
+   - El **Diferenciador Clave** de la hoja 08 sobrescribe la síntesis; si se deja
+     vacío, se usa la síntesis estratégica de Configuración.
+   - La **Recomendación del Analista** aparece en la sección de recomendaciones
+     del portal.
+   - Pasa `--client-logo "https://..."` para el logo del cliente en el reporte.
 2. Asegúrate de tener `DATABASE_URL` en un `.env` local (ya está en `.gitignore`).
 3. Corre el importador:
 
