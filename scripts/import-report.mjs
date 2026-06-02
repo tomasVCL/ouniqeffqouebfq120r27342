@@ -38,6 +38,10 @@ function sheet(wb, namePart) {
   if (!name) throw new Error(`No se encontró la hoja que contenga "${namePart}"`);
   return xlsx.utils.sheet_to_json(wb.Sheets[name], { header: 1, defval: null });
 }
+function sheetOptional(wb, namePart) {
+  const name = wb.SheetNames.find((n) => n.includes(namePart));
+  return name ? xlsx.utils.sheet_to_json(wb.Sheets[name], { header: 1, defval: null }) : null;
+}
 function findRow(rows, predicate) {
   return rows.findIndex(predicate);
 }
@@ -71,6 +75,7 @@ const wb = xlsx.readFile(args.file);
 const cfg = sheet(wb, "Configuración");
 const perfiles = sheet(wb, "Perfiles");
 const matriz = sheet(wb, "Matriz de Evaluación");
+const cualitativa = sheetOptional(wb, "Cualitativo"); // hoja 08 (opcional)
 
 // A · Datos del proyecto
 const project = {
@@ -100,7 +105,9 @@ for (let i = reqHeader + 1; i < cfg.length; i++) {
     if (requirements.length > 0) break; // fin de la sección
     continue;
   }
-  requirements.push({ name, description: clean(row[3]), weight, sortOrder: requirements.length });
+  // Columna F "Tipo": Indispensable → mandatory; cualquier otra cosa → deseable
+  const mandatory = norm(row[5]) === "indispensable";
+  requirements.push({ name, description: clean(row[3]), weight, mandatory, sortOrder: requirements.length });
 }
 
 // D · Clusters
@@ -121,7 +128,23 @@ for (let i = stHeader + 1; i < cfg.length; i++) {
   const row = cfg[i];
   const name = clean(row[2]);
   if (!name) { if (startupBase.length > 0) break; else continue; }
-  startupBase.push({ name, clusterName: clean(row[3]), keyDifferentiator: clean(row[4]), sortOrder: startupBase.length });
+  // col[4] = síntesis estratégica (fallback del diferenciador clave)
+  startupBase.push({ name, clusterName: clean(row[3]), synthesis: clean(row[4]), sortOrder: startupBase.length });
+}
+
+// 08 · Análisis Cualitativo (opcional) — diferenciador clave + recomendación por startup
+// Columnas: A=Startup, B=Diferenciador Clave, C=Recomendación del Analista
+const qualMap = new Map();
+if (cualitativa) {
+  const qh = findRow(cualitativa, (r) => clean(r[0]) === "Startup");
+  if (qh >= 0) {
+    for (let i = qh + 1; i < cualitativa.length; i++) {
+      const row = cualitativa[i];
+      const name = clean(row[0]);
+      if (!name) continue;
+      qualMap.set(norm(name), { diferenciador: clean(row[1]), recomendacion: clean(row[2]) });
+    }
+  }
 }
 
 // 02 · Perfiles — alineado por orden con startupBase
@@ -235,20 +258,21 @@ try {
   for (const req of requirements) {
     const [r] = await conn.query(
       "INSERT INTO requirements (projectId, name, weight, mandatory, description, sortOrder) VALUES (?,?,?,?,?,?)",
-      [projectId, req.name, req.weight, 0, req.description, req.sortOrder]
+      [projectId, req.name, req.weight, req.mandatory ? 1 : 0, req.description, req.sortOrder]
     );
     reqIdByName.set(norm(req.name), r.insertId);
   }
 
-  // Startups
+  // Startups (diferenciador clave: hoja cualitativa con fallback a la síntesis)
   const startupIdByName = new Map();
   for (const s of startupBase) {
+    const keyDifferentiator = qualMap.get(norm(s.name))?.diferenciador ?? s.synthesis;
     const [r] = await conn.query(
       `INSERT INTO startups (projectId, name, description, hqCity, hqCountry, foundedYear, fundingStage, employeeRange, eligible, keyDifferentiator, clientsRef, investors, fundingAmount, websiteUrl, clusterId, sortOrder)
        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         projectId, s.name, s.description, s.hqCity, s.hqCountry, s.foundedYear,
-        s.fundingStage, s.employeeRange, 1, s.keyDifferentiator, s.clientsRef,
+        s.fundingStage, s.employeeRange, 1, keyDifferentiator, s.clientsRef,
         s.investors, s.fundingAmount, s.websiteUrl,
         s.clusterName ? clusterIdByName.get(norm(s.clusterName)) ?? null : null,
         s.sortOrder,
@@ -278,7 +302,22 @@ try {
     );
   }
 
+  // Recomendaciones del analista (hoja cualitativa)
+  let recCount = 0;
+  for (const s of startupBase) {
+    const narrative = qualMap.get(norm(s.name))?.recomendacion;
+    if (!narrative) continue;
+    const sid = startupIdByName.get(norm(s.name));
+    if (!sid) continue;
+    await conn.query(
+      "INSERT INTO recommendations (projectId, startupId, narrative) VALUES (?,?,?)",
+      [projectId, sid, narrative]
+    );
+    recCount++;
+  }
+
   await conn.commit();
+  console.log(`   Criterios indispensables: ${requirements.filter((r) => r.mandatory).length} · Recomendaciones: ${recCount}`);
   console.log(`\n✅ Reporte importado. projectId=${projectId}`);
   console.log(`   URL: /${args.slug}/${args.problem}`);
   console.log(`   Passkey: ${args.passkey}`);
