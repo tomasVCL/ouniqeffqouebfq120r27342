@@ -29,6 +29,20 @@ su reporte (contexto, rankings y matriz de evaluación). Multi-tenant por
 
 ---
 
+## Reportes en producción
+
+| Reporte | Ruta | Origen |
+|---------|------|--------|
+| Grupo Purdy | `/purdy/001` | Excel (`scripts/import-report.mjs`) |
+| BAC Credomatic — Última Milla | `/bac/retana-001` | seed local `scripts/seed-bac-retana.ts` |
+| WTS Perú v2 — DPP/LCA | `/client/v2/5` | seed local `seed-demo-v2.mjs` |
+
+> Los passkeys NO se versionan (el repo es público). Viven en los seed scripts
+> locales (gitignored) y se comparten con cada cliente por separado.
+> Los seeds de BAC y WTS se recuperaron del historial de git y se adaptaron a
+> TiDB (TLS) y a bcrypt; córrelos con `DATABASE_URL` en el entorno si necesitas
+> recrear esos reportes.
+
 ## Agregar un nuevo reporte (para otro cliente)
 
 El panel de analista no existe; los reportes se cargan desde el **Excel template

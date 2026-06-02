@@ -113,3 +113,8 @@ temp/
 client/public/__manus__/version.json
 .vercel
 api/index.js
+
+# Local-only seed/recovery scripts (contienen passkeys en texto plano — NO subir a repo público)
+scripts/seed-bac-retana.ts
+seed-demo-v2.mjs
+seed-demo.mjs
