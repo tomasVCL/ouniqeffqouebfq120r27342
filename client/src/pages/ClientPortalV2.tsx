@@ -239,7 +239,7 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
           <div className="flex items-center justify-between gap-3 mb-10">
             <img src={LOGO_DARK} alt="VCL studio" className="h-14 object-contain" />
             {project.clientLogoUrl && (
-              <img src={project.clientLogoUrl} alt={project.clientName} className="h-10 object-contain opacity-90" />
+              <img src={project.clientLogoUrl} alt={project.clientName} className="h-14 object-contain" />
             )}
           </div>
           <div className="flex items-start justify-between gap-8">
@@ -397,7 +397,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
           <div className="flex items-center justify-between gap-3 mb-6">
             <img src={LOGO_DARK} alt="VCL studio" className="h-12 object-contain" />
             {data.project.clientLogoUrl && (
-              <img src={data.project.clientLogoUrl} alt={data.project.clientName} className="h-9 object-contain opacity-90" />
+              <img src={data.project.clientLogoUrl} alt={data.project.clientName} className="h-12 object-contain" />
             )}
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
@@ -600,7 +600,7 @@ function PageMatrix({ data }: { data: any }) {
           <div className="flex items-center justify-between gap-3 mb-6">
             <img src={LOGO_DARK} alt="VCL studio" className="h-12 object-contain" />
             {data.project.clientLogoUrl && (
-              <img src={data.project.clientLogoUrl} alt={data.project.clientName} className="h-9 object-contain opacity-90" />
+              <img src={data.project.clientLogoUrl} alt={data.project.clientName} className="h-12 object-contain" />
             )}
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
