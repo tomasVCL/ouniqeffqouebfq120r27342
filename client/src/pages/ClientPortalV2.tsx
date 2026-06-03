@@ -5,7 +5,10 @@ import { trpc } from "@/lib/trpc";
 const LOGO_DARK   = "/vcl-logo-dark.webp";
 const ISOTIPO     = "/vcl-isotipo.webp";
 
+const GF = (d: string) => `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${d}&size=128`;
+
 const STARTUP_LOGOS: Record<string, string> = {
+  // BAC — Última Milla
   "DispatchTrack": "https://www.suiteapp.com/SSP%20Applications/SDN%20SuiteApp.com/suiteappcom/img/items/DispatchTrack_01.png",
   "FarEye":        "https://play-lh.googleusercontent.com/bCIYElymG0CA07n2SaifOctjueJDotL9rRZJOHqCpnnQgSVdimmrbsvCcx3QsnvV4AY",
   "Bringg":        "https://play-lh.googleusercontent.com/tyZZHZuenzCd730izQcp96k_Tg7Mc_SM1H1FARzf-sHUq4Ms4jojPO0-KlI4XL2jS6w=w600-h300-pc0xffffff-pd",
@@ -18,6 +21,17 @@ const STARTUP_LOGOS: Record<string, string> = {
   "Mienvío":       "https://pbs.twimg.com/profile_images/1494125766656856065/hE1CLRVg_400x400.jpg",
   "Cubbo":         "https://i.tracxn.com/logo/company/cubbo.com_Logo_bfde9e3b-bce2-40e4-b56b-aadd56d6b608.jpg",
   "Ravent":        "/ravent-logo.jpg",
+  // ITC — DPP & LCA
+  "EcoVadis":      "https://ecovadis.com/wp-content/uploads/2026/05/revamp-logo.svg",
+  "TrusTrace":     GF("trustrace.com"),
+  "osapiens":      GF("osapiens.com"),
+  "Fairly Made":   GF("fairlymade.com"),
+  "Carbonfact":    "https://www.carbonfact.com/hubfs/carbon_fact_2025/Images/logo.svg",
+  "Kezzler":       "https://kezzler.com/wp-content/uploads/2020/12/kezzler-logo-dark.svg",
+  "Myneral Labs":  "https://cdn.prod.website-files.com/6995839b9012af59defecb0f/6995839c9012af59defeccd7_Company%20logo.svg",
+  "Ecochain":      GF("ecochain.com"),
+  "Circularise":   "https://www.circularise.com/assets/icons/circularise-logo-dark.svg",
+  "Carbon Trail":  GF("carbontrail.net"),
 };
 
 // ── Tier config ────────────────────────────────────────────────────────────
