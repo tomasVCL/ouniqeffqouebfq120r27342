@@ -5,9 +5,14 @@ import { trpc } from "@/lib/trpc";
 const LOGO_WHITE  = "/manus-storage/vcl-logo-white_96a5cf7b.png";
 const LOGO_DARK   = "https://images.squarespace-cdn.com/content/v1/6966cefb09b55d2220261038/fb7ff39c-ecbb-4870-be2e-af36f239bbc2/01-VCLstudio-Logotipo.png?format=1500w";
 const ISOTIPO     = "/manus-storage/vcl-isotipo_24d37529.png";
-const BAC_LOGO    = "https://upload.wikimedia.org/wikipedia/commons/8/8a/Bac_credomatic_logo.png";
+// ── Client logos (keyed by clientSlug) ────────────────────────────────────
+const CLIENT_LOGOS: Record<string, { url: string; alt: string; className: string }> = {
+  "bac":   { url: "https://upload.wikimedia.org/wikipedia/commons/8/8a/Bac_credomatic_logo.png", alt: "BAC Credomatic", className: "h-10 object-contain opacity-90" },
+  "purdy": { url: "https://logo.clearbit.com/grupopurdy.com", alt: "Grupo Purdy", className: "h-10 object-contain opacity-90" },
+};
 
 const STARTUP_LOGOS: Record<string, string> = {
+  // BAC Retana startups
   "DispatchTrack": "https://www.suiteapp.com/SSP%20Applications/SDN%20SuiteApp.com/suiteappcom/img/items/DispatchTrack_01.png",
   "FarEye":        "https://play-lh.googleusercontent.com/bCIYElymG0CA07n2SaifOctjueJDotL9rRZJOHqCpnnQgSVdimmrbsvCcx3QsnvV4AY",
   "Bringg":        "https://play-lh.googleusercontent.com/tyZZHZuenzCd730izQcp96k_Tg7Mc_SM1H1FARzf-sHUq4Ms4jojPO0-KlI4XL2jS6w=w600-h300-pc0xffffff-pd",
@@ -20,6 +25,19 @@ const STARTUP_LOGOS: Record<string, string> = {
   "Mienvío":       "https://pbs.twimg.com/profile_images/1494125766656856065/hE1CLRVg_400x400.jpg",
   "Cubbo":         "https://i.tracxn.com/logo/company/cubbo.com_Logo_bfde9e3b-bce2-40e4-b56b-aadd56d6b608.jpg",
   "Ravent":        "/ravent-logo.jpg",
+  // Grupo Purdy startups
+  "Open Loyalty":  "https://logo.clearbit.com/openloyalty.io",
+  "EasyRewardz":   "https://logo.clearbit.com/easyrewardz.com",
+  "Antavo":        "https://logo.clearbit.com/antavo.com",
+  "Orbee":         "https://logo.clearbit.com/orbee.com",
+  "Impel AI":      "https://logo.clearbit.com/impel.ai",
+  "myKaarma":      "https://logo.clearbit.com/mykaarma.com",
+  "Smartcar":      "https://logo.clearbit.com/smartcar.com",
+  "Mojio":         "https://logo.clearbit.com/moj.io",
+  "Sibros":        "https://logo.clearbit.com/sibros.tech",
+  "Vinli":         "https://logo.clearbit.com/vin.li",
+  "CAFU":          "https://logo.clearbit.com/cafu.com",
+  "Spiffy":        "https://logo.clearbit.com/getspiffy.com",
 };
 
 // ── Tier config ────────────────────────────────────────────────────────────
@@ -222,7 +240,9 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
         <div className="max-w-5xl mx-auto px-6 py-14">
           <div className="flex items-center justify-between gap-3 mb-10">
             <img src={LOGO_DARK} alt="VCL studio" className="h-14 object-contain" />
-            <img src={BAC_LOGO} alt="BAC Credomatic" className="h-10 object-contain opacity-90" />
+            {CLIENT_LOGOS[data?.project?.clientSlug ?? ""] && (
+              <img src={CLIENT_LOGOS[data.project.clientSlug!].url} alt={CLIENT_LOGOS[data.project.clientSlug!].alt} className={CLIENT_LOGOS[data.project.clientSlug!].className} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+            )}
           </div>
           <div className="flex items-start justify-between gap-8">
             <div className="flex-1">
@@ -378,7 +398,9 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
         <div className="max-w-6xl mx-auto px-6 py-10">
           <div className="flex items-center justify-between gap-3 mb-6">
             <img src={LOGO_DARK} alt="VCL studio" className="h-12 object-contain" />
-            <img src={BAC_LOGO} alt="BAC Credomatic" className="h-9 object-contain opacity-90" />
+            {CLIENT_LOGOS[data?.project?.clientSlug ?? ""] && (
+              <img src={CLIENT_LOGOS[data.project.clientSlug!].url} alt={CLIENT_LOGOS[data.project.clientSlug!].alt} className={CLIENT_LOGOS[data.project.clientSlug!].className} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+            )}
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
             Rankings Finales
@@ -579,7 +601,9 @@ function PageMatrix({ data }: { data: any }) {
         <div className="max-w-7xl mx-auto px-6 py-10">
           <div className="flex items-center justify-between gap-3 mb-6">
             <img src={LOGO_DARK} alt="VCL studio" className="h-12 object-contain" />
-            <img src={BAC_LOGO} alt="BAC Credomatic" className="h-9 object-contain opacity-90" />
+            {CLIENT_LOGOS[data?.project?.clientSlug ?? ""] && (
+              <img src={CLIENT_LOGOS[data.project.clientSlug!].url} alt={CLIENT_LOGOS[data.project.clientSlug!].alt} className={CLIENT_LOGOS[data.project.clientSlug!].className} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+            )}
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
             Evaluación Detallada
@@ -712,7 +736,7 @@ export default function ClientPortalV2() {
 
   const slugPasskey = sessionData?.passkey ?? "";
   const slugQuery = trpc.report.getBySlug.useQuery(
-    { clientSlug: params.clientSlug ?? "", problemId: params.problemId ?? "", passkey: slugPasskey },
+    { clientSlug: params.clientSlug ?? "", problemId: params.problemId ?? "" },
     { enabled: isSlugRoute && slugPasskey.length > 0, retry: false }
   );
 
