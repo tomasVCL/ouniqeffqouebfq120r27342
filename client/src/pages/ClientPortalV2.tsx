@@ -239,7 +239,7 @@ function PageContext({ data, onNextPage }: { data: any; onNextPage: () => void }
           <div className="flex items-center justify-between gap-3 mb-10">
             <img src={LOGO_DARK} alt="VCL studio" className="h-14 object-contain" />
             {project.clientLogoUrl && (
-              <img src={project.clientLogoUrl} alt={project.clientName} className="h-14 object-contain" />
+              <img src={project.clientLogoUrl} alt={project.clientName} className="h-8 object-contain" />
             )}
           </div>
           <div className="flex items-start justify-between gap-8">
@@ -395,9 +395,9 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6 py-10">
           <div className="flex items-center justify-between gap-3 mb-6">
-            <img src={LOGO_DARK} alt="VCL studio" className="h-12 object-contain" />
+            <img src={LOGO_DARK} alt="VCL studio" className="h-7 object-contain" />
             {data.project.clientLogoUrl && (
-              <img src={data.project.clientLogoUrl} alt={data.project.clientName} className="h-12 object-contain" />
+              <img src={data.project.clientLogoUrl} alt={data.project.clientName} className="h-7 object-contain" />
             )}
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
@@ -598,9 +598,9 @@ function PageMatrix({ data }: { data: any }) {
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 py-10">
           <div className="flex items-center justify-between gap-3 mb-6">
-            <img src={LOGO_DARK} alt="VCL studio" className="h-12 object-contain" />
+            <img src={LOGO_DARK} alt="VCL studio" className="h-7 object-contain" />
             {data.project.clientLogoUrl && (
-              <img src={data.project.clientLogoUrl} alt={data.project.clientName} className="h-12 object-contain" />
+              <img src={data.project.clientLogoUrl} alt={data.project.clientName} className="h-7 object-contain" />
             )}
           </div>
           <div className="text-xs font-semibold tracking-[0.2em] text-[#E8521A] uppercase mb-2">
