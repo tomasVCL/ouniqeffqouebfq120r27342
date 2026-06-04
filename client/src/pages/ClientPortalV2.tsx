@@ -26,6 +26,7 @@ const STARTUP_LOGOS: Record<string, string> = {
   "Cubbo":         "https://i.tracxn.com/logo/company/cubbo.com_Logo_bfde9e3b-bce2-40e4-b56b-aadd56d6b608.jpg",
   "Ravent":        "/ravent-logo.jpg",
   // Grupo Purdy startups
+  "Open Loyalty":  "/logos/open-loyalty.png",
   "EasyRewardz":   "/logos/easyrewardz.png",
   "Antavo":        "/logos/antavo.png",
   "Orbee":         "/logos/orbee.png",
