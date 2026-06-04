@@ -1,14 +1,29 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
 import { trpc } from "@/lib/trpc";
 
-// ── Brand tokens ───────────────────────────────────────────────────────────
+// ── Assets ─────────────────────────────────────────────────────────────────
 const LOGO_DARK = "/vcl-logo-dark.webp";
 const ISOTIPO   = "/vcl-isotipo.webp";
 
+// ── Startup logos ─────────────────────────────────────────────────────────
 const GF = (d: string) => `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${d}&size=128`;
 const STARTUP_LOGOS: Record<string, string> = {
-  // BAC
+  // Purdy — local files
+  "CAFU":          "/logos/purdy/cafu.png",
+  "Spiffy":        "/logos/purdy/spiffy.png",
+  "Smartcar":      "/logos/purdy/smartcar.png",
+  "Mojio":         "/logos/purdy/mojio.png",
+  "Sibros":        "/logos/purdy/sibros.png",
+  "Vinli":         "/logos/purdy/vinli.png",
+  "Open Loyalty":  "/logos/purdy/open-loyalty.png",
+  "EasyRewardz":   "/logos/purdy/easyrewardz.png",
+  "Antavo":        "/logos/purdy/antavo.png",
+  "Orbee":         "/logos/purdy/orbee.png",
+  "Impel AI":      "/logos/purdy/impelai.png",
+  "myKaarma":      "/logos/purdy/mykaarma.png",
+  // BAC — external
   "DispatchTrack": "https://www.suiteapp.com/SSP%20Applications/SDN%20SuiteApp.com/suiteappcom/img/items/DispatchTrack_01.png",
   "FarEye":        "https://play-lh.googleusercontent.com/bCIYElymG0CA07n2SaifOctjueJDotL9rRZJOHqCpnnQgSVdimmrbsvCcx3QsnvV4AY",
   "Bringg":        "https://play-lh.googleusercontent.com/tyZZHZuenzCd730izQcp96k_Tg7Mc_SM1H1FARzf-sHUq4Ms4jojPO0-KlI4XL2jS6w=w600-h300-pc0xffffff-pd",
@@ -34,24 +49,37 @@ const STARTUP_LOGOS: Record<string, string> = {
   "Carbon Trail":  GF("carbontrail.net"),
 };
 
-// ── Tier system ────────────────────────────────────────────────────────────
-const TIERS: Record<number, { label: string; short: string; color: string; bg: string; text: string; border: string }> = {
-  1: { label: "TOP PICK",  short: "TOP PICK",  color: "#059669", bg: "#D1FAE5", text: "#065F46", border: "#6EE7B7" },
-  2: { label: "STRONG",    short: "STRONG",    color: "#2563EB", bg: "#DBEAFE", text: "#1E3A8A", border: "#93C5FD" },
-  3: { label: "VIABLE",    short: "VIABLE",    color: "#D97706", bg: "#FEF3C7", text: "#92400E", border: "#FCD34D" },
-  4: { label: "MONITOR",   short: "MONITOR",   color: "#DC2626", bg: "#FEE2E2", text: "#991B1B", border: "#FCA5A5" },
+// ── Tier config ───────────────────────────────────────────────────────────
+const TIERS: Record<number, { label: string; color: string; bg: string; text: string; border: string }> = {
+  1: { label: "TOP PICK", color: "#059669", bg: "#D1FAE5", text: "#065F46", border: "#6EE7B7" },
+  2: { label: "STRONG",   color: "#2563EB", bg: "#DBEAFE", text: "#1E3A8A", border: "#93C5FD" },
+  3: { label: "VIABLE",   color: "#D97706", bg: "#FEF3C7", text: "#92400E", border: "#FCD34D" },
+  4: { label: "MONITOR",  color: "#DC2626", bg: "#FEE2E2", text: "#991B1B", border: "#FCA5A5" },
+};
+const SCORE_STYLES: Record<number, { bg: string; text: string; bar: string }> = {
+  0: { bg: "#F5F4F1", text: "#9CA3AF", bar: "#D1D5DB" },
+  1: { bg: "#FEF2F2", text: "#B91C1C", bar: "#F87171" },
+  2: { bg: "#FFFBEB", text: "#92400E", bar: "#FCD34D" },
+  3: { bg: "#EFF6FF", text: "#1D4ED8", bar: "#93C5FD" },
+  4: { bg: "#ECFDF5", text: "#065F46", bar: "#34D399" },
 };
 
-// ── Score cell ─────────────────────────────────────────────────────────────
-const SCORE_STYLES: Record<number, { bg: string; text: string; bar: string; label: string }> = {
-  0: { bg: "#F5F4F1", text: "#9CA3AF", bar: "#D1D5DB", label: "—" },
-  1: { bg: "#FEF2F2", text: "#B91C1C", bar: "#F87171", label: "1" },
-  2: { bg: "#FFFBEB", text: "#92400E", bar: "#FCD34D", label: "2" },
-  3: { bg: "#EFF6FF", text: "#1D4ED8", bar: "#93C5FD", label: "3" },
-  4: { bg: "#ECFDF5", text: "#065F46", bar: "#34D399", label: "4" },
+// ── Loading messages ──────────────────────────────────────────────────────
+const LOADING_MSGS = [
+  "Cargando análisis…",
+  "Procesando resultados…",
+  "Preparando el reporte…",
+  "Casi listo…",
+];
+
+// ── Page transition variants ──────────────────────────────────────────────
+const pageVariants = {
+  initial: { opacity: 0, y: 12 },
+  enter:   { opacity: 1, y: 0, transition: { duration: 0.3 } },
+  exit:    { opacity: 0, y: -8, transition: { duration: 0.2 } },
 };
 
-// ── Tooltip ────────────────────────────────────────────────────────────────
+// ── Score tooltip ─────────────────────────────────────────────────────────
 function ScoreTooltip({ children, rationale }: { children: React.ReactNode; rationale?: string | null }) {
   const [show, setShow] = useState(false);
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -67,10 +95,8 @@ function ScoreTooltip({ children, rationale }: { children: React.ReactNode; rati
     >
       {children}
       {show && rationale && (
-        <div
-          className="fixed z-50 pointer-events-none"
-          style={{ left: Math.min(pos.x - 130, window.innerWidth - 280), top: pos.y - 12, transform: "translateY(-100%)" }}
-        >
+        <div className="fixed z-50 pointer-events-none"
+          style={{ left: Math.min(pos.x - 130, window.innerWidth - 280), top: pos.y - 12, transform: "translateY(-100%)" }}>
           <div className="bg-[#1B2A33] text-white text-xs rounded-xl px-4 py-3 shadow-2xl max-w-[260px] leading-relaxed">
             {rationale}
             <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#1B2A33] rotate-45" />
@@ -81,42 +107,36 @@ function ScoreTooltip({ children, rationale }: { children: React.ReactNode; rati
   );
 }
 
-// ── Startup hover card ─────────────────────────────────────────────────────
+// ── Startup hover card ────────────────────────────────────────────────────
 function StartupName({ startup }: { startup: any }) {
   const [show, setShow] = useState(false);
-  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const [pos, setPos]   = useState({ x: 0, y: 0 });
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
-
   const clear = () => { if (timer.current) clearTimeout(timer.current); };
-  const hide = () => { clear(); timer.current = setTimeout(() => setShow(false), 120); };
+  const hide  = () => { clear(); timer.current = setTimeout(() => setShow(false), 120); };
 
-  const inner = (
-    <span
-      className="font-semibold text-[#1B2A33] hover:text-[#E8521A] transition-colors cursor-pointer underline decoration-dotted underline-offset-2"
-      onMouseEnter={e => {
-        clear();
-        const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-        setPos({ x: r.left, y: r.bottom });
-        setShow(true);
-      }}
-      onMouseLeave={hide}
-    >
+  const trigger = (e: React.MouseEvent) => {
+    clear();
+    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setPos({ x: r.left, y: r.bottom });
+    setShow(true);
+  };
+
+  const nameEl = (
+    <span className="font-semibold text-[#1B2A33] hover:text-[#E8521A] transition-colors cursor-pointer underline decoration-dotted underline-offset-2"
+      onMouseEnter={trigger} onMouseLeave={hide}>
       {startup.name}
     </span>
   );
 
   return (
     <span className="relative">
-      {startup.websiteUrl ? <a href={startup.websiteUrl} target="_blank" rel="noopener noreferrer">{inner}</a> : inner}
+      {startup.websiteUrl ? <a href={startup.websiteUrl} target="_blank" rel="noopener noreferrer">{nameEl}</a> : nameEl}
       {show && (
-        <div
-          className="fixed z-50 bg-white border border-[#E2D9CF] rounded-2xl shadow-2xl p-5 w-72"
+        <div className="fixed z-50 bg-white border border-[#E2D9CF] rounded-2xl shadow-2xl p-5 w-72"
           style={{ left: Math.min(pos.x, window.innerWidth - 300), top: pos.y + 6 }}
-          onMouseEnter={clear}
-          onMouseLeave={hide}
-        >
+          onMouseEnter={clear} onMouseLeave={hide}>
           <div className="flex items-start justify-between gap-3 mb-3">
             <div>
               <p className="font-bold text-[#1B2A33] text-sm">{startup.name}</p>
@@ -142,15 +162,20 @@ function StartupName({ startup }: { startup: any }) {
   );
 }
 
-// ── Shared portal header (per page) ───────────────────────────────────────
+// ── Shared header ─────────────────────────────────────────────────────────
 function PortalHeader({ project }: { project: any }) {
   return (
     <div className="bg-white border-b border-[#E2D9CF]">
-      <div className="max-w-7xl mx-auto px-6 lg:px-10 py-8">
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 py-6">
         <div className="flex items-center justify-between">
-          <img src={LOGO_DARK} alt="VCL studio" className="h-10 object-contain" />
+          <img src={LOGO_DARK} alt="VCL studio" className="h-9 object-contain" />
           {project.clientLogoUrl && (
-            <img src={project.clientLogoUrl} alt={project.clientName} className="h-10 object-contain" />
+            <img
+              src={project.clientLogoUrl}
+              alt={project.clientName}
+              className="object-contain"
+              style={{ height: "40px", maxWidth: "160px" }}
+            />
           )}
         </div>
       </div>
@@ -172,26 +197,20 @@ function PageContext({ data, onNext }: { data: any; onNext: () => void }) {
       <PortalHeader project={project} />
 
       {/* Hero */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-10 py-14 lg:py-20">
-        <div className="grid lg:grid-cols-[1fr_280px] gap-12 items-start">
-          {/* Left — editorial title block */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 py-14 lg:py-18">
+        <div className="grid lg:grid-cols-[1fr_260px] gap-10 items-start">
           <div>
-            <p className="text-xs font-bold tracking-[0.3em] text-[#E8521A] uppercase mb-5">
-              Reporte de Scouting
-            </p>
-            <h1 className="text-4xl lg:text-5xl font-black text-[#1B2A33] leading-[1.05] tracking-tight mb-6" style={{ fontFamily: "'Archivo Black', sans-serif" }}>
+            <p className="text-xs font-bold tracking-[0.3em] text-[#E8521A] uppercase mb-4">Reporte de Scouting</p>
+            <h1 className="text-4xl lg:text-5xl font-black text-[#1B2A33] leading-[1.05] tracking-tight mb-5"
+              style={{ fontFamily: "'Archivo Black', sans-serif" }}>
               {project.title}
             </h1>
             {project.scopeDescription && (
-              <p className="text-base text-[#4A5860] leading-relaxed max-w-2xl">
-                {project.scopeDescription}
-              </p>
+              <p className="text-base text-[#4A5860] leading-relaxed max-w-2xl">{project.scopeDescription}</p>
             )}
-
-            {/* Stats pills */}
-            <div className="flex flex-wrap gap-3 mt-8">
+            <div className="flex flex-wrap gap-3 mt-7">
               {[
-                { n: project.universeSize ?? data.startups.length, label: "Startups evaluadas" },
+                { n: data.startups.length, label: "Startups" },
                 { n: requirements.length, label: "Criterios" },
                 { n: indispensable.length, label: "Indispensables" },
               ].map(s => (
@@ -203,23 +222,20 @@ function PageContext({ data, onNext }: { data: any; onNext: () => void }) {
             </div>
           </div>
 
-          {/* Right — metadata card */}
           <div className="bg-white border border-[#E2D9CF] rounded-2xl p-6 shadow-sm">
             <div className="space-y-4">
               {[
-                { label: "Empresa", value: project.clientName },
+                { label: "Empresa",   value: project.clientName },
                 { label: "Industria", value: project.industry },
-                { label: "Analista", value: project.analystName ?? "Equipo VCL studio" },
-                { label: "Fecha", value: project.reportDate },
-              ].map(m => m.value && (
+                { label: "Analista",  value: project.analystName ?? "Equipo VCL studio" },
+                { label: "Fecha",     value: project.reportDate },
+              ].filter(m => m.value).map(m => (
                 <div key={m.label}>
                   <p className="text-[10px] font-bold tracking-[0.2em] text-[#9BA8B0] uppercase mb-0.5">{m.label}</p>
                   <p className="text-sm font-semibold text-[#1B2A33]">{m.value}</p>
                 </div>
               ))}
             </div>
-
-            {/* Geo */}
             {(project.geoAllowed || project.geoExcluded) && (
               <div className="mt-5 pt-5 border-t border-[#F0EBE3] grid grid-cols-2 gap-4">
                 {project.geoAllowed && (
@@ -240,15 +256,14 @@ function PageContext({ data, onNext }: { data: any; onNext: () => void }) {
         </div>
       </div>
 
-      {/* Criteria section */}
+      {/* Criteria */}
       <div className="border-t border-[#E2D9CF] bg-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-12">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10">
           <p className="text-xs font-bold tracking-[0.25em] text-[#9BA8B0] uppercase mb-6">Criterios de Evaluación</p>
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Indispensable */}
+          <div className="grid md:grid-cols-2 gap-5">
             {indispensable.length > 0 && (
               <div className="rounded-2xl border border-[#E2D9CF] overflow-hidden">
-                <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-[#E2D9CF]" style={{ background: "#FEF2F2" }}>
+                <div className="flex items-center gap-2.5 px-5 py-3 border-b border-[#E2D9CF]" style={{ background: "#FFF5F0" }}>
                   <span className="w-2 h-2 rounded-full bg-[#E8521A]" />
                   <span className="text-xs font-bold tracking-[0.2em] text-[#E8521A] uppercase">Indispensable</span>
                 </div>
@@ -267,10 +282,9 @@ function PageContext({ data, onNext }: { data: any; onNext: () => void }) {
                 </div>
               </div>
             )}
-            {/* Deseable */}
             {deseable.length > 0 && (
               <div className="rounded-2xl border border-[#E2D9CF] overflow-hidden">
-                <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-[#E2D9CF]" style={{ background: "#EFF6FF" }}>
+                <div className="flex items-center gap-2.5 px-5 py-3 border-b border-[#E2D9CF]" style={{ background: "#EFF6FF" }}>
                   <span className="w-2 h-2 rounded-full bg-[#3B82F6]" />
                   <span className="text-xs font-bold tracking-[0.2em] text-[#2563EB] uppercase">Deseable</span>
                 </div>
@@ -293,13 +307,11 @@ function PageContext({ data, onNext }: { data: any; onNext: () => void }) {
         </div>
       </div>
 
-      {/* Methodology */}
+      {/* Methodology weight bars */}
       <div className="border-t border-[#E2D9CF]" style={{ backgroundColor: "#FDF6EE" }}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-12">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10">
           <p className="text-xs font-bold tracking-[0.25em] text-[#9BA8B0] uppercase mb-2">Metodología WSM</p>
-          <p className="text-sm text-[#6B7A84] mb-8 max-w-xl">
-            Weighted Scoring Matrix — {requirements.length} criterios ponderados, escala 0–4 por startup.
-          </p>
+          <p className="text-sm text-[#6B7A84] mb-7 max-w-xl">Weighted Scoring Matrix — {requirements.length} criterios ponderados, escala 0–4 por startup.</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {sorted.map((r: any) => (
               <div key={r.id} className="bg-white border border-[#E2D9CF] rounded-xl p-4 shadow-sm">
@@ -310,10 +322,7 @@ function PageContext({ data, onNext }: { data: any; onNext: () => void }) {
                   </span>
                 </div>
                 <div className="h-1.5 bg-[#F0EBE3] rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-[#E8521A] transition-all"
-                    style={{ width: `${r.weight * 100}%` }}
-                  />
+                  <div className="h-full rounded-full bg-[#E8521A]" style={{ width: `${r.weight * 100}%` }} />
                 </div>
               </div>
             ))}
@@ -321,13 +330,10 @@ function PageContext({ data, onNext }: { data: any; onNext: () => void }) {
         </div>
       </div>
 
-      {/* CTA */}
       <div className="border-t border-[#E2D9CF] bg-white py-10">
         <div className="max-w-7xl mx-auto px-6 lg:px-10 flex justify-center">
-          <button
-            onClick={onNext}
-            className="inline-flex items-center gap-3 bg-[#1B2A33] hover:bg-[#2C3E4A] text-white font-bold px-8 py-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-sm tracking-wide"
-          >
+          <button onClick={onNext}
+            className="inline-flex items-center gap-3 bg-[#1B2A33] hover:bg-[#2C3E4A] text-white font-bold px-8 py-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-sm tracking-wide">
             Ver Rankings
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
@@ -346,19 +352,18 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
   const { rankings, startups, clusters, recommendations } = data;
   const startupMap = Object.fromEntries(startups.map((s: any) => [s.id, s]));
   const clusterMap = Object.fromEntries(clusters.map((c: any) => [c.id, c]));
-  const recMap = Object.fromEntries((recommendations ?? []).map((r: any) => [r.startupId, r]));
+  const recMap     = Object.fromEntries((recommendations ?? []).map((r: any) => [r.startupId, r]));
 
   const enriched = [...rankings]
     .sort((a: any, b: any) => (a.rank ?? 99) - (b.rank ?? 99))
     .map((r: any) => ({ ...r, startup: startupMap[r.startupId], rec: recMap[r.startupId] }));
 
-  const maxScore = Math.max(...enriched.map((r: any) => r.wsmScore ?? 0), 1);
+  const hasRecs = enriched.some((r: any) => r.rec?.narrative);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#FDF6EE" }}>
       <PortalHeader project={data.project} />
 
-      {/* Section header */}
       <div className="bg-white border-b border-[#E2D9CF]">
         <div className="max-w-7xl mx-auto px-6 lg:px-10 py-8">
           <p className="text-xs font-bold tracking-[0.3em] text-[#E8521A] uppercase mb-1">Rankings Finales</p>
@@ -379,7 +384,8 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
               {clusters.map((c: any) => {
                 const members = startups.filter((s: any) => s.clusterId === c.id);
                 return (
-                  <div key={c.id} className="bg-white border border-[#E2D9CF] rounded-2xl p-5 shadow-sm" style={{ borderLeft: `4px solid ${c.color || "#E8521A"}` }}>
+                  <div key={c.id} className="bg-white border border-[#E2D9CF] rounded-2xl p-5 shadow-sm"
+                    style={{ borderLeft: `4px solid ${c.color || "#E8521A"}` }}>
                     <p className="font-bold text-[#1B2A33] text-sm mb-1">{c.name}</p>
                     {c.description && <p className="text-xs text-[#6B7A84] mb-3 leading-relaxed">{c.description}</p>}
                     <div className="flex flex-wrap gap-1.5">
@@ -423,27 +429,21 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
                 const tier = TIERS[row.tier ?? 4] ?? TIERS[4];
                 const startup = row.startup;
                 const cluster = startup?.clusterId ? clusterMap[startup.clusterId] : null;
-                const isTop = idx === 0;
+                const logo = startup ? STARTUP_LOGOS[startup.name] : null;
                 return (
                   <tr key={row.id} className={`border-b border-[#F0EBE3] hover:bg-[#FDFAF6] transition-colors ${idx % 2 === 0 ? "bg-white" : "bg-[#FDFAF6]/50"}`}>
-                    {/* Rank */}
                     <td className="px-5 py-4 text-center">
-                      {isTop ? (
-                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#E8521A] text-white text-xs font-black" style={{ fontFamily: "'Archivo Black', sans-serif" }}>1</span>
-                      ) : (
-                        <span className="text-sm font-bold text-[#9BA8B0]">{row.rank}</span>
-                      )}
+                      {idx === 0
+                        ? <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#E8521A] text-white text-xs font-black" style={{ fontFamily: "'Archivo Black', sans-serif" }}>1</span>
+                        : <span className="text-sm font-bold text-[#9BA8B0]">{row.rank}</span>
+                      }
                     </td>
-                    {/* Startup */}
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
-                        {startup && STARTUP_LOGOS[startup.name] && (
-                          <img
-                            src={STARTUP_LOGOS[startup.name]}
-                            alt={startup.name}
+                        {logo && (
+                          <img src={logo} alt={startup.name}
                             className="w-8 h-8 rounded-lg object-contain shrink-0 border border-[#E2D9CF] bg-white p-0.5"
-                            onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-                          />
+                            onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                         )}
                         <div>
                           {startup ? <StartupName startup={startup} /> : <span className="font-semibold text-[#1B2A33]">—</span>}
@@ -453,41 +453,35 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
                         </div>
                       </div>
                     </td>
-                    {/* Cluster */}
                     <td className="px-4 py-4 hidden md:table-cell">
-                      {cluster ? (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#4A5860] bg-[#F5F0EA] rounded-lg px-2.5 py-1">
-                          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: cluster.color || "#E8521A" }} />
-                          {cluster.name}
-                        </span>
-                      ) : "—"}
+                      {cluster
+                        ? <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#4A5860] bg-[#F5F0EA] rounded-lg px-2.5 py-1">
+                            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: cluster.color || "#E8521A" }} />
+                            {cluster.name}
+                          </span>
+                        : "—"
+                      }
                     </td>
-                    {/* Score */}
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-2.5">
                         <span className="text-xl font-black text-[#1B2A33] tabular-nums" style={{ fontFamily: "'Archivo Black', sans-serif" }}>
                           {row.wsmScore?.toFixed(1) ?? "—"}
                         </span>
-                        <div className="flex-1 max-w-[80px]">
+                        <div className="flex-1 max-w-[72px]">
                           <div className="h-1.5 bg-[#F0EBE3] rounded-full overflow-hidden">
-                            <div
-                              className="h-full rounded-full bg-[#E8521A] transition-all"
-                              style={{ width: `${((row.wsmScore ?? 0) / 10) * 100}%` }}
-                            />
+                            <div className="h-full rounded-full bg-[#E8521A]" style={{ width: `${((row.wsmScore ?? 0) / 10) * 100}%` }} />
                           </div>
                           <p className="text-[10px] text-[#9BA8B0] mt-0.5">/ 10</p>
                         </div>
                       </div>
                     </td>
-                    {/* Tier */}
                     <td className="px-4 py-4 text-center">
                       <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border"
                         style={{ background: tier.bg, color: tier.text, borderColor: tier.border }}>
                         <span className="w-1.5 h-1.5 rounded-full" style={{ background: tier.color }} />
-                        {tier.short}
+                        {tier.label}
                       </span>
                     </td>
-                    {/* Differentiator */}
                     <td className="px-4 py-4 hidden lg:table-cell">
                       <p className="text-xs text-[#6B7A84] leading-relaxed max-w-[280px]">{startup?.keyDifferentiator ?? "—"}</p>
                     </td>
@@ -498,22 +492,30 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
           </table>
         </div>
 
-        {/* Analyst recommendations */}
-        {enriched.some((r: any) => r.rec?.narrative) && (
-          <div>
-            <p className="text-xs font-bold tracking-[0.25em] text-[#9BA8B0] uppercase mb-4">Recomendaciones del Analista</p>
+        {/* Analyst recommendations — always show section if there are startups */}
+        <div>
+          <p className="text-xs font-bold tracking-[0.25em] text-[#9BA8B0] uppercase mb-4">Recomendaciones del Analista</p>
+          {hasRecs ? (
             <div className="grid md:grid-cols-2 gap-4">
               {enriched.filter((r: any) => r.rec?.narrative).map((row: any) => {
                 const tier = TIERS[row.tier ?? 4] ?? TIERS[4];
+                const logo = row.startup ? STARTUP_LOGOS[row.startup.name] : null;
                 return (
                   <div key={row.startupId} className="bg-white border border-[#E2D9CF] rounded-2xl p-5 shadow-sm overflow-hidden relative">
                     <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl" style={{ background: tier.color }} />
                     <div className="pl-3">
                       <div className="flex items-center justify-between gap-2 mb-3">
-                        <span className="font-bold text-sm text-[#1B2A33]">#{row.rank} {row.startup?.name}</span>
-                        <span className="text-xs font-bold px-2 py-0.5 rounded-full border"
+                        <div className="flex items-center gap-2.5">
+                          {logo && (
+                            <img src={logo} alt={row.startup.name}
+                              className="w-6 h-6 rounded-md object-contain border border-[#E2D9CF] bg-white p-0.5"
+                              onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+                          )}
+                          <span className="font-bold text-sm text-[#1B2A33]">#{row.rank} {row.startup?.name}</span>
+                        </div>
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full border shrink-0"
                           style={{ background: tier.bg, color: tier.text, borderColor: tier.border }}>
-                          {tier.short}
+                          {tier.label}
                         </span>
                       </div>
                       <p className="text-xs text-[#4A5860] leading-relaxed">{row.rec.narrative}</p>
@@ -522,15 +524,22 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
                 );
               })}
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="bg-white border border-[#E2D9CF] rounded-2xl p-8 text-center">
+              <div className="w-10 h-10 bg-[#F5F0EA] rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-5 h-5 text-[#9BA8B0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <p className="text-sm font-semibold text-[#1B2A33] mb-1">Recomendaciones en preparación</p>
+              <p className="text-xs text-[#9BA8B0]">El analista está completando las recomendaciones individuales para este reporte.</p>
+            </div>
+          )}
+        </div>
 
-        {/* CTA */}
-        <div className="flex justify-center pt-4 pb-2">
-          <button
-            onClick={onNext}
-            className="inline-flex items-center gap-3 bg-[#1B2A33] hover:bg-[#2C3E4A] text-white font-bold px-8 py-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-sm tracking-wide"
-          >
+        <div className="flex justify-center pt-2 pb-2">
+          <button onClick={onNext}
+            className="inline-flex items-center gap-3 bg-[#1B2A33] hover:bg-[#2C3E4A] text-white font-bold px-8 py-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-sm tracking-wide">
             Ver Matriz de Evaluación
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
@@ -543,7 +552,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-// PAGE 3 — EVALUACIÓN (MATRIX)
+// PAGE 3 — MATRIZ  (headers rotados = sin scroll horizontal)
 // ══════════════════════════════════════════════════════════════════════════
 function PageMatrix({ data }: { data: any }) {
   const { requirements, startups, wsmScores, rankings } = data;
@@ -558,121 +567,130 @@ function PageMatrix({ data }: { data: any }) {
     scoreMap[s.startupId][s.requirementId] = s;
   }
 
+  // Header height for rotated text — each req col gets a fixed height
+  const HEADER_H = 130;
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#FDF6EE" }}>
       <PortalHeader project={data.project} />
 
-      {/* Section header */}
       <div className="bg-white border-b border-[#E2D9CF]">
         <div className="max-w-7xl mx-auto px-6 lg:px-10 py-8">
           <p className="text-xs font-bold tracking-[0.3em] text-[#E8521A] uppercase mb-1">Evaluación Detallada</p>
           <h2 className="text-3xl font-black text-[#1B2A33]" style={{ fontFamily: "'Archivo Black', sans-serif" }}>
             Matriz de Evaluación
           </h2>
-          <p className="text-sm text-[#6B7A84] mt-1.5">
-            Escala 0–4 · Pasa el cursor sobre un puntaje para ver el razonamiento del analista
-          </p>
+          <p className="text-sm text-[#6B7A84] mt-1.5">Escala 0–4 · Pasa el cursor sobre un puntaje para ver el razonamiento del analista</p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 lg:px-10 py-8">
         {/* Legend */}
         <div className="flex flex-wrap gap-2 mb-6">
           {[4,3,2,1,0].map(n => {
             const s = SCORE_STYLES[n];
+            const labels = ["Ausente","Débil","Regular","Bueno","Excelente"];
             return (
               <span key={n} className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg border"
                 style={{ background: s.bg, color: s.text, borderColor: s.bar }}>
                 <span className="w-2 h-2 rounded-sm" style={{ background: s.bar }} />
-                {n} — {["Ausente","Débil","Regular","Bueno","Excelente"][n]}
+                {n} — {labels[n]}
               </span>
             );
           })}
         </div>
 
-        {/* Matrix table */}
+        {/* Matrix — rotated headers eliminate horizontal scroll */}
         <div className="bg-white rounded-2xl border border-[#E2D9CF] shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="text-xs border-collapse" style={{ minWidth: "max-content", width: "100%" }}>
-              <thead>
-                <tr className="bg-[#1B2A33]">
-                  <th className="text-left px-4 py-4 font-bold text-[#9BA8B0] uppercase tracking-widest sticky left-0 bg-[#1B2A33] z-10 min-w-[160px]">
-                    Startup
+          <table className="w-full border-collapse table-fixed">
+            <colgroup>
+              <col style={{ width: "180px" }} />
+              {sortedReqs.map((r: any) => <col key={r.id} />)}
+              <col style={{ width: "72px" }} />
+            </colgroup>
+            <thead>
+              <tr className="bg-[#1B2A33]">
+                {/* Startup col header */}
+                <th className="text-left px-4 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest sticky left-0 bg-[#1B2A33] z-10"
+                  style={{ height: `${HEADER_H}px`, verticalAlign: "bottom", paddingBottom: "12px" }}>
+                  Startup
+                </th>
+                {/* Rotated criterion headers */}
+                {sortedReqs.map((r: any) => (
+                  <th key={r.id} className="p-0 relative" style={{ height: `${HEADER_H}px` }}>
+                    <div className="absolute bottom-2 left-1/2 origin-bottom-left"
+                      style={{ transform: "rotate(-50deg) translateX(-50%)", whiteSpace: "nowrap" }}>
+                      <span className="text-[11px] font-semibold text-white/80 leading-none">{r.name}</span>
+                      <span className="ml-1.5 text-[10px] font-bold text-[#E8521A]">{(r.weight * 100).toFixed(0)}%</span>
+                    </div>
                   </th>
-                  {sortedReqs.map((r: any) => (
-                    <th key={r.id} className="px-3 py-4 font-semibold text-center min-w-[120px]">
-                      <div className="group relative cursor-help">
-                        <p className="text-white text-xs font-semibold leading-tight whitespace-normal">{r.name}</p>
-                        <p className="text-[#E8521A] text-[11px] font-bold mt-1">{(r.weight * 100).toFixed(0)}%</p>
-                        {r.description && (
-                          <div className="hidden group-hover:block absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 bg-white text-[#1B2A33] rounded-xl shadow-2xl p-3 text-left border border-[#E2D9CF] w-56">
-                            <p className="leading-relaxed font-normal">{r.description}</p>
-                          </div>
-                        )}
-                      </div>
-                    </th>
-                  ))}
-                  <th className="px-4 py-4 font-bold text-center bg-[#E8521A] min-w-[80px] text-white">WSM</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedStartups.map((startup: any, idx: number) => {
-                  const ranking = rankMap[startup.id];
-                  const isTop = ranking?.rank === 1;
-                  return (
-                    <tr key={startup.id} className={`border-b border-[#F0EBE3] hover:bg-[#FDFAF6] transition-colors ${idx % 2 === 0 ? "bg-white" : "bg-[#FDFAF6]/40"}`}>
-                      <td className={`px-4 py-3 sticky left-0 z-10 border-r border-[#E2D9CF] ${idx % 2 === 0 ? "bg-white" : "bg-[#FDFAF8]"}`}>
-                        <div className="flex items-center gap-2.5">
-                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${isTop ? "bg-[#E8521A] text-white" : "bg-[#F0EBE3] text-[#6B7A84]"}`}
-                            style={{ fontFamily: "'Archivo Black', sans-serif" }}>
-                            {ranking?.rank ?? "—"}
-                          </span>
-                          {STARTUP_LOGOS[startup.name] && (
-                            <img
-                              src={STARTUP_LOGOS[startup.name]}
-                              alt={startup.name}
-                              className="w-6 h-6 rounded-md object-contain shrink-0 border border-[#E2D9CF] bg-white p-0.5"
-                              onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-                            />
-                          )}
-                          <div>
-                            <p className="font-semibold text-[#1B2A33] text-xs">{startup.name}</p>
-                            {startup.hqCountry && <p className="text-[10px] text-[#9BA8B0]">{startup.hqCountry}</p>}
-                          </div>
-                        </div>
-                      </td>
-                      {sortedReqs.map((r: any) => {
-                        const entry = scoreMap[startup.id]?.[r.id];
-                        const raw = entry?.humanScore ?? entry?.aiScore;
-                        const score = raw != null ? Math.min(4, Math.max(0, Math.round(raw / 2.5))) : null;
-                        const style = score != null ? SCORE_STYLES[score] : null;
-                        return (
-                          <td key={r.id} className="p-1">
-                            <ScoreTooltip rationale={entry?.rationale}>
-                              <div
-                                className="flex items-center justify-center h-10 rounded-lg text-sm font-bold transition-transform hover:scale-105 relative overflow-hidden"
-                                style={style ? { background: style.bg, color: style.text } : { background: "#F5F4F1", color: "#9CA3AF" }}
-                              >
-                                {score != null ? score : "—"}
-                                {style && (
-                                  <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-b-lg" style={{ background: style.bar }} />
-                                )}
-                              </div>
-                            </ScoreTooltip>
-                          </td>
-                        );
-                      })}
-                      <td className="px-3 py-3 text-center bg-[#FFF5F0]">
-                        <span className="text-sm font-black text-[#E8521A]" style={{ fontFamily: "'Archivo Black', sans-serif" }}>
-                          {ranking?.wsmScore?.toFixed(1) ?? "—"}
+                ))}
+                {/* WSM total */}
+                <th className="text-center text-xs font-bold text-white bg-[#E8521A] tracking-widest"
+                  style={{ height: `${HEADER_H}px`, verticalAlign: "bottom", paddingBottom: "12px" }}>
+                  WSM
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedStartups.map((startup: any, idx: number) => {
+                const ranking = rankMap[startup.id];
+                const isTop = ranking?.rank === 1;
+                const logo = STARTUP_LOGOS[startup.name];
+                const rowBg = idx % 2 === 0 ? "bg-white" : "bg-[#FDFAF6]/40";
+                return (
+                  <tr key={startup.id} className={`border-b border-[#F0EBE3] hover:bg-[#FFF8F5] transition-colors ${rowBg}`}>
+                    {/* Startup cell */}
+                    <td className={`px-3 py-3 sticky left-0 z-10 border-r border-[#E2D9CF] ${rowBg}`}>
+                      <div className="flex items-center gap-2">
+                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${isTop ? "bg-[#E8521A] text-white" : "bg-[#F0EBE3] text-[#6B7A84]"}`}
+                          style={{ fontFamily: "'Archivo Black', sans-serif" }}>
+                          {ranking?.rank ?? "—"}
                         </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        {logo && (
+                          <img src={logo} alt={startup.name}
+                            className="w-6 h-6 rounded-md object-contain shrink-0 border border-[#E2D9CF] bg-white p-0.5"
+                            onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-semibold text-[#1B2A33] text-xs truncate">{startup.name}</p>
+                          {startup.hqCountry && <p className="text-[10px] text-[#9BA8B0]">{startup.hqCountry}</p>}
+                        </div>
+                      </div>
+                    </td>
+                    {/* Score cells */}
+                    {sortedReqs.map((r: any) => {
+                      const entry = scoreMap[startup.id]?.[r.id];
+                      const raw   = entry?.humanScore ?? entry?.aiScore;
+                      const score = raw != null ? Math.min(4, Math.max(0, Math.round(raw / 2.5))) : null;
+                      const style = score != null ? SCORE_STYLES[score] : null;
+                      return (
+                        <td key={r.id} className="p-1">
+                          <ScoreTooltip rationale={entry?.rationale}>
+                            <div className="flex items-center justify-center rounded-lg text-sm font-bold transition-transform hover:scale-110 relative overflow-hidden"
+                              style={{
+                                height: "36px",
+                                background: style ? style.bg : "#F5F4F1",
+                                color: style ? style.text : "#9CA3AF",
+                              }}>
+                              {score != null ? score : "—"}
+                              {style && <div className="absolute bottom-0 left-0 right-0 h-[3px]" style={{ background: style.bar }} />}
+                            </div>
+                          </ScoreTooltip>
+                        </td>
+                      );
+                    })}
+                    {/* WSM total */}
+                    <td className="px-2 py-3 text-center bg-[#FFF5F0]">
+                      <span className="text-sm font-black text-[#E8521A]" style={{ fontFamily: "'Archivo Black', sans-serif" }}>
+                        {ranking?.wsmScore?.toFixed(1) ?? "—"}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
 
         <p className="text-xs text-[#9BA8B0] mt-5 text-center">
@@ -684,7 +702,38 @@ function PageMatrix({ data }: { data: any }) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-// MAIN COMPONENT
+// LOADING STATE
+// ══════════════════════════════════════════════════════════════════════════
+function LoadingScreen() {
+  const [msgIdx, setMsgIdx] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setMsgIdx(i => (i + 1) % LOADING_MSGS.length), 1800);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center" style={{ backgroundColor: "#FDF6EE" }}>
+      <div className="text-center">
+        <img src={ISOTIPO} alt="VCL" className="h-10 mx-auto mb-6 animate-pulse" />
+        <div className="flex items-center gap-2 justify-center mb-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#E8521A] animate-bounce" style={{ animationDelay: "0ms" }} />
+          <div className="w-1.5 h-1.5 rounded-full bg-[#E8521A] animate-bounce" style={{ animationDelay: "150ms" }} />
+          <div className="w-1.5 h-1.5 rounded-full bg-[#E8521A] animate-bounce" style={{ animationDelay: "300ms" }} />
+        </div>
+        <AnimatePresence mode="wait">
+          <motion.p key={msgIdx}
+            initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.3 }}
+            className="text-sm text-[#6B7A84]">
+            {LOADING_MSGS[msgIdx]}
+          </motion.p>
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// MAIN
 // ══════════════════════════════════════════════════════════════════════════
 export default function ClientPortalV2() {
   const params = useParams<{ projectId?: string; clientSlug?: string; problemId?: string }>();
@@ -697,15 +746,15 @@ export default function ClientPortalV2() {
     try { return JSON.parse(sessionStorage.getItem(sessionKey) ?? ""); } catch { return null; }
   })() : null;
 
-  const projectId = sessionData?.projectId ?? parseInt(params.projectId ?? "0", 10);
+  const projectId    = sessionData?.projectId ?? parseInt(params.projectId ?? "0", 10);
   const sessionToken: string = sessionData?.sessionToken ?? "";
-  const isSlugRoute = !!(params.clientSlug && params.problemId);
-  const hasSession = isSlugRoute ? !!sessionData : true;
+  const isSlugRoute  = !!(params.clientSlug && params.problemId);
+  const hasSession   = isSlugRoute ? !!sessionData : true;
 
   const [submitted] = useState<string>(sessionData?.sessionToken ?? "");
   const [page, setPage] = useState<"context" | "rankings" | "matrix">("context");
 
-  useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }); }, [page]);
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "smooth" }); }, [page]);
 
   const slugQuery = trpc.report.getBySlug.useQuery(
     { clientSlug: params.clientSlug ?? "", problemId: params.problemId ?? "", sessionToken },
@@ -715,14 +764,13 @@ export default function ClientPortalV2() {
     { projectId, sessionToken: submitted },
     { enabled: !isSlugRoute && submitted.length > 0 && projectId > 0, retry: false }
   );
-
   const { data, isLoading, error } = isSlugRoute ? slugQuery : passkeyQuery;
 
-  // ── Expired session ──
+  // ── Session expired ──
   if (isSlugRoute && !hasSession) {
     return (
-      <div className="h-screen w-full flex flex-col items-center justify-center px-4" style={{ backgroundColor: "#FDF6EE" }}>
-        <img src={LOGO_DARK} alt="VCL studio" className="h-16 object-contain mx-auto mb-8" />
+      <div className="h-screen flex flex-col items-center justify-center px-4" style={{ backgroundColor: "#FDF6EE" }}>
+        <img src={LOGO_DARK} alt="VCL studio" className="h-14 object-contain mx-auto mb-8" />
         <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm text-center border border-[#E2D9CF]">
           <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -739,24 +787,8 @@ export default function ClientPortalV2() {
     );
   }
 
-  if (!isSlugRoute && !submitted) {
-    window.location.href = "/acceso";
-    return null;
-  }
-
-  // ── Loading ──
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#FDF6EE" }}>
-        <div className="text-center">
-          <img src={ISOTIPO} alt="VCL" className="h-10 mx-auto mb-4 animate-pulse" />
-          <p className="text-[#6B7A84] text-sm">Cargando reporte…</p>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Error ──
+  if (!isSlugRoute && !submitted) { window.location.href = "/acceso"; return null; }
+  if (isLoading) return <LoadingScreen />;
   if (!data || error) {
     return (
       <div className="h-screen flex flex-col items-center justify-center px-4" style={{ backgroundColor: "#FDF6EE" }}>
@@ -780,20 +812,15 @@ export default function ClientPortalV2() {
         <div className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between h-14">
           <div className="flex items-center gap-3 min-w-0">
             <img src={ISOTIPO} alt="VCL" className="h-6 w-6 object-contain shrink-0" />
-            <span className="text-xs text-[#9BA8B0] hidden sm:block">|</span>
-            <span className="text-xs font-medium text-[#6B7A84] hidden sm:block truncate max-w-[220px]">{data.project.title}</span>
+            <span className="text-[10px] text-[#C8BFB5] hidden sm:block">|</span>
+            <span className="text-xs font-medium text-[#6B7A84] hidden sm:block truncate max-w-[200px]">{data.project.title}</span>
           </div>
           <nav className="flex items-center gap-1">
             {pages.map(p => (
-              <button
-                key={p.id}
-                onClick={() => setPage(p.id)}
+              <button key={p.id} onClick={() => setPage(p.id)}
                 className={`relative px-4 py-2 text-xs font-bold rounded-lg transition-all ${
-                  page === p.id
-                    ? "bg-[#E8521A] text-white shadow-sm"
-                    : "text-[#6B7A84] hover:bg-[#F5F0EA] hover:text-[#1B2A33]"
-                }`}
-              >
+                  page === p.id ? "bg-[#E8521A] text-white shadow-sm" : "text-[#6B7A84] hover:bg-[#F5F0EA] hover:text-[#1B2A33]"
+                }`}>
                 {p.label}
               </button>
             ))}
@@ -801,15 +828,20 @@ export default function ClientPortalV2() {
         </div>
       </div>
 
-      {page === "context"  && <PageContext  data={data} onNext={() => setPage("rankings")} />}
-      {page === "rankings" && <PageRankings data={data} onNext={() => setPage("matrix")} />}
-      {page === "matrix"   && <PageMatrix   data={data} />}
+      {/* Animated page content */}
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div key={page} variants={pageVariants} initial="initial" animate="enter" exit="exit">
+          {page === "context"  && <PageContext  data={data} onNext={() => setPage("rankings")} />}
+          {page === "rankings" && <PageRankings data={data} onNext={() => setPage("matrix")} />}
+          {page === "matrix"   && <PageMatrix   data={data} />}
+        </motion.div>
+      </AnimatePresence>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-[#E2D9CF] py-8 mt-0">
+      <footer className="bg-white border-t border-[#E2D9CF] py-7">
         <div className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={ISOTIPO} alt="VCL" className="h-5 w-5 opacity-40 object-contain" />
+            <img src={ISOTIPO} alt="VCL" className="h-5 w-5 opacity-30 object-contain" />
             <span className="text-xs text-[#9BA8B0]">© {new Date().getFullYear()} VCL studio · Confidencial</span>
           </div>
           <span className="text-xs text-[#9BA8B0]">{data.project.reportDate}</span>
