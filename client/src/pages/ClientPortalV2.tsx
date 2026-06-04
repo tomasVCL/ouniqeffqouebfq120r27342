@@ -731,9 +731,13 @@ export default function ClientPortalV2() {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [page]);
 
+  // Slug routes require a valid session (passkey entered via /acceso).
+  // Without it, we block the query and show the expired-session screen.
+  const hasSession = isSlugRoute ? !!sessionData : true;
+
   const slugQuery = trpc.report.getBySlug.useQuery(
     { clientSlug: params.clientSlug ?? "", problemId: params.problemId ?? "" },
-    { enabled: isSlugRoute, retry: false }
+    { enabled: isSlugRoute && hasSession, retry: false }
   );
 
   const passkeyQuery = trpc.report.getByPasskey.useQuery(
@@ -749,6 +753,32 @@ export default function ClientPortalV2() {
   };
 
 
+
+  // Slug route with no session → "Sesión expirada"
+  if (isSlugRoute && !hasSession) {
+    return (
+      <div className="h-screen w-full bg-[#FDF6EE] flex flex-col items-center justify-center px-4">
+        <img src={LOGO_DARK} alt="VCL studio" className="h-16 object-contain mx-auto mb-8" />
+        <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm text-center">
+          <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+          </div>
+          <p className="text-gray-800 font-semibold mb-1">Sesión expirada</p>
+          <p className="text-sm text-gray-500 mb-6">
+            Vuelve a ingresar tu clave de acceso.
+          </p>
+          <a
+            href="/acceso"
+            className="inline-block w-full bg-[#E8521A] hover:bg-[#CC4415] text-white font-semibold py-3 rounded-lg transition-colors text-sm"
+          >
+            Acceder al reporte
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   if (!isSlugRoute && (!submitted || error)) {
     return (
