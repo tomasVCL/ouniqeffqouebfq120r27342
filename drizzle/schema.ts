@@ -237,6 +237,13 @@ export const recommendations = mysqlTable("recommendations", {
 
 export type Recommendation = typeof recommendations.$inferSelect;
 
+// ─── Rate Limits ──────────────────────────────────────────────────────────────
+export const rateLimits = mysqlTable("rate_limits", {
+  id: int("id").autoincrement().primaryKey(),
+  ip: varchar("ip", { length: 45 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
 // ─── Publish Log (Step L) ─────────────────────────────────────────────────
 export const publishLog = mysqlTable("publish_log", {
   id: int("id").autoincrement().primaryKey(),

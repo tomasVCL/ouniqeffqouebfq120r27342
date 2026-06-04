@@ -721,10 +721,10 @@ export default function ClientPortalV2() {
   })() : null;
 
   const projectId = sessionData?.projectId ?? parseInt(params.projectId ?? "0", 10);
+  const sessionToken: string = sessionData?.sessionToken ?? "";
   const isSlugRoute = !!(params.clientSlug && params.problemId);
 
-  const [passkey, setPasskey] = useState("");
-  const [submitted, setSubmitted] = useState<string>(sessionData?.passkey ?? "");
+  const [submitted] = useState<string>(sessionData?.sessionToken ?? "");
   const [page, setPage] = useState<"context" | "rankings" | "matrix">("context");
 
   useEffect(() => {
@@ -736,21 +736,16 @@ export default function ClientPortalV2() {
   const hasSession = isSlugRoute ? !!sessionData : true;
 
   const slugQuery = trpc.report.getBySlug.useQuery(
-    { clientSlug: params.clientSlug ?? "", problemId: params.problemId ?? "" },
+    { clientSlug: params.clientSlug ?? "", problemId: params.problemId ?? "", sessionToken },
     { enabled: isSlugRoute && hasSession, retry: false }
   );
 
   const passkeyQuery = trpc.report.getByPasskey.useQuery(
-    { projectId, passkey: submitted },
+    { projectId, sessionToken: submitted },
     { enabled: !isSlugRoute && submitted.length > 0 && projectId > 0, retry: false }
   );
 
   const { data, isLoading, error } = isSlugRoute ? slugQuery : passkeyQuery;
-
-  const handleUnlock = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(passkey.trim());
-  };
 
 
 
@@ -780,46 +775,10 @@ export default function ClientPortalV2() {
     );
   }
 
-  if (!isSlugRoute && (!submitted || error)) {
-    return (
-      <div className="h-screen w-full bg-[#FDF6EE] flex flex-col items-center justify-center px-4">
-        <div className="mb-10 text-center">
-          <img src={LOGO_DARK} alt="VCL studio" className="h-16 object-contain mx-auto mb-4" />
-          <p className="text-gray-500 text-sm">Scouting</p>
-        </div>
-        <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm">
-          <div className="text-center mb-6">
-            <div className="w-12 h-12 bg-[#E8521A]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-              <svg className="w-6 h-6 text-[#E8521A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </div>
-            <h2 className="text-lg font-bold text-gray-900">Acceso al Reporte</h2>
-            <p className="text-sm text-gray-500 mt-1">Ingresa la clave de acceso proporcionada por VCL studio</p>
-          </div>
-          <form onSubmit={handleUnlock} className="space-y-4">
-            <input
-              type="password"
-              value={passkey}
-              onChange={e => setPasskey(e.target.value)}
-              placeholder="Clave de acceso"
-              className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8521A] focus:border-transparent"
-              autoFocus
-            />
-            {error && (
-              <p className="text-xs text-red-600 text-center">Clave incorrecta. Por favor intenta de nuevo.</p>
-            )}
-            <button
-              type="submit"
-              disabled={isLoading || passkey.length === 0}
-              className="w-full bg-[#E8521A] hover:bg-[#CC4415] text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 text-sm"
-            >
-              {isLoading ? "Verificando..." : "Acceder al Reporte"}
-            </button>
-          </form>
-        </div>
-      </div>
-    );
+  if (!isSlugRoute && !submitted) {
+    // Legacy route without session → redirect to /acceso
+    window.location.href = "/acceso";
+    return null;
   }
 
   if (isLoading) {

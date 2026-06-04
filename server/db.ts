@@ -1,7 +1,7 @@
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, gt, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2";
-import { projects, requirements, clusters, startups, wsmScores, rankings, recommendations, publishLog } from "../drizzle/schema";
+import { projects, requirements, clusters, startups, wsmScores, rankings, recommendations, publishLog, rateLimits } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -215,10 +215,23 @@ export async function addPublishLog(projectId: number, action: "published" | "un
   await db.insert(publishLog).values({ projectId, action });
 }
 
-// ─── Report (Client Portal) ───────────────────────────────────────────────
-export async function getPublishedProjectByPasskeyHash(passkeyHash: string) {
+// ─── Rate Limiting ────────────────────────────────────────────────────────────
+export async function countRecentAttempts(ip: string, windowMinutes: number): Promise<number> {
   const db = await getDb();
-  if (!db) return undefined;
-  const result = await db.select().from(projects).where(and(eq(projects.passkeyHash, passkeyHash), eq(projects.published, true))).limit(1);
-  return result[0];
+  if (!db) return 0; // fail open if DB is down (don't block legitimate users)
+  const cutoff = new Date(Date.now() - windowMinutes * 60 * 1000);
+  const [row] = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(rateLimits)
+    .where(and(eq(rateLimits.ip, ip), gt(rateLimits.createdAt, cutoff)));
+  return Number(row?.count ?? 0);
+}
+
+export async function insertAttempt(ip: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(rateLimits).values({ ip });
+  // Prune old entries (>1h) to keep the table small
+  const cutoff = new Date(Date.now() - 60 * 60 * 1000);
+  await db.delete(rateLimits).where(sql`${rateLimits.createdAt} < ${cutoff}`);
 }
