@@ -437,7 +437,11 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
   const { rankings, startups, clusters, recommendations } = data;
   const [showProfiles, setShowProfiles] = useState(false);
   const startupMap = Object.fromEntries(startups.map((s: any) => [s.id, s]));
-  const clusterMap = Object.fromEntries(clusters.map((c: any) => [c.id, c]));
+  // Assign distinct palette colors to clusters that have no color in DB
+  const CLUSTER_PALETTE = ["#E8521A","#2563EB","#059669","#7C3AED","#D97706","#0891B2","#BE185D","#65A30D"];
+  const clusterMap = Object.fromEntries(
+    clusters.map((c: any, i: number) => [c.id, { ...c, color: c.color || CLUSTER_PALETTE[i % CLUSTER_PALETTE.length] }])
+  );
   const recMap     = Object.fromEntries((recommendations ?? []).map((r: any) => [r.startupId, r]));
 
   const enriched = [...rankings]
@@ -524,7 +528,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
               <div>
                 <p className="text-[10px] font-bold tracking-[0.18em] text-[#9BA8B0] uppercase">Capital Levantado</p>
                 <p className="text-2xl font-black text-[#1B2A33] leading-tight" style={{ fontFamily: "'Archivo Black', sans-serif" }}>{formatCapital(totalCapital)}</p>
-                <p className="text-[10px] text-[#9BA8B0] mt-0.5">entre {enriched.length} startups evaluadas</p>
+                <p className="text-[10px] text-[#9BA8B0] mt-0.5">entre {project.eligibleCount ?? enriched.length} startups evaluadas</p>
               </div>
             </div>
           )}
@@ -559,9 +563,6 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
               </div>
             ))}
           </div>
-          <p className="text-[11px] text-[#9BA8B0] mt-3 leading-relaxed">
-            <strong className="text-[#059669]">TOP PICK</strong> distingue a una sola startup: la de mayor puntaje. Los demás tiers agrupan al resto por rango: <strong className="text-[#2563EB]">STRONG</strong> puntaje mayor a 7.5, <strong className="text-[#D97706]">VIABLE</strong> entre 4.5 y 7.5, <strong className="text-[#DC2626]">MONITOR</strong> menor a 4.5.
-          </p>
         </div>
 
         {/* Rankings table */}
@@ -573,7 +574,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
                 <th className="text-left px-4 py-3.5 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest">Startup</th>
                 {!showProfiles && <>
                   <th className="text-left px-4 py-3.5 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest hidden md:table-cell">Cluster</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest">Weighted Score</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest">Score</th>
                   <th className="text-center px-4 py-3.5 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest">Tier</th>
                   <th className="text-left px-4 py-3.5 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest hidden lg:table-cell">Diferenciador</th>
                 </>}
@@ -741,7 +742,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
 // ══════════════════════════════════════════════════════════════════════════
 // PAGE 3 — MATRIZ  (headers rotados = sin scroll horizontal)
 // ══════════════════════════════════════════════════════════════════════════
-function PageMatrix({ data }: { data: any }) {
+function PageMatrix({ data, onNavigate }: { data: any; onNavigate?: () => void }) {
   const { requirements, startups, wsmScores, rankings } = data;
   const rankMap = Object.fromEntries(rankings.map((r: any) => [r.startupId, r]));
   const sortedStartups = [...startups]
@@ -803,7 +804,7 @@ function PageMatrix({ data }: { data: any }) {
                   </th>
                 ))}
                 <th className="text-center text-xs font-bold text-white bg-[#E8521A] tracking-widest px-2 py-3">
-                  WSM
+                  Score
                 </th>
               </tr>
             </thead>
@@ -871,6 +872,22 @@ function PageMatrix({ data }: { data: any }) {
         <p className="text-xs text-[#9BA8B0] mt-5 text-center">
           Evaluación independiente por el equipo de análisis de VCL studio · Basada en documentación pública
         </p>
+
+        {/* CTA → Simulador */}
+        {onNavigate && (
+          <div className="flex justify-center mt-6">
+            <button
+              onClick={onNavigate}
+              className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl text-white font-bold text-sm transition-all hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
+              style={{ background: "#E8521A" }}
+            >
+              Explorar en el Simulador
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1776,7 +1793,7 @@ export default function ClientPortalV2() {
           {page === "briefing"   && <PageBriefing  data={data} onContinue={acknowledgeBriefing} sessionToken={sessionToken} />}
           {page === "context"    && <PageContext   data={data} onNext={() => setPage("rankings")} />}
           {page === "rankings"   && <PageRankings  data={data} onNext={() => setPage("matrix")} />}
-          {page === "matrix"     && <PageMatrix    data={data} />}
+          {page === "matrix"     && <PageMatrix    data={data} onNavigate={() => setPage("simulator")} />}
           {page === "simulator"  && <PageSimulator data={data} />}
         </motion.div>
       </AnimatePresence>
