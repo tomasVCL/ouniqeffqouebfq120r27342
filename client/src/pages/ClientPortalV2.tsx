@@ -220,7 +220,7 @@ function PortalHeader({ project }: { project: any }) {
               src={project.clientLogoUrl}
               alt={project.clientName}
               className="object-contain"
-              style={{ height: "40px", maxWidth: "160px" }}
+              style={{ height: "40px", width: "auto", maxWidth: "220px" }}
             />
           )}
         </div>
