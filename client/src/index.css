@@ -180,3 +180,16 @@ h1, h2, h3 { font-family: var(--font-display); }
 
 /* ─── Flex min-size fix ───────────────────────────────────────────── */
 .flex { min-width: 0; min-height: 0; }
+
+/* ─── Print styles (Briefing PDF export) ─────────────────────────── */
+@media print {
+  /* Hide nav, footer, sidebar, interactive elements */
+  .sticky, footer, nav { display: none !important; }
+  /* Reset backgrounds for readability */
+  body { background: white !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* Page margins */
+  @page { margin: 1.5cm 2cm; }
+  /* Avoid page breaks inside sections */
+  .bg-white.border.border-\[\#E2D9CF\].rounded-2xl { break-inside: avoid; }
+}
