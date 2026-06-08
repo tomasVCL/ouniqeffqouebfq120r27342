@@ -16,7 +16,6 @@ import {
   getProject,
   countRecentAttempts,
   insertAttempt,
-  insertFeedback,
 } from "./db";
 
 // ── JWT helpers ───────────────────────────────────────────────────────────────
@@ -124,37 +123,6 @@ export const appRouter = router({
         return buildReportPayload(project, input.projectId);
       }),
 
-    // Submit client feedback on the briefing
-    submitFeedback: publicProcedure
-      .input(z.object({
-        sessionToken: z.string(),
-        projectId: z.number(),
-        authorName: z.string().max(255).optional(),
-        items: z.array(z.object({
-          section: z.string().max(64),
-          requirementId: z.number().optional(),
-          commentText: z.string().max(4000),
-          suggestedWeight: z.number().min(0).max(1).optional(),
-        })).min(1).max(50),
-      }))
-      .mutation(async ({ input }) => {
-        const session = await verifySession(input.sessionToken);
-        if (session.projectId !== input.projectId) {
-          throw new TRPCError({ code: "UNAUTHORIZED", message: "Sesión no válida" });
-        }
-        for (const item of input.items) {
-          await insertFeedback({
-            projectId: input.projectId,
-            section: item.section,
-            requirementId: item.requirementId ?? null,
-            commentText: item.commentText,
-            suggestedWeight: item.suggestedWeight ?? null,
-            authorName: input.authorName ?? null,
-          });
-        }
-        return { ok: true };
-      }),
-
     // List published projects (passkey entry page — public)
     listPublished: publicProcedure.query(async () => {
       const all = await listProjects();
@@ -199,7 +167,6 @@ async function buildReportPayload(project: Awaited<ReturnType<typeof getProject>
       clientLogoUrl: project!.clientLogoUrl,
       clientSlug: project!.clientSlug,
       problemId: project!.problemId,
-      briefingContent: project!.briefingContent ?? null,
     },
     requirements: reqs,
     clusters: clusterList,

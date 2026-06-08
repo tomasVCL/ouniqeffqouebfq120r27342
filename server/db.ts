@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, gt, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2";
-import { projects, requirements, clusters, startups, wsmScores, rankings, recommendations, publishLog, rateLimits, clientFeedback } from "../drizzle/schema";
+import { projects, requirements, clusters, startups, wsmScores, rankings, recommendations, publishLog, rateLimits } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -234,19 +234,4 @@ export async function insertAttempt(ip: string): Promise<void> {
   // Prune old entries (>1h) to keep the table small
   const cutoff = new Date(Date.now() - 60 * 60 * 1000);
   await db.delete(rateLimits).where(sql`${rateLimits.createdAt} < ${cutoff}`);
-}
-
-// ─── Client Feedback ──────────────────────────────────────────────────────────
-export async function insertFeedback(data: typeof clientFeedback.$inferInsert): Promise<void> {
-  const db = await getDb();
-  if (!db) throw new Error("DB not available");
-  await db.insert(clientFeedback).values(data);
-}
-
-export async function getFeedbackForProject(projectId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  return db.select().from(clientFeedback)
-    .where(eq(clientFeedback.projectId, projectId))
-    .orderBy(asc(clientFeedback.createdAt));
 }
