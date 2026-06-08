@@ -44,7 +44,7 @@ async function verifySession(token: string): Promise<{ projectId: number; slug: 
 }
 
 // ── Rate limiting ─────────────────────────────────────────────────────────────
-const RATE_LIMIT = 5;        // max attempts
+const RATE_LIMIT = 30;       // max attempts
 const RATE_WINDOW_MIN = 15;  // minutes
 
 async function checkRateLimit(req: { headers: Record<string, string | string[] | undefined> }) {
