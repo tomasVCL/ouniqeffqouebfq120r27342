@@ -54,7 +54,7 @@ const STARTUP_LOGOS: Record<string, string> = {
 // STRONG / VIABLE / MONITOR son rangos de puntaje sobre escala 0–10.
 const TIERS: Record<number, { label: string; color: string; bg: string; text: string; border: string; rule: string }> = {
   1: { label: "TOP PICK", color: "#059669", bg: "#D1FAE5", text: "#065F46", border: "#6EE7B7", rule: "Startup #1, mayor puntaje" },
-  2: { label: "STRONG",   color: "#2563EB", bg: "#DBEAFE", text: "#1E3A8A", border: "#93C5FD", rule: "Puntaje ≥ 7.0" },
+  2: { label: "STRONG",   color: "#2563EB", bg: "#DBEAFE", text: "#1E3A8A", border: "#93C5FD", rule: "Puntaje > 7.5" },
   3: { label: "VIABLE",   color: "#D97706", bg: "#FEF3C7", text: "#92400E", border: "#FCD34D", rule: "Puntaje 4.5 – 6.9" },
   4: { label: "MONITOR",  color: "#DC2626", bg: "#FEE2E2", text: "#991B1B", border: "#FCA5A5", rule: "Puntaje < 4.5" },
 };
@@ -62,7 +62,7 @@ const TIERS: Record<number, { label: string; color: string; bg: string; text: st
 // Tier por posición + puntaje. La #1 siempre es TOP PICK; el resto por rango.
 function computeTier(rank: number, score10: number): number {
   if (rank === 1) return 1;
-  if (score10 >= 7) return 2;
+  if (score10 > 7.5) return 2;
   if (score10 >= 4.5) return 3;
   return 4;
 }
@@ -560,7 +560,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
             ))}
           </div>
           <p className="text-[11px] text-[#9BA8B0] mt-3 leading-relaxed">
-            <strong className="text-[#059669]">TOP PICK</strong> distingue a una sola startup: la de mayor puntaje. Los demás tiers agrupan al resto según su rango de puntaje.
+            <strong className="text-[#059669]">TOP PICK</strong> distingue a una sola startup: la de mayor puntaje. Los demás tiers agrupan al resto por rango: <strong className="text-[#2563EB]">STRONG</strong> puntaje mayor a 7.5, <strong className="text-[#D97706]">VIABLE</strong> entre 4.5 y 7.5, <strong className="text-[#DC2626]">MONITOR</strong> menor a 4.5.
           </p>
         </div>
 
