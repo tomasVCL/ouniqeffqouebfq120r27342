@@ -1764,16 +1764,13 @@ export default function ClientPortalV2() {
           <nav className="flex items-center gap-1">
             {pages.map(p => {
               const notReady = !p.ready;
-              const gatedLock = p.gated && !briefingAcknowledged;
-              const locked = notReady || gatedLock;
               return (
                 <button key={p.id}
-                  onClick={() => !locked && setPage(p.id)}
-                  disabled={locked}
+                  onClick={() => !notReady && setPage(p.id)}
+                  disabled={notReady}
                   className={`relative px-4 py-2 text-xs font-bold rounded-lg transition-all ${
                     page === p.id ? "bg-[#E8521A] text-white shadow-sm"
                     : notReady ? "text-[#D8D0C8] cursor-default"
-                    : gatedLock ? "text-[#C8BFB5] cursor-not-allowed"
                     : "text-[#6B7A84] hover:bg-[#F5F0EA] hover:text-[#1B2A33]"
                   }`}>
                   {p.label}
