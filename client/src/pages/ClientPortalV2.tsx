@@ -1766,20 +1766,17 @@ export default function ClientPortalV2() {
               const notReady = !p.ready;
               const gatedLock = p.gated && !briefingAcknowledged;
               const locked = notReady || gatedLock;
-              const title = notReady ? "Esta sección aún está en construcción"
-                : gatedLock ? "Lee el reporte primero para desbloquear" : undefined;
               return (
                 <button key={p.id}
                   onClick={() => !locked && setPage(p.id)}
                   disabled={locked}
-                  title={title}
                   className={`relative px-4 py-2 text-xs font-bold rounded-lg transition-all ${
                     page === p.id ? "bg-[#E8521A] text-white shadow-sm"
-                    : locked ? "text-[#C8BFB5] cursor-not-allowed"
+                    : notReady ? "text-[#D8D0C8] cursor-default"
+                    : gatedLock ? "text-[#C8BFB5] cursor-not-allowed"
                     : "text-[#6B7A84] hover:bg-[#F5F0EA] hover:text-[#1B2A33]"
                   }`}>
                   {p.label}
-                  {locked && <span className="ml-1 opacity-60">🔒</span>}
                 </button>
               );
             })}
