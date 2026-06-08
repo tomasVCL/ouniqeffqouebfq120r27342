@@ -434,7 +434,7 @@ function formatCapital(usd: number): string {
 // PAGE 2 — RANKINGS
 // ══════════════════════════════════════════════════════════════════════════
 function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
-  const { rankings, startups, clusters, recommendations } = data;
+  const { rankings, startups, clusters, recommendations, project } = data;
   const [showProfiles, setShowProfiles] = useState(false);
   const startupMap = Object.fromEntries(startups.map((s: any) => [s.id, s]));
   // Assign distinct palette colors to clusters that have no color in DB
