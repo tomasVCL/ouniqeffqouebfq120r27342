@@ -256,7 +256,7 @@ function PageContext({ data, onNext }: { data: any; onNext: () => void }) {
             )}
             <div className="flex flex-wrap gap-3 mt-7">
               {[
-                { n: data.startups.length, label: "Startups" },
+                { n: project.eligibleCount ?? data.startups.length, label: "Startups" },
                 { n: requirements.length, label: "Criterios" },
                 { n: data.clusters.length, label: data.clusters.length === 1 ? "Clúster" : "Clústeres" },
               ].map(s => (
