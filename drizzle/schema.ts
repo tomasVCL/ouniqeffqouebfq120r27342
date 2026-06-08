@@ -56,6 +56,7 @@ export const projects = mysqlTable("projects", {
   clientLogoUrl: varchar("clientLogoUrl", { length: 512 }),
   clientSlug: varchar("clientSlug", { length: 64 }),
   problemId: varchar("problemId", { length: 16 }),
+  briefingContent: text("briefingContent"),   // JSON blob — problem report
   published: boolean("published").default(false).notNull(),
   publishedAt: timestamp("publishedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -236,6 +237,21 @@ export const recommendations = mysqlTable("recommendations", {
 });
 
 export type Recommendation = typeof recommendations.$inferSelect;
+
+// ─── Client Feedback ──────────────────────────────────────────────────────────
+export const clientFeedback = mysqlTable("client_feedback", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  section: varchar("section", { length: 64 }),        // 'general' | 'criterion' | 'problem'
+  requirementId: int("requirementId"),                  // nullable — for per-criterion feedback
+  commentText: text("commentText").notNull(),
+  suggestedWeight: float("suggestedWeight"),             // nullable — 0.0 to 1.0
+  authorName: varchar("authorName", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ClientFeedback = typeof clientFeedback.$inferSelect;
+export type InsertClientFeedback = typeof clientFeedback.$inferInsert;
 
 // ─── Rate Limits ──────────────────────────────────────────────────────────────
 export const rateLimits = mysqlTable("rate_limits", {
