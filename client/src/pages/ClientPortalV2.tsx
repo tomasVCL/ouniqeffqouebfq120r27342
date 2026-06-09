@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useParams } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { trpc } from "@/lib/trpc";
@@ -190,8 +191,8 @@ function StartupName({ startup }: { startup: any }) {
   return (
     <span className="relative">
       {startup.websiteUrl ? <a href={startup.websiteUrl} target="_blank" rel="noopener noreferrer">{nameEl}</a> : nameEl}
-      {show && (
-        <div className="fixed z-50 bg-white border border-[#E2D9CF] rounded-2xl shadow-2xl p-5 w-72"
+      {show && createPortal(
+        <div className="fixed z-[9999] bg-white border border-[#E2D9CF] rounded-2xl shadow-2xl p-5 w-72"
           style={{ left: Math.min(pos.x, window.innerWidth - 300), top: pos.y + 6 }}
           onMouseEnter={clear} onMouseLeave={hide}>
           <div className="flex items-start justify-between gap-3 mb-3">
@@ -211,7 +212,8 @@ function StartupName({ startup }: { startup: any }) {
             {startup.clientsRef && <><span className="text-[#9BA8B0]">Clientes</span><span className="text-[#1B2A33]">{startup.clientsRef}</span></>}
             {startup.investors && <><span className="text-[#9BA8B0]">Inversores</span><span className="text-[#1B2A33]">{startup.investors}</span></>}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </span>
   );
