@@ -69,12 +69,14 @@ const TIERS: Record<number, { label: string; color: string; bg: string; text: st
   1: { label: "TOP PICK", color: "#059669", bg: "#D1FAE5", text: "#065F46", border: "#6EE7B7", rule: "Startup #1, mayor puntaje" },
   2: { label: "STRONG",   color: "#2563EB", bg: "#DBEAFE", text: "#1E3A8A", border: "#93C5FD", rule: "Puntaje > 7.5" },
   3: { label: "VIABLE",   color: "#D97706", bg: "#FEF3C7", text: "#92400E", border: "#FCD34D", rule: "Puntaje 4.5 – 6.9" },
-  4: { label: "MONITOR",  color: "#DC2626", bg: "#FEE2E2", text: "#991B1B", border: "#FCA5A5", rule: "Puntaje < 4.5" },
+  4: { label: "MONITOR",  color: "#DC2626", bg: "#FEE2E2", text: "#991B1B", border: "#FCA5A5", rule: "Las 2 últimas del ranking" },
 };
 
-// Tier por posición + puntaje. La #1 siempre es TOP PICK; el resto por rango.
-function computeTier(rank: number, score10: number): number {
+// Tier por posición + puntaje. La #1 siempre es TOP PICK; las 2 últimas siempre
+// MONITOR; el resto por rango de puntaje.
+function computeTier(rank: number, score10: number, total?: number): number {
   if (rank === 1) return 1;
+  if (total != null && total >= 4 && rank > total - 2) return 4; // bottom 2 → MONITOR
   if (score10 > 7.5) return 2;
   if (score10 >= 4.5) return 3;
   return 4;
@@ -611,7 +613,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
             </thead>
             <tbody>
               {enriched.map((row: any, idx: number) => {
-                const tier = TIERS[computeTier(row.rank ?? 99, row.wsmScore ?? 0)];
+                const tier = TIERS[computeTier(row.rank ?? 99, row.wsmScore ?? 0, enriched.length)];
                 const startup = row.startup;
                 const cluster = startup?.clusterId ? clusterMap[startup.clusterId] : null;
                 const logo = startup ? STARTUP_LOGOS[startup.name] : null;
@@ -694,7 +696,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
           {hasRecs ? (
             <div className="grid md:grid-cols-2 gap-4">
               {enriched.filter((r: any) => r.rec?.narrative).map((row: any) => {
-                const tier = TIERS[computeTier(row.rank ?? 99, row.wsmScore ?? 0)];
+                const tier = TIERS[computeTier(row.rank ?? 99, row.wsmScore ?? 0, enriched.length)];
                 const logo = row.startup ? STARTUP_LOGOS[row.startup.name] : null;
                 return (
                   <div key={row.startupId} className="bg-white border border-[#E2D9CF] rounded-2xl p-5 shadow-sm overflow-hidden relative">
@@ -1517,7 +1519,7 @@ function PageSimulator({ data }: { data: any }) {
                 const logo = STARTUP_LOGOS[startup.name];
                 const delta = origRank - simRank; // positive = moved up in ranking
                 const location = [startup.hqCity, startup.hqCountry].filter(Boolean).join(", ");
-                const tier = TIERS[computeTier(simRank, simScore)];
+                const tier = TIERS[computeTier(simRank, simScore, simulated.length)];
 
                 return (
                   <motion.div
