@@ -620,10 +620,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
                 return (
                   <tr key={row.id} className={`border-b border-[#F0EBE3] transition-colors bg-white ${showProfiles ? "" : "hover:bg-[#FDFAF6]"}`}>
                     <td className="px-4 py-3 text-center">
-                      {idx === 0
-                        ? <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#E8521A] text-white text-xs font-black" style={{ fontFamily: "'Archivo Black', sans-serif" }}>1</span>
-                        : <span className="text-sm font-bold text-[#9BA8B0]">{row.rank}</span>
-                      }
+                      <span className="text-sm font-bold text-[#9BA8B0]">{row.rank}</span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
