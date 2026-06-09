@@ -36,6 +36,18 @@ const STARTUP_LOGOS: Record<string, string> = {
   "Mienvío":       "https://pbs.twimg.com/profile_images/1494125766656856065/hE1CLRVg_400x400.jpg",
   "Cubbo":         "https://i.tracxn.com/logo/company/cubbo.com_Logo_bfde9e3b-bce2-40e4-b56b-aadd56d6b608.jpg",
   "Ravent":        "/ravent-logo.jpg",
+  // CoopeAnde — local files
+  "DigiVentures":  "/logos/coopeande/digiventures.png",
+  "Truora":        "/logos/coopeande/truora.jpg",
+  "Docuten":       "/logos/coopeande/docuten.png",
+  "VaFirma":       "/logos/coopeande/vafirma.png",
+  "Veridas":       GF("veridas.com"),
+  "Tecalis":       "/logos/coopeande/tecalis.png",
+  "Mifiel":        "/logos/coopeande/mifiel.png",
+  "Weetrust":      "/logos/coopeande/weetrust.png",
+  "Incode":        "/logos/coopeande/incode.png",
+  "Signzy":        "/logos/coopeande/signzy.png",
+  "Firmamex":      "/logos/coopeande/firmamex.png",
   // ITC
   "EcoVadis":      "https://ecovadis.com/wp-content/uploads/2026/05/revamp-logo.svg",
   "TrusTrace":     GF("trustrace.com"),
