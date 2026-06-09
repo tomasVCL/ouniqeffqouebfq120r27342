@@ -798,7 +798,7 @@ function PageMatrix({ data, onNavigate }: { data: any; onNavigate?: () => void }
         <div className="bg-white rounded-2xl border border-[#E2D9CF] shadow-sm overflow-x-auto">
           <table className="border-collapse" style={{ minWidth: "100%", tableLayout: "fixed", width: `${180 + sortedReqs.length * 82 + 64}px` }}>
             <colgroup>
-              <col style={{ width: "180px" }} />
+              <col style={{ width: "230px" }} />
               {sortedReqs.map((r: any) => <col key={r.id} style={{ width: "82px" }} />)}
               <col style={{ width: "64px" }} />
             </colgroup>
@@ -820,26 +820,23 @@ function PageMatrix({ data, onNavigate }: { data: any; onNavigate?: () => void }
             <tbody>
               {sortedStartups.map((startup: any, idx: number) => {
                 const ranking = rankMap[startup.id];
-                const isTop = ranking?.rank === 1;
                 const logo = STARTUP_LOGOS[startup.name];
-                const rowBg = idx % 2 === 0 ? "bg-white" : "bg-[#FDFAF6]/40";
                 return (
-                  <tr key={startup.id} className={`border-b border-[#F0EBE3] hover:bg-[#FFF8F5] transition-colors ${rowBg}`}>
+                  <tr key={startup.id} className="border-b border-[#F0EBE3] hover:bg-[#FFF8F5] transition-colors bg-white">
                     {/* Startup cell */}
-                    <td className={`px-3 py-3 sticky left-0 z-10 border-r border-[#E2D9CF] ${rowBg}`}>
-                      <div className="flex items-center gap-2">
-                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${isTop ? "bg-[#E8521A] text-white" : "bg-[#F0EBE3] text-[#6B7A84]"}`}
-                          style={{ fontFamily: "'Archivo Black', sans-serif" }}>
+                    <td className="px-3 py-3 sticky left-0 z-10 border-r border-[#E2D9CF] bg-white">
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-5 text-center text-sm font-bold text-[#9BA8B0] shrink-0">
                           {ranking?.rank ?? "-"}
                         </span>
                         {logo && (
                           <img src={logo} alt={startup.name}
-                            className="w-6 h-6 rounded-md object-contain shrink-0 border border-[#E2D9CF] bg-white p-0.5"
+                            className="w-9 h-9 rounded-lg object-contain shrink-0 border border-[#E2D9CF] bg-white p-1"
                             onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                         )}
                         <div className="min-w-0">
-                          <p className="font-semibold text-[#1B2A33] text-xs truncate">{startup.name}</p>
-                          {startup.hqCountry && <p className="text-[10px] text-[#9BA8B0]">{startup.hqCountry}</p>}
+                          <p className="font-bold text-[#1B2A33] text-sm truncate">{startup.name}</p>
+                          {startup.hqCountry && <p className="text-[11px] text-[#9BA8B0] truncate">{startup.hqCountry}</p>}
                         </div>
                       </div>
                     </td>
