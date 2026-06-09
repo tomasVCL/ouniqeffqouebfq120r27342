@@ -211,9 +211,6 @@ function StartupName({ startup }: { startup: any }) {
             {startup.clientsRef && <><span className="text-[#9BA8B0]">Clientes</span><span className="text-[#1B2A33]">{startup.clientsRef}</span></>}
             {startup.investors && <><span className="text-[#9BA8B0]">Inversores</span><span className="text-[#1B2A33]">{startup.investors}</span></>}
           </div>
-          {startup.keyDifferentiator && (
-            <p className="mt-3 pt-3 border-t border-[#F0EBE3] text-xs text-[#6B7A84] italic leading-relaxed">{startup.keyDifferentiator}</p>
-          )}
         </div>
       )}
     </span>
@@ -835,7 +832,7 @@ function PageMatrix({ data, onNavigate }: { data: any; onNavigate?: () => void }
                             onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                         )}
                         <div className="min-w-0">
-                          <p className="font-bold text-[#1B2A33] text-sm truncate">{startup.name}</p>
+                          <StartupName startup={startup} />
                           {startup.hqCountry && <p className="text-[11px] text-[#9BA8B0] truncate">{startup.hqCountry}</p>}
                         </div>
                       </div>
