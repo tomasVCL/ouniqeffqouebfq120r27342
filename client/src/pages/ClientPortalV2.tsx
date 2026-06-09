@@ -798,7 +798,7 @@ function PageMatrix({ data, onNavigate }: { data: any; onNavigate?: () => void }
         <div className="bg-white rounded-2xl border border-[#E2D9CF] shadow-sm overflow-x-auto">
           <table className="border-collapse" style={{ minWidth: "100%", tableLayout: "fixed", width: `${180 + sortedReqs.length * 82 + 64}px` }}>
             <colgroup>
-              <col style={{ width: "230px" }} />
+              <col style={{ width: "172px" }} />
               {sortedReqs.map((r: any) => <col key={r.id} style={{ width: "82px" }} />)}
               <col style={{ width: "64px" }} />
             </colgroup>
