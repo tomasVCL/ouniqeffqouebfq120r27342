@@ -181,7 +181,7 @@ function StartupName({ startup }: { startup: any }) {
   };
 
   const nameEl = (
-    <span className="font-semibold text-[#1B2A33] hover:text-[#E8521A] transition-colors cursor-pointer underline decoration-dotted underline-offset-2"
+    <span className="text-base font-bold text-[#1B2A33] hover:text-[#E8521A] transition-colors cursor-pointer underline decoration-dotted underline-offset-2"
       onMouseEnter={trigger} onMouseLeave={hide}>
       {startup.name}
     </span>
@@ -582,13 +582,13 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-[#1B2A33]">
-                <th className="text-left px-5 py-3.5 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest w-12">#</th>
-                <th className="text-left px-4 py-3.5 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest">Startup</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest w-10">#</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest w-[200px]">Startup</th>
                 {!showProfiles && <>
-                  <th className="text-left px-4 py-3.5 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest hidden md:table-cell">Cluster</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest">Score</th>
-                  <th className="text-center px-4 py-3.5 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest">Tier</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest hidden lg:table-cell">Diferenciador</th>
+                  <th className="text-left px-3 py-3 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest hidden md:table-cell w-[150px]">Cluster</th>
+                  <th className="text-left px-3 py-3 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest w-[88px]">Score</th>
+                  <th className="text-center px-3 py-3 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest w-[110px]">Tier</th>
+                  <th className="text-left px-4 py-3 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest hidden lg:table-cell">Diferenciador</th>
                 </>}
                 {showProfiles && <>
                   <th className="text-left px-4 py-3.5 text-xs font-bold text-[#9BA8B0] uppercase tracking-widest">Año Fund.</th>
@@ -618,39 +618,39 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
                 const logo = startup ? STARTUP_LOGOS[startup.name] : null;
                 const location = [startup?.hqCity, startup?.hqCountry].filter(Boolean).join(", ");
                 return (
-                  <tr key={row.id} className={`border-b border-[#F0EBE3] transition-colors ${showProfiles ? "" : "hover:bg-[#FDFAF6]"} ${idx % 2 === 0 ? "bg-white" : "bg-[#FDFAF6]/50"}`}>
-                    <td className="px-5 py-4 text-center">
+                  <tr key={row.id} className={`border-b border-[#F0EBE3] transition-colors bg-white ${showProfiles ? "" : "hover:bg-[#FDFAF6]"}`}>
+                    <td className="px-4 py-3 text-center">
                       {idx === 0
-                        ? <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#E8521A] text-white text-xs font-black" style={{ fontFamily: "'Archivo Black', sans-serif" }}>1</span>
+                        ? <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#E8521A] text-white text-xs font-black" style={{ fontFamily: "'Archivo Black', sans-serif" }}>1</span>
                         : <span className="text-sm font-bold text-[#9BA8B0]">{row.rank}</span>
                       }
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         {logo && (
                           <img src={logo} alt={startup.name}
-                            className="w-8 h-8 rounded-lg object-contain shrink-0 border border-[#E2D9CF] bg-white p-0.5"
+                            className="w-12 h-12 rounded-lg object-contain shrink-0 border border-[#E2D9CF] bg-white p-1"
                             onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                         )}
-                        <div>
+                        <div className="min-w-0">
                           {startup ? <StartupName startup={startup} /> : <span className="font-semibold text-[#1B2A33]">-</span>}
                           {startup?.description && (
-                            <p className="text-xs text-[#9BA8B0] mt-0.5 max-w-[200px] truncate">{startup.description}</p>
+                            <p className="text-xs text-[#9BA8B0] mt-0.5 max-w-[160px] truncate">{startup.description}</p>
                           )}
                         </div>
                       </div>
                     </td>
                     {!showProfiles && <>
-                      <td className="px-4 py-4 hidden md:table-cell">
+                      <td className="px-3 py-3 hidden md:table-cell">
                         {cluster
-                          ? <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#4A5860] bg-[#F5F0EA] rounded-lg px-2.5 py-1">
+                          ? <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[#4A5860] bg-[#F5F0EA] rounded-lg px-2 py-1 leading-snug">
                               <span className="w-2 h-2 rounded-full shrink-0" style={{ background: cluster.color || "#E8521A" }} />
                               {cluster.name}
                             </span>
                           : <span className="text-xs text-[#9BA8B0]">-</span>
                         }
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="px-3 py-3">
                         <div className="flex items-baseline gap-1">
                           <span className="text-xl font-black text-[#1B2A33] tabular-nums" style={{ fontFamily: "'Archivo Black', sans-serif" }}>
                             {row.wsmScore?.toFixed(1) ?? "-"}
@@ -658,15 +658,15 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
                           <span className="text-[11px] text-[#9BA8B0]">/ 10</span>
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-center">
+                      <td className="px-3 py-3 text-center">
                         <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border"
                           style={{ background: tier.bg, color: tier.text, borderColor: tier.border }}>
                           <span className="w-1.5 h-1.5 rounded-full" style={{ background: tier.color }} />
                           {tier.label}
                         </span>
                       </td>
-                      <td className="px-4 py-4 hidden lg:table-cell">
-                        <p className="text-xs text-[#6B7A84] leading-relaxed max-w-[280px]">{startup?.keyDifferentiator ?? "-"}</p>
+                      <td className="px-4 py-3 hidden lg:table-cell">
+                        <p className="text-xs text-[#6B7A84] leading-relaxed">{startup?.keyDifferentiator ?? "-"}</p>
                       </td>
                     </>}
                     {showProfiles && <>
