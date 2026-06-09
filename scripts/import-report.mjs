@@ -124,10 +124,18 @@ for (let i = cluHeader + 1; i < cfg.length; i++) {
 // E · Startups (nombre, cluster, síntesis = diferenciador)
 const stHeader = findRow(cfg, (r) => clean(r[2]) === "Startup" && /cluster/i.test(String(r[3] ?? "")));
 const startupBase = [];
+// Tolera filas en blanco internas (p.ej. una startup eliminada deja un hueco);
+// solo termina la sección al encontrar 2+ filas vacías consecutivas.
+let stBlankRun = 0;
 for (let i = stHeader + 1; i < cfg.length; i++) {
   const row = cfg[i];
   const name = clean(row[2]);
-  if (!name) { if (startupBase.length > 0) break; else continue; }
+  if (!name) {
+    stBlankRun++;
+    if (startupBase.length > 0 && stBlankRun >= 2) break;
+    continue;
+  }
+  stBlankRun = 0;
   // col[4] = síntesis estratégica (fallback del diferenciador clave)
   startupBase.push({ name, clusterName: clean(row[3]), synthesis: clean(row[4]), sortOrder: startupBase.length });
 }
@@ -152,7 +160,9 @@ const perfHeader = findRow(perfiles, (r) => clean(r[2]) === "Descripción");
 const profiles = [];
 for (let i = perfHeader + 1; i < perfiles.length; i++) {
   const row = perfiles[i];
-  if (row.every((c) => c == null)) continue;
+  // Salta filas vacías o sin nombre de startup (col B) — mantiene la alineación
+  // por índice con startupBase cuando hay huecos por startups eliminadas.
+  if (row.every((c) => c == null) || !clean(row[1])) continue;
   profiles.push(row);
 }
 startupBase.forEach((s, i) => {
@@ -195,14 +205,18 @@ for (const s of scores) {
 const rankings = startupBase.map((s) => {
   const cumpl = (perStartup.get(s.name)?.sum ?? 0) / weightSum;
   const wsmScore = Math.round(cumpl * 1000) / 100; // 0–10, 2 decimales
-  let tier = 4;
-  if (cumpl >= thresholds.top) tier = 1;
-  else if (cumpl >= thresholds.strong) tier = 2;
-  else if (cumpl >= thresholds.viable) tier = 3;
-  return { name: s.name, wsmScore, tier };
+  return { name: s.name, wsmScore };
 });
 rankings.sort((a, b) => b.wsmScore - a.wsmScore);
-rankings.forEach((r, i) => (r.rank = i + 1));
+// Tiers según los rangos establecidos del portal (escala 0–10):
+//   TOP PICK = startup #1 · STRONG > 7.5 · VIABLE ≥ 4.5 · MONITOR < 4.5
+rankings.forEach((r, i) => {
+  r.rank = i + 1;
+  if (r.rank === 1) r.tier = 1;
+  else if (r.wsmScore > 7.5) r.tier = 2;
+  else if (r.wsmScore >= 4.5) r.tier = 3;
+  else r.tier = 4;
+});
 
 console.log(`\nParseado: ${requirements.length} criterios, ${clusters.length} clusters, ${startupBase.length} startups, ${scores.length} scores.`);
 console.log("Ranking computado:");
