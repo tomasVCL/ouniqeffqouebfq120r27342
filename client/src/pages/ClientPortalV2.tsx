@@ -56,11 +56,15 @@ const STARTUP_LOGOS: Record<string, string> = {
   "Fairly Made":   GF("fairlymade.com"),
   "Carbonfact":    "https://www.carbonfact.com/hubfs/carbon_fact_2025/Images/logo.svg",
   "Kezzler":       "https://kezzler.com/wp-content/uploads/2020/12/kezzler-logo-dark.svg",
-  "Myneral Labs":  "https://cdn.prod.website-files.com/6995839b9012af59defecb0f/6995839c9012af59defeccd7_Company%20logo.svg",
+  "Myneral Labs":  "https://blog.myneral.com/content/images/2022/08/white.png",
   "Ecochain":      GF("ecochain.com"),
   "Circularise":   "https://www.circularise.com/assets/icons/circularise-logo-dark.svg",
   "Carbon Trail":  GF("carbontrail.net"),
 };
+
+// Logos blancos/claros que necesitan fondo oscuro para ser visibles
+const LIGHT_LOGOS = new Set(["Myneral Labs"]);
+const logoBg = (name?: string) => (name && LIGHT_LOGOS.has(name) ? "bg-[#1B2A33]" : "bg-white");
 
 // ── Tier config ───────────────────────────────────────────────────────────
 // TOP PICK siempre es UNA SOLA startup (la #1 con mayor puntuación).
@@ -631,7 +635,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
                       <div className="flex items-center gap-3">
                         {logo && (
                           <img src={logo} alt={startup.name}
-                            className="w-12 h-12 rounded-lg object-contain shrink-0 border border-[#E2D9CF] bg-white p-1"
+                            className={`w-12 h-12 rounded-lg object-contain shrink-0 border border-[#E2D9CF] p-1 ${logoBg(startup.name)}`}
                             onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                         )}
                         <div className="min-w-0">
@@ -710,7 +714,7 @@ function PageRankings({ data, onNext }: { data: any; onNext: () => void }) {
                         <div className="flex items-center gap-2.5">
                           {logo && (
                             <img src={logo} alt={row.startup.name}
-                              className="w-6 h-6 rounded-md object-contain border border-[#E2D9CF] bg-white p-0.5"
+                              className={`w-6 h-6 rounded-md object-contain border border-[#E2D9CF] p-0.5 ${logoBg(row.startup?.name)}`}
                               onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                           )}
                           <span className="font-bold text-sm text-[#1B2A33]">#{row.rank} {row.startup?.name}</span>
@@ -836,7 +840,7 @@ function PageMatrix({ data, onNavigate }: { data: any; onNavigate?: () => void }
                         </span>
                         {logo && (
                           <img src={logo} alt={startup.name}
-                            className="w-9 h-9 rounded-lg object-contain shrink-0 border border-[#E2D9CF] bg-white p-1"
+                            className={`w-9 h-9 rounded-lg object-contain shrink-0 border border-[#E2D9CF] p-1 ${logoBg(startup.name)}`}
                             onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                         )}
                         <div className="min-w-0">
@@ -1559,7 +1563,7 @@ function PageSimulator({ data }: { data: any }) {
                       {/* Logo */}
                       {logo && (
                         <img src={logo} alt={startup.name}
-                          className="w-10 h-10 rounded-xl object-contain shrink-0 border border-[#E2D9CF] bg-white p-1 mt-0.5"
+                          className={`w-10 h-10 rounded-xl object-contain shrink-0 border border-[#E2D9CF] p-1 mt-0.5 ${logoBg(startup.name)}`}
                           onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                       )}
 
