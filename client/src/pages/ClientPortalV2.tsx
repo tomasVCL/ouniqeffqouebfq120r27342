@@ -227,7 +227,7 @@ function PortalHeader({ project }: { project: any }) {
     <div className="bg-white border-b border-[#E2D9CF]">
       <div className="max-w-7xl mx-auto px-6 lg:px-10 py-6">
         <div className="flex items-center justify-between">
-          <img src={LOGO_DARK} alt="VCL studio" className="h-9 object-contain" />
+          <img src={LOGO_DARK} alt="VCL studio" className="h-14 object-contain" />
           {project.clientLogoUrl && (
             <img
               src={project.clientLogoUrl}
