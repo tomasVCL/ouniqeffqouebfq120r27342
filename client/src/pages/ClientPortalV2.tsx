@@ -1222,7 +1222,7 @@ function PageBriefing({ data, onContinue, sessionToken }: { data: any; onContinu
           <BriefingSection label="6 · Fórmulas e Impacto Estimado">
             <div className="space-y-3">
               {impact.dimensions.map((dim: any, i: number) => (
-                <div key={i} className={`rounded-xl border p-4 ${i === 0 ? "border-[#E8521A]/25 bg-[#FFF8F5]" : "border-[#E2D9CF] bg-[#FDFAF6]"}`}>
+                <div key={i} className="rounded-xl border border-[#E8521A]/25 bg-[#FFF8F5] p-4">
                   <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
                     <p className="font-bold text-sm text-[#1B2A33]">{dim.label}</p>
                     {dim.estimate && (
