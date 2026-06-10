@@ -356,26 +356,30 @@ function PageContext({ data, onNext }: { data: any; onNext: () => void }) {
           <p className="text-xs font-bold tracking-[0.25em] text-[#9BA8B0] uppercase mb-2">Metodología: Weighted Scoring Matrix</p>
           <p className="text-sm text-[#6B7A84] mb-7 max-w-xl">Cada criterio recibe una ponderación; la suma genera un puntaje único por startup. Estos son los pesos relativos de cada criterio.</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {sorted.map((r: any) => {
-              const pct = Math.round((r.weight ?? 0) * 100);
-              return (
-                <div key={r.id} className="bg-white border border-[#E2D9CF] rounded-xl p-4 shadow-sm flex items-center gap-3.5">
-                  {/* Conic ring */}
-                  <div className="relative shrink-0 w-12 h-12 rounded-full"
-                    style={{ background: `conic-gradient(#E8521A ${pct * 3.6}deg, #F0EBE3 0deg)` }}>
-                    <div className="absolute inset-[3px] rounded-full bg-white flex items-center justify-center">
-                      <span className="text-[11px] font-black text-[#1B2A33] tabular-nums" style={{ fontFamily: "'Archivo Black', sans-serif" }}>{pct}%</span>
+            {(() => {
+              const maxWeight = Math.max(...sorted.map((r: any) => r.weight ?? 0), 0.0001);
+              return sorted.map((r: any) => {
+                const pct  = Math.round((r.weight ?? 0) * 100);
+                // Longitud de barra proporcional al peso relativo (el mayor = barra llena)
+                const fill = Math.max(10, Math.round(((r.weight ?? 0) / maxWeight) * 100));
+                const accent = r.mandatory ? "#E8521A" : "#3B82F6";
+                return (
+                  <div key={r.id} className="bg-white border border-[#E2D9CF] rounded-xl px-4 py-3.5 shadow-sm">
+                    <div className="flex items-baseline justify-between gap-2 mb-2.5">
+                      <p className="text-xs font-semibold text-[#1B2A33] leading-tight">{r.name}</p>
+                      <span className="text-xl font-black tabular-nums shrink-0 leading-none" style={{ fontFamily: "'Archivo Black', sans-serif", color: accent }}>{pct}%</span>
                     </div>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-[#1B2A33] leading-tight">{r.name}</p>
-                    <span className={`inline-block mt-1 text-[9px] font-black tracking-wider rounded-full px-1.5 py-0.5 uppercase ${r.mandatory ? "bg-[#FFF5F0] text-[#E8521A] border border-[#E8521A]/20" : "bg-[#EFF6FF] text-[#2563EB] border border-[#93C5FD]"}`}>
+                    {/* Barra de peso relativo */}
+                    <div className="h-2.5 rounded-full bg-[#F0EBE3] overflow-hidden">
+                      <div className="h-full rounded-full transition-all" style={{ width: `${fill}%`, background: accent }} />
+                    </div>
+                    <span className={`inline-block mt-2.5 text-[9px] font-black tracking-wider rounded-full px-1.5 py-0.5 uppercase ${r.mandatory ? "bg-[#FFF5F0] text-[#E8521A] border border-[#E8521A]/20" : "bg-[#EFF6FF] text-[#2563EB] border border-[#93C5FD]"}`}>
                       {r.mandatory ? "Indispensable" : "Deseable"}
                     </span>
                   </div>
-                </div>
-              );
-            })}
+                );
+              });
+            })()}
           </div>
         </div>
       </div>
